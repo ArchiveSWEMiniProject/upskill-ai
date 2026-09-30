@@ -1,13 +1,6 @@
 # Shared Contracts
 
-**Status: DRAFT.** Becomes frozen when all four owners have signed off below (backlog UA-6, architecture rule R3). After that, any change needs all four to agree.
-
-| Owner | Signed off |
-|---|---|
-| Vansh Sharma | [ ] |
-| Yajat Soni | [ ] |
-| Hemanth Kumar R | [ ] |
-| Shubhika Pradeep | [ ] |
+**Status: FINAL (frozen).** Agreed by all four owners (backlog UA-6, architecture rule R3). Any change needs all four to agree; do not edit these unilaterally.
 
 ## 1. Skill vector format
 

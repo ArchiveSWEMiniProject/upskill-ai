@@ -50,7 +50,7 @@ Review pairs: Vansh → Yajat, Yajat → Hemanth, Hemanth → Shubhika, Shubhika
 
 ## Frozen contracts
 
-Full copies live in [docs/CONTRACTS.md](docs/CONTRACTS.md). Status: **draft until all four members sign off** (UA-6).
+Full copies live in [docs/CONTRACTS.md](docs/CONTRACTS.md). Status: **final and frozen** (UA-6). Changes need all four owners.
 
 - Skill vector format
 - Skill taxonomy schema
