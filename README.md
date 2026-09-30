@@ -59,3 +59,21 @@ Full copies live in [docs/CONTRACTS.md](docs/CONTRACTS.md). Status: **final and 
 ## Definition of Done
 
 Acceptance criteria met and demonstrated; reviewed PR merged to `main`; unit tests passing in CI; linked test cases passing; SonarQube gate passed; no cross-module internal imports; no unilateral contract change; requirement IDs genuinely satisfied.
+
+## M3 implementation handoff
+
+M3 progress tracking, completion evidence, dashboard, adaptive update triggers,
+and the M3 frontend slice are implemented in this feature branch. M3-local
+enums, ports, errors, unavailable integration adapters, and the temporary
+student identity dependency live under `backend/progress/`; frozen
+`backend/shared/` files and contracts are not modified.
+
+For local checks, install `requirements-dev.txt`, then run
+`ruff check backend tests` and `pytest --cov=backend --cov-report=term-missing`.
+In `frontend/`, run `npm ci`, `npm test`, `npm run lint`, and `npm run build`.
+Copy `.env.example` to `.env` and replace the database placeholders for local
+use; never commit `.env`.
+
+See [docs/M3_INTEGRATION_CONTRACTS.md](docs/M3_INTEGRATION_CONTRACTS.md) for
+the temporary M1/M2/M4 adapters and unresolved contract alignment items. No
+Jenkins, SonarQube, or full-system test result is claimed by this local run.
