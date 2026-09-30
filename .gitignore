@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+.pytest_cache/
+.coverage
+htmlcov/
+node_modules/
+.next/
+uploads/
+pgdata/
+.idea/
+.vscode/
+
+# Personal / internal planning files (not shared in the repo)
+/plan.md
+/18_*.pdf
+docs/M1-PLAN.md
+docs/18_Work Allocation and Kickoff Plan.pdf
