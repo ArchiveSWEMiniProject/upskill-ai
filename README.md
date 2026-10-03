@@ -12,6 +12,19 @@ UE24CS341A Software Engineering, Team 18, Project ID 22.
 
 Stack: Next.js (TypeScript), FastAPI (Python 3.12), PostgreSQL 16, SQLAlchemy + Alembic, pytest, Jenkins, SonarQube, Docker Compose.
 
+## Sprint 1 CI setup
+
+Jenkins uses `Jenkinsfile` to install development dependencies, run Ruff and
+pytest with coverage when backend source and tests are present, archive reports,
+and run SonarQube. The Jenkins SonarQube installation must be configured with
+the name `SonarQube`; credentials are supplied by Jenkins and are not stored in
+this repository.
+
+This foundation branch may not yet contain application source or tests, so
+those runtime checks remain pending until the corresponding sprint work is
+merged. A real Jenkins agent and SonarQube server are required to execute the
+pipeline and verify the quality gate.
+
 ## Repository layout
 
 The layout mirrors module boundaries, so a cross-module import shows up in review as a path crossing a top-level folder.

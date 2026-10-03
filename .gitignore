@@ -5,8 +5,12 @@ __pycache__/
 .pytest_cache/
 .coverage
 htmlcov/
+coverage.xml
 node_modules/
 .next/
+frontend/node_modules/
+frontend/.next/
+frontend/coverage/
 uploads/
 pgdata/
 .idea/
