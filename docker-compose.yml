@@ -5,10 +5,10 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-upskill}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-upskill_password}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (copy .env.example)}
       POSTGRES_DB: ${POSTGRES_DB:-upskill_ai}
-    ports:
-      - "5432:5432"
+    # No published ports: the database is reachable only from other containers
+    # on the compose network as upskill-db:5432 (architecture section 4.4).
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -25,8 +25,8 @@ services:
       dockerfile: backend/Dockerfile
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-upskill}:${POSTGRES_PASSWORD:-upskill_password}@upskill-db:5432/${POSTGRES_DB:-upskill_ai}
-      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_key_12345}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-upskill}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@upskill-db:5432/${POSTGRES_DB:-upskill_ai}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env (copy .env.example)}
       PORT: 8000
     ports:
       - "8000:8000"
