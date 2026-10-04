@@ -1,0 +1,56 @@
+{
+  "_class": "org.jenkinsci.plugins.workflow.job.WorkflowRun",
+  "actions": [
+    {
+      "_class": "hudson.model.CauseAction",
+      "causes": [
+        {
+          "_class": "hudson.model.Cause$UserIdCause",
+          "shortDescription": "Started by user upskill-admin",
+          "userId": "upskill-admin",
+          "userName": "upskill-admin"
+        }
+      ]
+    },
+    {
+      "_class": "org.jenkinsci.plugins.workflow.libs.LibrariesAction"
+    },
+    {},
+    {
+      "_class": "hudson.plugins.git.util.BuildData"
+    },
+    {},
+    {
+      "_class": "hudson.tasks.junit.TestResultAction"
+    },
+    {},
+    {},
+    {
+      "_class": "hudson.plugins.sonar.action.SonarAnalysisAction"
+    },
+    {},
+    {
+      "_class": "hudson.plugins.sonar.action.SonarBuildBadgeAction"
+    },
+    {},
+    {},
+    {
+      "_class": "org.jenkinsci.plugins.displayurlapi.actions.RunDisplayAction"
+    },
+    {
+      "_class": "org.jenkinsci.plugins.pipeline.modeldefinition.actions.RestartDeclarativePipelineAction"
+    },
+    {},
+    {
+      "_class": "org.jenkinsci.plugins.workflow.job.views.FlowGraphAction"
+    },
+    {},
+    {}
+  ],
+  "building": false,
+  "duration": 116599,
+  "number": 1,
+  "result": "SUCCESS",
+  "timestamp": 1791124309293,
+  "url": "http://localhost:8080/job/UpSkill-Final-Revision/1/"
+}
