@@ -14,16 +14,26 @@ Stack: Next.js (TypeScript), FastAPI (Python 3.12), PostgreSQL 16, SQLAlchemy + 
 
 ## Sprint 1 CI setup
 
-Jenkins uses `Jenkinsfile` to install development dependencies, run Ruff and
-pytest with coverage when backend source and tests are present, archive reports,
-and run SonarQube. The Jenkins SonarQube installation must be configured with
-the name `SonarQube`; credentials are supplied by Jenkins and are not stored in
-this repository.
+For UA-3, Jenkins checks out the repository, creates a Python virtual environment,
+installs `requirements-dev.txt` (and `requirements.txt` when present), and runs
+Ruff against `backend/` and pytest with coverage. Tests are discovered alongside
+their modules inside `backend/`. Test failures and zero collected tests fail the
+build; test and coverage reports are published/archived even after failure.
 
-This foundation branch may not yet contain application source or tests, so
-those runtime checks remain pending until the corresponding sprint work is
-merged. A real Jenkins agent and SonarQube server are required to execute the
-pipeline and verify the quality gate.
+Use a Unix Jenkins agent with Python 3.12, the Python venv module, and
+`sonar-scanner` on PATH. Install the Jenkins JUnit and SonarQube Scanner plugins.
+Configure a multibranch Pipeline job for this repository with PR discovery and
+the repository webhook so PR updates trigger a build.
+
+For UA-4, configure the Jenkins SonarQube installation as `SonarQube`, with its
+server URL and token supplied through Jenkins configuration/credentials. On
+SonarQube, configure a webhook to `<Jenkins URL>/sonarqube-webhook/` (including
+the trailing slash) so Jenkins can receive the analysis completion event. The
+pipeline fails if the quality gate is not OK or the wait times out.
+
+Actual Jenkins and SonarQube execution remains unverified. UA-3/UA-4 completion
+requires real evidence of a PR-triggered build and a deliberate violation that
+fails the configured quality gate. No server credentials belong in this repo.
 
 ## Repository layout
 
