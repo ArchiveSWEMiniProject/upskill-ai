@@ -22,7 +22,8 @@ build; test and coverage reports are published/archived even after failure.
 
 Use a Unix Jenkins agent with Python 3 and the Python venv module.
 A managed SonarScanner installation named `SonarScanner` must be configured
-under Jenkins Tools. Install the Jenkins JUnit and SonarQube Scanner plugins.
+under Jenkins Tools. Install the Jenkins JUnit, Timestamper, GitHub Branch Source,
+and SonarQube Scanner plugins.
 Configure a multibranch Pipeline job for this repository with PR discovery and
 the repository webhook so PR updates trigger a build.
 
@@ -32,9 +33,12 @@ SonarQube, configure a webhook to `<Jenkins URL>/sonarqube-webhook/` (including
 the trailing slash) so Jenkins can receive the analysis completion event. The
 pipeline fails if the quality gate is not OK or the wait times out.
 
-Actual Jenkins and SonarQube execution remains unverified. UA-3/UA-4 completion
-requires real evidence of a PR-triggered build and a deliberate violation that
-fails the configured quality gate. No server credentials belong in this repo.
+One real PR-merge build passed lint, 14 tests, and the SonarQube quality gate.
+An isolated demonstration run also passed lint/tests, then failed specifically
+because its deliberately strict coverage gate returned ERROR. Successful
+automatic-trigger completion and final log export are still pending due to
+local Docker instability. See the evidence document for precise observations,
+saved evidence, and remaining dependencies. No server credentials belong here.
 
 See [the local server and evidence checklist](docs/SPRINT1_CI_EVIDENCE.md)
 for the optional Docker setup and the evidence still required for review.
