@@ -36,14 +36,17 @@ pipeline fails if the quality gate is not OK or the wait times out.
 The committed pipeline and clean Jenkins image were verified on an independent
 Docker Engine in Ubuntu WSL. Against current shared main, Jenkins passed Ruff,
 14 tests (plus 6 expected M2 fixture failures), and the SonarQube gate. Pytest
-coverage was 76%; SonarQube source coverage was 68.0%. An earlier isolated run
-also proved that a gate ERROR fails Jenkins. Full logs and reports are saved in
-the evidence folder. GitHub-trigger wiring and merge blocking remain separate
-team configuration tasks; pushing files alone does not configure them.
+coverage was 76%; SonarQube source coverage was 68.0%. A real GitHub webhook
+automatically triggered PR #4's successful build and Jenkins published its
+success status. An isolated demo also proved that a gate ERROR fails Jenkins.
+Full logs and reports are saved in `docs/evidence/sprint1/webhook-verified/`.
+The verification receiver uses a temporary tunnel and the Jenkins job discovers
+only PR #4. A stable team endpoint and wider PR discovery are still needed for
+repository-wide continuous CI; branch protection remains user-managed.
 No server credentials belong here.
 
 See [the local server and evidence checklist](docs/SPRINT1_CI_EVIDENCE.md)
-for the optional Docker setup and the evidence still required for review.
+for the optional Docker setup, review evidence and operational limitations.
 
 ## Repository layout
 

@@ -1,12 +1,51 @@
 # UA-3 / UA-4 execution evidence
 
-Status: latest committed pipeline, clean image build, real analysis and gate
-verified on Linux Docker Engine. Automatic GitHub PR-trigger completion and
-merge blocking remain unverified; no GitHub changes were authorized.
+Status: real GitHub webhook-triggered PR build and deliberate quality-gate
+failure verified on Linux Docker Engine. GitHub webhook configuration and
+feature-branch pushes were subsequently authorized. Required-check merge
+blocking remains a separate user-managed configuration.
 Saved API responses and logs live in `docs/evidence/sprint1/`; unfinished build
 snapshots have `building: true` and must not be presented as completed runs.
 
-## Latest Linux verification (2026-10-04)
+## GitHub webhook and gate-failure verification (2026-10-04)
+
+- Pushed prepared feature revision `2ba141ec476a3e1fac57c396c4a24c54158490a6`
+  to `feature/m3-sprint1-ci-foundation`; no push to main or PR merge.
+- GitHub webhook 692060182 delivered genuine `push` and `pull_request`
+  (`synchronize`) events with HTTP 200. Delivery IDs and timestamps are saved
+  in `docs/evidence/sprint1/webhook-verified/github-deliveries.json`.
+- `UpSkill-PR-Webhooks/PR-4/2` finished SUCCESS with `BranchEventCause`,
+  description `Pull request #4 updated`. This is webhook-triggered execution,
+  not a manual build or periodic scan. The initial discovery scan is excluded
+  from successful automatic-trigger evidence.
+- Jenkins tested that feature revision merged with main
+  `83af45e69405326f6d1249aa2065fe3e679417eb`. Ruff passed; pytest reported
+  14 passed and 6 documented expected failures, 76% coverage including tests.
+  SonarQube source coverage was 68.0%; its webhook delivered gate OK.
+- Jenkins published a real GitHub success status with context
+  `continuous-integration/jenkins/pr-merge` on the pushed feature revision.
+- `UpSkill-UA4-Gate-Demo/3` finished FAILURE specifically with
+  `SonarQube quality gate failed: ERROR`. Its tests/lint and scanner passed;
+  source coverage 68.0% violated the isolated demo project's 100% threshold.
+  The ordinary project's gate was not changed and no application bug was added.
+- Full console logs, completed build metadata, test/coverage reports and Sonar
+  gate responses are in `docs/evidence/sprint1/webhook-verified/`.
+
+Operational limits: the signature-validating webhook receiver uses a temporary
+Cloudflare Quick Tunnel. It exposes only `/github-webhook/`, not Jenkins UI.
+Its URL requires the local receiver, tunnel, Ubuntu Docker and Jenkins to remain
+running and changes when the tunnel is recreated. Jenkins links containing
+localhost are usable only on the host; repository evidence is shareable.
+The multibranch verification job filters to PR #4, so it is not yet a
+repository-wide always-on CI service. Before requiring its status for all PRs,
+provide a stable team endpoint and enable discovery for the intended PR set.
+Branch protection is now handled by the user; it was not changed in this pass.
+UA-7 database execution is explicitly deferred by the user.
+
+The sections below retain earlier results and restrictions for provenance;
+their "unverified"/"not authorized" statements describe those earlier passes.
+
+## Earlier Linux manual verification (2026-10-04)
 
 - Installed official Docker Engine 29.8.2 and Compose 5.6.0 in the existing
   Ubuntu 24.04 WSL distribution. Docker Desktop's data was neither reset nor

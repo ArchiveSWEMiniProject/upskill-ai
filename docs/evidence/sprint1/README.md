@@ -1,10 +1,19 @@
 # Sprint 1 evidence manifest
 
 All files are from real local Jenkins/SonarQube runs. No credentials or local
-bootstrap files are included. These files have not been uploaded to GitHub.
+bootstrap files are included. Evidence is committed for sharing through PR #4.
 Trailing whitespace on timestamp-only console lines was removed for Git hygiene.
 
-The latest successful verification is under `linux-final/`. It tests feature
+The latest automatic verification is under `webhook-verified/`: PR #4 build 2
+was triggered by a real GitHub PR update and finished SUCCESS on feature
+`2ba141e` merged with main `83af45e`. Its GitHub status is success, with
+14 passed / 6 expected failures, 76% pytest coverage and 68.0% Sonar coverage.
+The isolated gate demo build 3 finished FAILURE because 68.0% coverage violates
+its 100% threshold. Full final console/build/gate evidence is included.
+The webhook is a temporary local-host tunnel and the job filters to PR #4;
+this is not proof of permanent repository-wide CI or branch protection.
+
+The earlier manual verification is under `linux-final/`. It tests feature
 `0bf7aae` combined with updated main `83af45e`, with 14 passed, 6 expected
 failures, 76% pytest coverage, 68.0% SonarQube source coverage and gate OK.
 The exact Jenkinsfile executed from a local-only SCM validation merge; this
@@ -31,7 +40,6 @@ the manual retry analyzed `2ba174cc6a004bd637368a048bba27382895d9ba`, and the
 demo analyzed `3ee0584e8f030285295d9f25435d54d9dc4b339e`.
 
 These are Sprint 1 checks of the shared PR merge revision, not full-system or
-completed M3 feature tests. The newer unpushed CI changes are not represented
-as a remotely tested revision. Clean-image rebuild remains unverified due to
-plugin-download failures. Full console/artifact export should be repeated when
-Docker recovers; retain these files as evidence of the observations to date.
+completed M3 feature tests. These historical files are not evidence of the newer
+remotely tested revision. The later Linux runs above supersede the old
+infrastructure blockers; retain the old files for provenance.

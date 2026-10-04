@@ -1,0 +1,66 @@
+{
+  "_class": "org.jenkinsci.plugins.workflow.job.WorkflowRun",
+  "actions": [
+    {
+      "_class": "hudson.model.CauseAction",
+      "causes": [
+        {
+          "_class": "jenkins.branch.BranchEventCause",
+          "shortDescription": "Pull request #4 updated"
+        }
+      ]
+    },
+    {
+      "_class": "jenkins.scm.api.SCMRevisionAction"
+    },
+    {},
+    {},
+    {
+      "_class": "hudson.plugins.git.util.BuildData"
+    },
+    {},
+    {
+      "_class": "org.jenkinsci.plugins.workflow.libs.LibrariesAction"
+    },
+    {},
+    {},
+    {
+      "_class": "hudson.plugins.git.util.BuildData"
+    },
+    {},
+    {
+      "_class": "hudson.plugins.git.util.BuildData"
+    },
+    {
+      "_class": "hudson.tasks.junit.TestResultAction"
+    },
+    {},
+    {
+      "_class": "hudson.plugins.sonar.action.SonarAnalysisAction"
+    },
+    {},
+    {
+      "_class": "hudson.plugins.sonar.action.SonarBuildBadgeAction"
+    },
+    {},
+    {},
+    {
+      "_class": "org.jenkinsci.plugins.displayurlapi.actions.RunDisplayAction"
+    },
+    {
+      "_class": "org.jenkinsci.plugins.pipeline.modeldefinition.actions.RestartDeclarativePipelineAction"
+    },
+    {},
+    {
+      "_class": "org.jenkinsci.plugins.workflow.job.views.FlowGraphAction"
+    },
+    {},
+    {}
+  ],
+  "building": false,
+  "duration": 90901,
+  "number": 2,
+  "result": "SUCCESS",
+  "timestamp": 1791126890120,
+  "url": "http://localhost:8080/job/UpSkill-PR-Webhooks/job/PR-4/2/"
+}

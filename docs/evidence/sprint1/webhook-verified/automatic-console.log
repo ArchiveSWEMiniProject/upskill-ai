@@ -1,0 +1,366 @@
+Pull request #4 updated
+Connecting to https://api.github.com using Hemanthk101/****** (Owner-authorized GitHub PR CI)
+Waiting for GitHub to create a merge commit for pull request 4.  Retrying 3 more times...
+Waiting for GitHub to create a merge commit for pull request 4.  Retrying 2 more times...
+Waiting for GitHub to create a merge commit for pull request 4.  Retrying 1 more times...
+Checking out git https://github.com/ArchiveSWEMiniProject/upskill-ai.git into /var/jenkins_home/jobs/UpSkill-PR-Webhooks/branches/PR-4/workspace@script/544a4474ecb50c88f9a968071a5881e79f3d7b5234a239fa76779349328a62ce to read Jenkinsfile
+The recommended git tool is: NONE
+using credential github-sprint1
+Cloning the remote Git repository
+Cloning with configured refspecs honoured and without tags
+Cloning repository https://github.com/ArchiveSWEMiniProject/upskill-ai.git
+ > git init /var/jenkins_home/jobs/UpSkill-PR-Webhooks/branches/PR-4/workspace@script/544a4474ecb50c88f9a968071a5881e79f3d7b5234a239fa76779349328a62ce # timeout=10
+Fetching upstream changes from https://github.com/ArchiveSWEMiniProject/upskill-ai.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+using GIT_ASKPASS to set credentials Owner-authorized GitHub PR CI
+ > git fetch --no-tags --force --progress -- https://github.com/ArchiveSWEMiniProject/upskill-ai.git +refs/pull/4/head:refs/remotes/origin/PR-4 +refs/heads/main:refs/remotes/origin/main # timeout=10
+ > git config remote.origin.url https://github.com/ArchiveSWEMiniProject/upskill-ai.git # timeout=10
+ > git config --add remote.origin.fetch +refs/pull/4/head:refs/remotes/origin/PR-4 # timeout=10
+ > git config --add remote.origin.fetch +refs/heads/main:refs/remotes/origin/main # timeout=10
+ > git config remote.origin.url https://github.com/ArchiveSWEMiniProject/upskill-ai.git # timeout=10
+Fetching without tags
+Fetching upstream changes from https://github.com/ArchiveSWEMiniProject/upskill-ai.git
+using GIT_ASKPASS to set credentials Owner-authorized GitHub PR CI
+ > git fetch --no-tags --force --progress -- https://github.com/ArchiveSWEMiniProject/upskill-ai.git +refs/pull/4/head:refs/remotes/origin/PR-4 +refs/heads/main:refs/remotes/origin/main # timeout=10
+Merging remotes/origin/main commit 83af45e69405326f6d1249aa2065fe3e679417eb into PR head commit 2ba141ec476a3e1fac57c396c4a24c54158490a6
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 2ba141ec476a3e1fac57c396c4a24c54158490a6 # timeout=10
+ > git remote # timeout=10
+ > git config --get remote.origin.url # timeout=10
+using GIT_ASKPASS to set credentials Owner-authorized GitHub PR CI
+ > git merge 83af45e69405326f6d1249aa2065fe3e679417eb # timeout=10
+ > git rev-parse HEAD^{commit} # timeout=10
+Merge succeeded, producing e6a7b45c44b363a12db9cdbcd2c5ea09f19f9846
+Checking out Revision e6a7b45c44b363a12db9cdbcd2c5ea09f19f9846 (PR-4)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f e6a7b45c44b363a12db9cdbcd2c5ea09f19f9846 # timeout=10
+Commit message: "Merge commit '83af45e69405326f6d1249aa2065fe3e679417eb' into HEAD"
+ > git rev-list --no-walk 09d5410f9cb2d1931129982fab0753db8274b681 # timeout=10
+First time build. Skipping changelog.
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/jenkins_home/jobs/UpSkill-PR-Webhooks/branches/PR-4/workspace
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+The recommended git tool is: NONE
+using credential github-sprint1
+ > git rev-parse --resolve-git-dir /var/jenkins_home/jobs/UpSkill-PR-Webhooks/branches/PR-4/workspace/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/ArchiveSWEMiniProject/upskill-ai.git # timeout=10
+Fetching without tags
+Fetching upstream changes from https://github.com/ArchiveSWEMiniProject/upskill-ai.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+using GIT_ASKPASS to set credentials Owner-authorized GitHub PR CI
+ > git fetch --no-tags --force --progress -- https://github.com/ArchiveSWEMiniProject/upskill-ai.git +refs/pull/4/head:refs/remotes/origin/PR-4 +refs/heads/main:refs/remotes/origin/main # timeout=10
+Merging remotes/origin/main commit 83af45e69405326f6d1249aa2065fe3e679417eb into PR head commit 2ba141ec476a3e1fac57c396c4a24c54158490a6
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 2ba141ec476a3e1fac57c396c4a24c54158490a6 # timeout=10
+ > git remote # timeout=10
+ > git config --get remote.origin.url # timeout=10
+using GIT_ASKPASS to set credentials Owner-authorized GitHub PR CI
+ > git merge 83af45e69405326f6d1249aa2065fe3e679417eb # timeout=10
+ > git rev-parse HEAD^{commit} # timeout=10
+Merge succeeded, producing 1a0cc793229f9e1f52a089fa733fc79bd0e97811
+Checking out Revision 1a0cc793229f9e1f52a089fa733fc79bd0e97811 (PR-4)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 1a0cc793229f9e1f52a089fa733fc79bd0e97811 # timeout=10
+Commit message: "Merge commit '83af45e69405326f6d1249aa2065fe3e679417eb' into HEAD"
+ > git rev-list --no-walk 09d5410f9cb2d1931129982fab0753db8274b681 # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] timestamps
+[Pipeline] {
+[Pipeline] timeout
+[2026-10-04T15:15:09.493Z] Timeout set to expire in 20 min
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Checkout)
+[Pipeline] checkout
+[2026-10-04T15:15:09.707Z] The recommended git tool is: NONE
+[2026-10-04T15:15:09.709Z] using credential github-sprint1
+[2026-10-04T15:15:09.732Z]  > git rev-parse --resolve-git-dir /var/jenkins_home/jobs/UpSkill-PR-Webhooks/branches/PR-4/workspace/.git # timeout=10
+[2026-10-04T15:15:09.739Z] Fetching changes from the remote Git repository
+[2026-10-04T15:15:09.742Z]  > git config remote.origin.url https://github.com/ArchiveSWEMiniProject/upskill-ai.git # timeout=10
+[2026-10-04T15:15:09.752Z] Fetching without tags
+[2026-10-04T15:15:09.752Z] Fetching upstream changes from https://github.com/ArchiveSWEMiniProject/upskill-ai.git
+[2026-10-04T15:15:09.752Z]  > git --version # timeout=10
+[2026-10-04T15:15:09.759Z]  > git --version # 'git version 2.47.3'
+[2026-10-04T15:15:09.760Z] using GIT_ASKPASS to set credentials Owner-authorized GitHub PR CI
+[2026-10-04T15:15:09.770Z]  > git fetch --no-tags --force --progress -- https://github.com/ArchiveSWEMiniProject/upskill-ai.git +refs/pull/4/head:refs/remotes/origin/PR-4 +refs/heads/main:refs/remotes/origin/main # timeout=10
+[2026-10-04T15:15:10.487Z] Merging remotes/origin/main commit 83af45e69405326f6d1249aa2065fe3e679417eb into PR head commit 2ba141ec476a3e1fac57c396c4a24c54158490a6
+[2026-10-04T15:15:10.487Z]  > git config core.sparsecheckout # timeout=10
+[2026-10-04T15:15:10.495Z]  > git checkout -f 2ba141ec476a3e1fac57c396c4a24c54158490a6 # timeout=10
+[2026-10-04T15:15:10.507Z]  > git remote # timeout=10
+[2026-10-04T15:15:10.518Z]  > git config --get remote.origin.url # timeout=10
+[2026-10-04T15:15:10.527Z] using GIT_ASKPASS to set credentials Owner-authorized GitHub PR CI
+[2026-10-04T15:15:10.536Z]  > git merge 83af45e69405326f6d1249aa2065fe3e679417eb # timeout=10
+[2026-10-04T15:15:10.560Z]  > git rev-parse HEAD^{commit} # timeout=10
+[2026-10-04T15:15:10.569Z] Merge succeeded, producing c5320143b6a6b3dbd4017c3ef769d949ca60d00d
+[2026-10-04T15:15:10.571Z] Checking out Revision c5320143b6a6b3dbd4017c3ef769d949ca60d00d (PR-4)
+[2026-10-04T15:15:10.571Z]  > git config core.sparsecheckout # timeout=10
+[2026-10-04T15:15:10.577Z]  > git checkout -f c5320143b6a6b3dbd4017c3ef769d949ca60d00d # timeout=10
+[2026-10-04T15:15:10.592Z] Commit message: "Merge commit '83af45e69405326f6d1249aa2065fe3e679417eb' into HEAD"
+[2026-10-04T15:15:10.592Z]  > git rev-list --no-walk 09d5410f9cb2d1931129982fab0753db8274b681 # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Backend checks)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
+[2026-10-04T15:15:12.664Z] + python3 -m venv .venv
+[Pipeline] sh
+[2026-10-04T15:15:14.847Z] + .venv/bin/python -m pip install -r requirements-dev.txt
+[2026-10-04T15:15:15.400Z] Requirement already satisfied: pytest<9,>=8.3 in ./.venv/lib/python3.13/site-packages (from -r requirements-dev.txt (line 1)) (8.4.2)
+[2026-10-04T15:15:15.400Z] Requirement already satisfied: pytest-cov<7,>=5 in ./.venv/lib/python3.13/site-packages (from -r requirements-dev.txt (line 2)) (6.3.0)
+[2026-10-04T15:15:15.400Z] Requirement already satisfied: ruff<1,>=0.6 in ./.venv/lib/python3.13/site-packages (from -r requirements-dev.txt (line 3)) (0.16.10)
+[2026-10-04T15:15:15.400Z] Requirement already satisfied: iniconfig>=1 in ./.venv/lib/python3.13/site-packages (from pytest<9,>=8.3->-r requirements-dev.txt (line 1)) (2.3.0)
+[2026-10-04T15:15:15.400Z] Requirement already satisfied: packaging>=20 in ./.venv/lib/python3.13/site-packages (from pytest<9,>=8.3->-r requirements-dev.txt (line 1)) (26.3)
+[2026-10-04T15:15:15.400Z] Requirement already satisfied: pluggy<2,>=1.5 in ./.venv/lib/python3.13/site-packages (from pytest<9,>=8.3->-r requirements-dev.txt (line 1)) (1.6.0)
+[2026-10-04T15:15:15.400Z] Requirement already satisfied: pygments>=2.7.2 in ./.venv/lib/python3.13/site-packages (from pytest<9,>=8.3->-r requirements-dev.txt (line 1)) (2.21.0)
+[2026-10-04T15:15:15.400Z] Requirement already satisfied: coverage>=7.5 in ./.venv/lib/python3.13/site-packages (from coverage[toml]>=7.5->pytest-cov<7,>=5->-r requirements-dev.txt (line 2)) (7.16.2)
+[Pipeline] fileExists
+[Pipeline] sh
+[2026-10-04T15:15:17.322Z] + .venv/bin/python -m pip install -r requirements.txt
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: fastapi<1.0.0,>=0.110.0 in ./.venv/lib/python3.13/site-packages (from -r requirements.txt (line 1)) (0.142.2)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: uvicorn<1.0.0,>=0.28.0 in ./.venv/lib/python3.13/site-packages (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2)) (0.54.0)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: pydantic<3.0.0,>=2.6.0 in ./.venv/lib/python3.13/site-packages (from -r requirements.txt (line 3)) (2.13.5)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: starlette>=0.46.0 in ./.venv/lib/python3.13/site-packages (from fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1)) (1.7.0)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: typing-extensions>=4.8.0 in ./.venv/lib/python3.13/site-packages (from fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1)) (4.16.0)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: typing-inspection>=0.4.2 in ./.venv/lib/python3.13/site-packages (from fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1)) (0.4.4)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: annotated-doc>=0.0.2 in ./.venv/lib/python3.13/site-packages (from fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1)) (0.0.5)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: opentelemetry-api>=1.44.0 in ./.venv/lib/python3.13/site-packages (from fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1)) (1.45.0)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: click>=7.0 in ./.venv/lib/python3.13/site-packages (from uvicorn<1.0.0,>=0.28.0->uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2)) (8.5.0)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: h11>=0.8 in ./.venv/lib/python3.13/site-packages (from uvicorn<1.0.0,>=0.28.0->uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2)) (0.16.0)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: annotated-types>=0.6.0 in ./.venv/lib/python3.13/site-packages (from pydantic<3.0.0,>=2.6.0->-r requirements.txt (line 3)) (0.8.0)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: pydantic-core==2.46.5 in ./.venv/lib/python3.13/site-packages (from pydantic<3.0.0,>=2.6.0->-r requirements.txt (line 3)) (2.46.5)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: httptools>=0.8.0 in ./.venv/lib/python3.13/site-packages (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2)) (0.8.0)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: python-dotenv>=0.13 in ./.venv/lib/python3.13/site-packages (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2)) (1.2.4)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: pyyaml>=5.1 in ./.venv/lib/python3.13/site-packages (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2)) (6.0.3)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: uvloop>=0.15.1 in ./.venv/lib/python3.13/site-packages (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2)) (0.23.0)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: watchfiles>=0.20 in ./.venv/lib/python3.13/site-packages (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2)) (1.3.0)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: websockets>=13.0 in ./.venv/lib/python3.13/site-packages (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2)) (17.2)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: anyio<5,>=4.0.0 in ./.venv/lib/python3.13/site-packages (from starlette>=0.46.0->fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1)) (4.15.1)
+[2026-10-04T15:15:18.237Z] Requirement already satisfied: idna>=2.8 in ./.venv/lib/python3.13/site-packages (from anyio<5,>=4.0.0->starlette>=0.46.0->fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1)) (3.20)
+[Pipeline] fileExists
+[Pipeline] sh
+[2026-10-04T15:15:18.871Z] + .venv/bin/python -m ruff check backend
+[2026-10-04T15:15:18.871Z] All checks passed!
+[Pipeline] sh
+[2026-10-04T15:15:19.201Z] + .venv/bin/python -m pytest --junitxml=pytest-report.xml --cov=backend --cov-report=xml:coverage.xml --cov-report=html:htmlcov --cov-report=term-missing
+[2026-10-04T15:15:19.753Z] ============================= test session starts ==============================
+[2026-10-04T15:15:19.753Z] platform linux -- Python 3.13.5, pytest-8.4.2, pluggy-1.6.0
+[2026-10-04T15:15:19.753Z] rootdir: /var/jenkins_home/jobs/UpSkill-PR-Webhooks/branches/PR-4/workspace
+[2026-10-04T15:15:19.753Z] configfile: pyproject.toml
+[2026-10-04T15:15:19.753Z] testpaths: backend
+[2026-10-04T15:15:19.753Z] plugins: anyio-4.15.1, cov-6.3.0
+[2026-10-04T15:15:19.753Z] collected 20 items
+[2026-10-04T15:15:19.753Z]
+[2026-10-04T15:15:19.753Z] backend/gap/tests/test_compute_gap.py xxxxxx                             [ 30%]
+[2026-10-04T15:15:20.004Z] backend/taxonomy/test_resolver.py ..............                         [100%]
+[2026-10-04T15:15:20.004Z]
+[2026-10-04T15:15:20.004Z] - generated xml file: /var/jenkins_home/jobs/UpSkill-PR-Webhooks/branches/PR-4/workspace/pytest-report.xml -
+[2026-10-04T15:15:20.004Z] ================================ tests coverage ================================
+[2026-10-04T15:15:20.004Z] _______________ coverage: platform linux, python 3.13.5-final-0 ________________
+[2026-10-04T15:15:20.004Z]
+[2026-10-04T15:15:20.004Z] Name                                      Stmts   Miss  Cover   Missing
+[2026-10-04T15:15:20.004Z] -----------------------------------------------------------------------
+[2026-10-04T15:15:20.004Z] backend/__init__.py                           0      0   100%
+[2026-10-04T15:15:20.004Z] backend/gap/service.py                       19      0   100%
+[2026-10-04T15:15:20.004Z] backend/gap/tests/test_compute_gap.py        57     11    81%   158, 166-167, 175, 183-189, 197-198, 208
+[2026-10-04T15:15:20.004Z] backend/main.py                               8      8     0%   3-19
+[2026-10-04T15:15:20.004Z] backend/shared/shared_types_proposed.py      96     40    58%   34-35, 51, 54-56, 59-61, 64-66, 69-71, 88-90, 98, 100, 103, 125, 127, 129, 147-157, 162, 165, 168, 171-174
+[2026-10-04T15:15:20.004Z] backend/taxonomy/__init__.py                  0      0   100%
+[2026-10-04T15:15:20.004Z] backend/taxonomy/resolver.py                 27      0   100%
+[2026-10-04T15:15:20.004Z] backend/taxonomy/test_resolver.py            35      0   100%
+[2026-10-04T15:15:20.004Z] -----------------------------------------------------------------------
+[2026-10-04T15:15:20.004Z] TOTAL                                       242     59    76%
+[2026-10-04T15:15:20.004Z] Coverage HTML written to dir htmlcov
+[2026-10-04T15:15:20.004Z] Coverage XML written to file coverage.xml
+[2026-10-04T15:15:20.004Z] ======================== 14 passed, 6 xfailed in 0.27s =========================
+[Pipeline] }
+[Pipeline] // script
+Post stage
+[Pipeline] junit
+[2026-10-04T15:15:20.453Z] Recording test results
+[2026-10-04T15:15:20.533Z] [Checks API] No suitable checks publisher found.
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (SonarQube analysis)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] tool
+[Pipeline] withSonarQubeEnv
+[2026-10-04T15:15:21.106Z] Injecting SonarQube environment variables using the configuration: SonarQube
+[Pipeline] {
+[Pipeline] sh
+[2026-10-04T15:15:21.491Z] + /var/jenkins_home/tools/sonar-scanner-8.1.0.6389/bin/sonar-scanner
+[2026-10-04T15:15:22.840Z] 15:15:22.746 INFO  Scanner configuration file: /var/jenkins_home/tools/sonar-scanner-8.1.0.6389/conf/sonar-scanner.properties
+[2026-10-04T15:15:22.840Z] 15:15:22.754 INFO  Project root configuration file: /var/jenkins_home/jobs/UpSkill-PR-Webhooks/branches/PR-4/workspace/sonar-project.properties
+[2026-10-04T15:15:22.840Z] 15:15:22.817 INFO  SonarScanner CLI 8.1.0.6389
+[2026-10-04T15:15:22.840Z] 15:15:22.834 INFO  Linux 6.18.35.2-microsoft-standard-WSL2 amd64
+[2026-10-04T15:15:29.460Z] 15:15:28.666 INFO  Communicating with SonarQube Community Build 26.9.0.129388
+[2026-10-04T15:15:29.460Z] 15:15:28.678 INFO  JRE provisioning: os[linux], arch[x86_64]
+[2026-10-04T15:15:29.710Z] 15:15:29.693 INFO  SONAR_SCANNER_JAVA_OPTS=-Xmx384m -XX:ActiveProcessorCount=2
+[2026-10-04T15:15:31.054Z] 15:15:30.738 INFO  Starting SonarScanner Engine...
+[2026-10-04T15:15:31.054Z] 15:15:30.738 INFO  Java 21.0.11 Eclipse Adoptium (64-bit)
+[2026-10-04T15:15:37.538Z] 15:15:36.739 INFO  Load global settings
+[2026-10-04T15:15:37.538Z] 15:15:36.970 INFO  Load global settings (done) | time=228ms
+[2026-10-04T15:15:37.538Z] 15:15:36.974 INFO  Server id: 147B411E-AaEHSs-4EuGMw1jtxucP
+[2026-10-04T15:15:37.538Z] 15:15:36.992 INFO  Loading required plugins
+[2026-10-04T15:15:37.538Z] 15:15:36.992 INFO  Load plugins index
+[2026-10-04T15:15:37.538Z] 15:15:37.029 INFO  Load plugins index (done) | time=37ms
+[2026-10-04T15:15:37.538Z] 15:15:37.030 INFO  Load/download plugins
+[2026-10-04T15:15:37.538Z] 15:15:37.072 INFO  Load/download plugins (done) | time=43ms
+[2026-10-04T15:15:37.790Z] 15:15:37.673 INFO  Process project properties
+[2026-10-04T15:15:37.790Z] 15:15:37.717 INFO  Process project properties (done) | time=45ms
+[2026-10-04T15:15:37.790Z] 15:15:37.742 INFO  Project key: upskill-ai
+[2026-10-04T15:15:37.790Z] 15:15:37.742 INFO  Base dir: /var/jenkins_home/jobs/UpSkill-PR-Webhooks/branches/PR-4/workspace
+[2026-10-04T15:15:37.790Z] 15:15:37.743 INFO  Working dir: /var/jenkins_home/jobs/UpSkill-PR-Webhooks/branches/PR-4/workspace/.scannerwork
+[2026-10-04T15:15:37.790Z] 15:15:37.767 INFO  Load project settings for component key: 'upskill-ai'
+[2026-10-04T15:15:38.041Z] 15:15:37.860 INFO  Load project settings for component key: 'upskill-ai' (done) | time=92ms
+[2026-10-04T15:15:38.041Z] 15:15:37.932 INFO  Load quality profiles
+[2026-10-04T15:15:38.593Z] 15:15:38.484 INFO  Load quality profiles (done) | time=552ms
+[2026-10-04T15:15:38.593Z] 15:15:38.540 INFO  Auto-configuring with CI 'Jenkins'
+[2026-10-04T15:15:38.845Z] 15:15:38.816 INFO  Load active rules
+[2026-10-04T15:15:40.190Z] 15:15:39.850 INFO  Load active rules (done) | time=1033ms
+[2026-10-04T15:15:40.190Z] 15:15:39.871 INFO  Load analysis cache
+[2026-10-04T15:15:40.190Z] 15:15:39.927 INFO  Load analysis cache | time=56ms
+[2026-10-04T15:15:40.443Z] 15:15:40.253 INFO  Preprocessing files...
+[2026-10-04T15:15:43.652Z] 15:15:40.642 INFO  2 languages detected in 19 preprocessed files (done) | time=383ms
+[2026-10-04T15:15:43.652Z] 15:15:40.646 INFO  2 files ignored because of inclusion/exclusion patterns
+[2026-10-04T15:15:43.652Z] 15:15:40.648 INFO  5 directories skipped because of exclusion patterns (content not counted)
+[2026-10-04T15:15:43.652Z] 15:15:40.651 INFO  0 files ignored because of scm ignore settings
+[2026-10-04T15:15:43.652Z] 15:15:40.654 INFO  Loading plugins for detected languages
+[2026-10-04T15:15:43.652Z] 15:15:40.657 INFO  Load/download plugins
+[2026-10-04T15:15:43.652Z] 15:15:43.648 INFO  Load/download plugins (done) | time=2989ms
+[2026-10-04T15:15:45.521Z] 15:15:45.145 INFO  Load project repositories
+[2026-10-04T15:15:46.441Z] 15:15:46.089 INFO  Load project repositories (done) | time=945ms
+[2026-10-04T15:15:46.442Z] 15:15:46.235 INFO  Indexing files...
+[2026-10-04T15:15:46.442Z] 15:15:46.238 INFO  Project configuration:
+[2026-10-04T15:15:46.442Z] 15:15:46.241 INFO    Excluded sources: **/__pycache__/**, **/.venv/**, **/node_modules/**, **/.next/**, **/coverage/**, **/test_*.py
+[2026-10-04T15:15:46.442Z] 15:15:46.245 INFO    Included tests: **/test_*.py
+[2026-10-04T15:15:46.442Z] 15:15:46.333 INFO  19 files indexed (done) | time=94ms
+[2026-10-04T15:15:46.442Z] 15:15:46.346 INFO  Quality profile for docker: Sonar way
+[2026-10-04T15:15:46.442Z] 15:15:46.348 INFO  Quality profile for py: Sonar way
+[2026-10-04T15:15:46.442Z] 15:15:46.349 INFO  ------------- Run sensors on module UpSkill-AI
+[2026-10-04T15:15:47.002Z] 15:15:46.758 INFO  Load metrics repository
+[2026-10-04T15:15:47.257Z] 15:15:47.101 INFO  Load metrics repository (done) | time=342ms
+[2026-10-04T15:15:50.494Z] 15:15:50.084 INFO  Sensor IaC YAML File Type Classification Sensor [iac]
+[2026-10-04T15:15:50.494Z] 15:15:50.094 INFO  Sensor IaC YAML File Type Classification Sensor [iac] (done) | time=12ms
+[2026-10-04T15:15:50.494Z] 15:15:50.095 INFO  Sensor IaC hadolint report Sensor [iac]
+[2026-10-04T15:15:50.495Z] 15:15:50.097 INFO  Sensor IaC hadolint report Sensor [iac] (done) | time=0ms
+[2026-10-04T15:15:50.495Z] 15:15:50.098 INFO  Sensor Java Config Sensor [iac]
+[2026-10-04T15:15:50.495Z] 15:15:50.099 INFO  There are no files to be analyzed for the Java language
+[2026-10-04T15:15:50.495Z] 15:15:50.100 INFO  Sensor Java Config Sensor [iac] (done) | time=2ms
+[2026-10-04T15:15:50.495Z] 15:15:50.101 INFO  Sensor IaC Docker Sensor [iac]
+[2026-10-04T15:15:50.495Z] 15:15:50.422 INFO  1 source file to be analyzed
+[2026-10-04T15:15:51.049Z] 15:15:50.881 INFO  1/1 source file has been analyzed
+[2026-10-04T15:15:51.049Z] 15:15:50.882 INFO  Sensor IaC Docker Sensor [iac] (done) | time=777ms
+[2026-10-04T15:15:51.049Z] 15:15:50.883 INFO  Sensor Python Sensor [python]
+[2026-10-04T15:15:51.049Z] 15:15:50.898 WARN  Your code is analyzed as compatible with all Python 3 versions by default. You can get a more precise analysis by setting the Python version or version range in your configuration via the parameter "sonar.python.version"
+[2026-10-04T15:15:56.298Z] 15:15:55.398 INFO  Starting global symbols computation
+[2026-10-04T15:15:56.298Z] 15:15:55.403 INFO  6 source files to be analyzed
+[2026-10-04T15:15:56.298Z] 15:15:56.156 INFO  6/6 source files have been analyzed
+[2026-10-04T15:15:56.298Z] 15:15:56.160 INFO  Finished step global symbols computation in 755ms
+[2026-10-04T15:15:56.549Z] 15:15:56.329 INFO  Starting rules execution
+[2026-10-04T15:15:56.550Z] 15:15:56.330 INFO  6 source files to be analyzed
+[2026-10-04T15:15:59.790Z] 15:15:59.251 INFO  6/6 source files have been analyzed
+[2026-10-04T15:15:59.790Z] 15:15:59.252 INFO  Finished step rules execution in 2921ms
+[2026-10-04T15:15:59.790Z] 15:15:59.253 INFO  The Python analyzer was able to leverage cached data from previous analyses for 0 out of 6 files. These files were not parsed.
+[2026-10-04T15:15:59.790Z] 15:15:59.260 INFO  Sensor Python Sensor [python] (done) | time=8383ms
+[2026-10-04T15:15:59.790Z] 15:15:59.261 INFO  Sensor Cobertura Sensor for Python coverage [python]
+[2026-10-04T15:15:59.790Z] 15:15:59.333 INFO  Python test coverage
+[2026-10-04T15:15:59.790Z] 15:15:59.338 INFO  Parsing report '/var/jenkins_home/jobs/UpSkill-PR-Webhooks/branches/PR-4/workspace/coverage.xml'
+[2026-10-04T15:15:59.818Z] 15:15:59.744 INFO  Sensor Cobertura Sensor for Python coverage [python] (done) | time=483ms
+[2026-10-04T15:15:59.818Z] 15:15:59.746 INFO  Sensor PythonXUnitSensor [python]
+[2026-10-04T15:16:01.344Z] 15:16:00.979 INFO  Sensor PythonXUnitSensor [python] (done) | time=1234ms
+[2026-10-04T15:16:01.344Z] 15:16:00.979 INFO  Sensor Python Dependency Sensor [python]
+[2026-10-04T15:16:01.344Z] 15:16:00.988 INFO  Sensor Python Dependency Sensor [python] (done) | time=8ms
+[2026-10-04T15:16:01.344Z] 15:16:00.989 INFO  Sensor TextAndSecretsSensor [text]
+[2026-10-04T15:16:01.344Z] 15:16:01.039 INFO  Available processors: 2
+[2026-10-04T15:16:01.344Z] 15:16:01.040 INFO  Using 2 threads for analysis.
+[2026-10-04T15:16:02.257Z] 15:16:01.921 INFO  The property "sonar.tests" is not set. To improve the analysis accuracy, we categorize a file as a test file if any of the following is true:
+[2026-10-04T15:16:02.257Z]   * The filename starts with "test"
+[2026-10-04T15:16:02.257Z]   * The filename contains "test." or "tests."
+[2026-10-04T15:16:02.258Z]   * Any directory in the file path is named: "doc", "docs", "test", "tests", "mock" or "mocks"
+[2026-10-04T15:16:02.258Z]   * Any directory in the file path has a name ending in "test" or "tests"
+[2026-10-04T15:16:02.258Z]
+[2026-10-04T15:16:02.258Z] 15:16:02.007 INFO  Start fetching files for the text and secrets analysis
+[2026-10-04T15:16:02.258Z] 15:16:02.047 INFO  Using Git CLI to retrieve dirty files
+[2026-10-04T15:16:02.258Z] 15:16:02.066 INFO  Retrieving language associated files and files included via "sonar.text.inclusions" that are tracked by git
+[2026-10-04T15:16:02.258Z] 15:16:02.068 INFO  Starting the text and secrets analysis
+[2026-10-04T15:16:02.259Z] 15:16:02.072 INFO  19 source files to be analyzed for the text and secrets analysis
+[2026-10-04T15:16:02.259Z] 15:16:02.136 INFO  19/19 source files have been analyzed for the text and secrets analysis
+[2026-10-04T15:16:02.259Z] 15:16:02.142 INFO  Sensor TextAndSecretsSensor [text] (done) | time=1154ms
+[2026-10-04T15:16:02.259Z] 15:16:02.148 INFO  ------------- Run sensors on project
+[2026-10-04T15:16:02.811Z] 15:16:02.703 INFO  Sensor IaC Project Sensor [iac]
+[2026-10-04T15:16:02.811Z] 15:16:02.706 INFO  Sensor IaC Project Sensor [iac] (done) | time=2ms
+[2026-10-04T15:16:02.811Z] 15:16:02.707 INFO  Sensor Zero Coverage Sensor
+[2026-10-04T15:16:02.811Z] 15:16:02.709 INFO  Sensor Zero Coverage Sensor (done) | time=1ms
+[2026-10-04T15:16:02.811Z] 15:16:02.709 INFO  ------------- Gather SCA dependencies on project
+[2026-10-04T15:16:02.811Z] 15:16:02.719 INFO  Dependency analysis skipped
+[2026-10-04T15:16:02.811Z] 15:16:02.736 INFO  CPD Executor 2 files had no CPD blocks
+[2026-10-04T15:16:02.811Z] 15:16:02.736 INFO  CPD Executor Calculating CPD for 4 files
+[2026-10-04T15:16:02.811Z] 15:16:02.752 INFO  CPD Executor CPD calculation finished (done) | time=14ms
+[2026-10-04T15:16:02.811Z] 15:16:02.763 INFO  SCM revision ID '2ba141ec476a3e1fac57c396c4a24c54158490a6'
+[2026-10-04T15:16:03.062Z] 15:16:03.015 INFO  Analysis report generated in 151ms, dir size=328.4 kB
+[2026-10-04T15:16:03.063Z] 15:16:03.059 INFO  Analysis report compressed in 43ms, zip size=59.8 kB
+[2026-10-04T15:16:03.313Z] 15:16:03.187 INFO  Analysis report uploaded in 129ms
+[2026-10-04T15:16:03.313Z] 15:16:03.190 INFO  ANALYSIS SUCCESSFUL, you can find the results at: http://sonarqube:9000/dashboard?id=upskill-ai
+[2026-10-04T15:16:03.313Z] 15:16:03.190 INFO  Note that you will be able to access the updated dashboard once the server has processed the submitted analysis report
+[2026-10-04T15:16:03.313Z] 15:16:03.190 INFO  More about the report processing at http://sonarqube:9000/api/ce/task?id=696587f4-4725-4af7-92db-464bf5489092
+[2026-10-04T15:16:03.313Z] 15:16:03.209 INFO  Analysis total time: 26.076 s
+[2026-10-04T15:16:03.313Z] 15:16:03.282 INFO  SonarScanner Engine completed successfully
+[2026-10-04T15:16:03.565Z] 15:16:03.442 INFO  EXECUTION SUCCESS
+[2026-10-04T15:16:03.565Z] 15:16:03.455 INFO  Total time: 41.043s
+[Pipeline] }
+[Pipeline] // withSonarQubeEnv
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Quality gate)
+[Pipeline] timeout
+[2026-10-04T15:16:04.980Z] Timeout set to expire in 5 min 0 sec
+[Pipeline] {
+[Pipeline] script
+[Pipeline] {
+[Pipeline] waitForQualityGate
+[2026-10-04T15:16:05.303Z] Checking status of SonarQube task '696587f4-4725-4af7-92db-464bf5489092' on server 'SonarQube'
+[2026-10-04T15:16:05.421Z] SonarQube task '696587f4-4725-4af7-92db-464bf5489092' status is 'IN_PROGRESS'
+[2026-10-04T15:16:19.932Z] SonarQube task '696587f4-4725-4af7-92db-464bf5489092' status is 'SUCCESS'
+[2026-10-04T15:16:19.933Z] SonarQube task '696587f4-4725-4af7-92db-464bf5489092' completed. Quality gate is 'OK'
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // timeout
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] archiveArtifacts
+[2026-10-04T15:16:20.592Z] Archiving artifacts
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // timeout
+[Pipeline] }
+[Pipeline] // timestamps
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+
+GitHub has been notified of this commit’s build result
+
+Finished: SUCCESS
