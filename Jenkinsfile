@@ -23,7 +23,14 @@ pipeline {
             post { always { junit allowEmptyResults: true, testResults: 'pytest-report.xml' } }
         }
         stage('SonarQube analysis') {
-            steps { withSonarQubeEnv('SonarQube') { sh 'sonar-scanner' } }
+            steps {
+                script {
+                    def scannerHome = tool 'SonarScanner'
+                    withSonarQubeEnv('SonarQube') {
+                        sh "\"${scannerHome}/bin/sonar-scanner\""
+                    }
+                }
+            }
         }
         stage('Quality gate') {
             steps {

@@ -20,8 +20,9 @@ Ruff against `backend/` and pytest with coverage. Tests are discovered alongside
 their modules inside `backend/`. Test failures and zero collected tests fail the
 build; test and coverage reports are published/archived even after failure.
 
-Use a Unix Jenkins agent with Python 3.12, the Python venv module, and
-`sonar-scanner` on PATH. Install the Jenkins JUnit and SonarQube Scanner plugins.
+Use a Unix Jenkins agent with Python 3 and the Python venv module.
+A managed SonarScanner installation named `SonarScanner` must be configured
+under Jenkins Tools. Install the Jenkins JUnit and SonarQube Scanner plugins.
 Configure a multibranch Pipeline job for this repository with PR discovery and
 the repository webhook so PR updates trigger a build.
 
@@ -34,6 +35,9 @@ pipeline fails if the quality gate is not OK or the wait times out.
 Actual Jenkins and SonarQube execution remains unverified. UA-3/UA-4 completion
 requires real evidence of a PR-triggered build and a deliberate violation that
 fails the configured quality gate. No server credentials belong in this repo.
+
+See [the local server and evidence checklist](docs/SPRINT1_CI_EVIDENCE.md)
+for the optional Docker setup and the evidence still required for review.
 
 ## Repository layout
 
