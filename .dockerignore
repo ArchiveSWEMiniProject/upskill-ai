@@ -1,0 +1,15 @@
+# Keep the build context small and free of local files
+.git
+.venv
+.env
+.pytest_cache
+.coverage
+htmlcov
+__pycache__
+*.pyc
+node_modules
+.next
+docs
+*.pdf
+tasks.md
+plan.md
