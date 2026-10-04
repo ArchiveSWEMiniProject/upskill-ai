@@ -7,21 +7,21 @@ for the right reason (NotImplementedError) rather than an ImportError,
 per the Sprint 1 "done when" criterion.
 
 Fill this in against RM-1 (gap computation) and RM-2 (ranking) once the
-skill vector (contract 7.1) is actually being produced by M1.
+skill vector (docs/CONTRACTS.md, section 1) is actually being produced by M1.
 
-Level and SkillVectorEntry live in backend/shared/types.py (frozen
+Level and SkillVectorEntry live in backend/shared/skill_vector.py (frozen
 contract, owned by M1) — imported here, not redefined, per review
 feedback on PR #6.
 """
 
 from dataclasses import dataclass
 
-from backend.shared.shared_types_proposed import Level, SkillVectorEntry
+from backend.shared.skill_vector import Level, SkillVectorEntry
 
 
 @dataclass(frozen=True)
 class RoleSkillRequirement:
-    """One row of role_skill_requirement — contract 7.2."""
+    """One row of role_skill_requirement (docs/CONTRACTS.md, section 2)."""
     role_id: int
     skill_id: int
     skill_name: str
