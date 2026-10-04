@@ -1,6 +1,9 @@
 -- =====================================================================
 -- UA-7 (Yajat's lead share) — Skill taxonomy seed
--- Schema reference: docs/CONTRACTS.md section 7.2
+-- Schema reference: docs/CONTRACTS.md, taxonomy schema section
+-- (referenced by name, not number — the kickoff-plan draft numbered it
+-- 7.2, the merged CONTRACTS.md numbers it section 2; avoid hardcoding
+-- a section number here again since it already drifted once).
 --
 -- Design notes:
 --   * 20 canonical skills across Foundations / Databases / Web / DevOps /
@@ -91,10 +94,11 @@ SELECT s.skill_id, p.skill_id FROM
   ('Backend Framework (Flask/FastAPI)','REST API Design'),
   ('Authentication & Authorization',  'REST API Design'),
   ('Unit Testing',                    'Programming Fundamentals'),
+  ('Docker & Containerization',       'Git & Version Control'),
   ('CI/CD Fundamentals',              'Git & Version Control'),
   ('CI/CD Fundamentals',              'Unit Testing'),
-  ('Docker & Containerization',       'CI/CD Fundamentals'),
-  ('Cloud Deployment Basics',         'Docker & Containerization'),
+  ('CI/CD Fundamentals',              'Docker & Containerization'),
+  ('Cloud Deployment Basics',         'CI/CD Fundamentals'),
   ('System Design Fundamentals',      'Data Structures'),
   ('System Design Fundamentals',      'REST API Design'),
   ('Vector Databases',                'Relational Database Design'),
@@ -113,20 +117,26 @@ ON CONFLICT (skill_id, prerequisite_skill_id) DO NOTHING;
 --    and for Sprint 2/3 end-to-end demo data.
 -- ---------------------------------------------------------------------
 INSERT INTO career_role (role_name, description) VALUES
-  ('Backend Developer', 'Entry-level backend engineering role used as the demo target role for M2 gap analysis.')
+  ('Backend Developer', 'Entry-level backend engineering role used as the demo target role for M2 gap analysis.'),
+  ('Data Analyst', 'Entry-level data analyst role — second target role, added for Vansh''s TC-F1-12 which needs at least two roles seeded.')
 ON CONFLICT (role_name) DO NOTHING;
 
 INSERT INTO role_skill_requirement (role_id, skill_id, required_level, weight)
 SELECT r.role_id, s.skill_id, req.required_level, req.weight FROM
 (VALUES
-  ('Python',                           'intermediate', 5),
-  ('REST API Design',                  'intermediate', 4),
-  ('SQL Basics',                       'beginner',     3),
-  ('Docker & Containerization',        'beginner',     2),
-  ('Unit Testing',                     'beginner',     1)
-) AS req(skill_name, required_level, weight)
+  ('Backend Developer', 'Python',                      'intermediate', 5),
+  ('Backend Developer', 'REST API Design',              'intermediate', 4),
+  ('Backend Developer', 'SQL Basics',                   'beginner',     3),
+  ('Backend Developer', 'Docker & Containerization',    'beginner',     2),
+  ('Backend Developer', 'Unit Testing',                 'beginner',     1),
+  ('Data Analyst',      'SQL Basics',                   'intermediate', 5),
+  ('Data Analyst',      'Relational Database Design',   'intermediate', 4),
+  ('Data Analyst',      'Python',                       'beginner',     3),
+  ('Data Analyst',      'Machine Learning Fundamentals','beginner',     2),
+  ('Data Analyst',      'Data Structures',              'beginner',     1)
+) AS req(role_name, skill_name, required_level, weight)
 JOIN skill s ON s.skill_name = req.skill_name
-CROSS JOIN career_role r WHERE r.role_name = 'Backend Developer'
+JOIN career_role r ON r.role_name = req.role_name
 ON CONFLICT (role_id, skill_id) DO NOTHING;
 
 COMMIT;
@@ -135,19 +145,20 @@ COMMIT;
 -- Acyclicity check (manual, for the record — satisfies the "done when"
 -- criterion in the kickoff plan: "valid acyclic prerequisite graph")
 --
--- The edges above form three strictly increasing tiers with no back
--- edges:
+-- The edges above form five strictly increasing tiers with no back
+-- edges (updated after moving Docker ahead of CI/CD per review — Docker
+-- is now learned independently of the pipeline that later builds on it,
+-- matching the usual order Vansh flagged):
 --   Tier 0 (no prerequisites): Programming Fundamentals, SQL Basics,
 --     Git & Version Control, HTTP & Web Fundamentals
 --   Tier 1 (depends only on Tier 0): Data Structures, Python,
---     Relational Database Design, Unit Testing
+--     Relational Database Design, Unit Testing, Docker & Containerization
 --   Tier 2 (depends only on Tier 0/1): Algorithms, REST API Design,
---     CI/CD Fundamentals, Vector Databases, Knowledge Graphs
+--     Vector Databases, Knowledge Graphs, CI/CD Fundamentals
 --   Tier 3 (depends only on Tier 0/1/2): Backend Framework,
---     Authentication & Authorization, Docker & Containerization,
---     System Design Fundamentals, Machine Learning Fundamentals
---   Tier 4 (depends only on Tier 0-3): Cloud Deployment Basics,
---     Retrieval-Augmented Generation (RAG)
+--     Authentication & Authorization, System Design Fundamentals,
+--     Machine Learning Fundamentals, Cloud Deployment Basics
+--   Tier 4 (depends only on Tier 0-3): Retrieval-Augmented Generation (RAG)
 --
 -- Every edge points from a higher tier to a strictly lower tier, so no
 -- cycle is possible. Combined with Vansh's and Hemanth's shares this
