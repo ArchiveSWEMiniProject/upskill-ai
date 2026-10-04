@@ -7,7 +7,7 @@ RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.l
     && rm -rf /var/lib/apt/lists/*
 
 USER jenkins
-RUN jenkins-plugin-cli --jenkins-update-center-download-url https://archives.jenkins.io/plugins \
+RUN jenkins-plugin-cli \
     --plugins workflow-aggregator:608.v67378e9d3db_1 git:5.10.1 \
     github-branch-source:1983.vfa_27ed961853 junit:1432.v3f9a_b_73dd986 \
     sonar:2.19.0 timestamper:1.30
