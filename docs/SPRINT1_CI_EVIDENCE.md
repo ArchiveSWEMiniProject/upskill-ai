@@ -1,11 +1,53 @@
 # UA-3 / UA-4 execution evidence
 
-Status: successful real CI build and deliberate quality-gate failure verified.
-The automatic-discovery success and final evidence export are still pending.
+Status: latest committed pipeline, clean image build, real analysis and gate
+verified on Linux Docker Engine. Automatic GitHub PR-trigger completion and
+merge blocking remain unverified; no GitHub changes were authorized.
 Saved API responses and logs live in `docs/evidence/sprint1/`; unfinished build
 snapshots have `building: true` and must not be presented as completed runs.
 
-## Observed execution (2026-10-04)
+## Latest Linux verification (2026-10-04)
+
+- Installed official Docker Engine 29.8.2 and Compose 5.6.0 in the existing
+  Ubuntu 24.04 WSL distribution. Docker Desktop's data was neither reset nor
+  deleted; its startup problem was bypassed using an independent Linux engine.
+- The committed Jenkins Dockerfile built successfully from its pinned base,
+  including Python and all required plugins. Standard Jenkins mirror routing
+  replaced the archive-server override because the archive route stalled.
+  Built image: `sha256:cb7eea916656ffb012cabd797853af7c16d90ca7459d50dfc5e4fccdc5300791`.
+- Feature revision: `0bf7aae04baecc41ce61a2135380e3a1872f3467`.
+  Current main: `83af45e69405326f6d1249aa2065fe3e679417eb`.
+  They merged without conflict into tree
+  `f227b05d3f21ca512a1f550cbef01bbe211c4357`.
+  A local-only validation commit, `13949879249b20b47f9412da39ef34998287cc4b`,
+  contains that tree and both revisions as parents. Neither branch history nor
+  GitHub was changed to create this temporary validation commit.
+- `UpSkill-Final-Revision/1` executed the actual committed Jenkinsfile via SCM
+  from a read-only local Git mirror and finished SUCCESS. It is a manual local
+  validation, not evidence of a GitHub webhook or automatic PR trigger.
+  Local URL: http://localhost:8080/job/UpSkill-Final-Revision/1/.
+- Ruff passed. Pytest collected 20: 14 passed and 6 expected failures from M2's
+  documented `compute_gap()` stub. JUnit reports zero errors/failures and six
+  skipped/xfail cases. No tests or xfail markers were changed by this CI pass.
+- Pytest coverage is 76% (including tests); SonarQube source coverage is 68.0%.
+  The older run's 89% pytest / 77.1% Sonar coverage must not be substituted for
+  these updated-main results.
+- Sonar task `c4484096-2079-46dc-86c4-fe7f49a1d8f6` completed SUCCESS,
+  its webhook delivered gate OK, and Jenkins archived JUnit/coverage reports.
+  Full actual evidence is in `docs/evidence/sprint1/linux-final/`.
+- Sonar reports one existing LOW security finding, rule `docker:S6471`, at
+  `backend/Dockerfile:1`: the Python base runs as root. That shared M4-owned
+  Dockerfile was not altered in this CI-only task. Gate OK is not zero issues.
+- Runtime credentials, bootstrap files, local Git mirror, and keep-alive helper
+  remain ignored under `.ci-local/`. No GitHub credential was configured on the
+  new server. It does not publish GitHub statuses or configure webhooks.
+
+This evidence records the tested code revision. Any later evidence/documentation
+commit must retain that attribution; do not relabel this run as testing a later
+commit. Final-HEAD rechecks can be exported separately without a self-referential
+evidence commit.
+
+## Earlier execution (2026-10-04; retained for provenance)
 
 - Jenkins 2.580.1 and SonarQube Community Build 26.9.0.129388 started
   successfully on local Docker servers. The Jenkins agent used Python 3.13.5
@@ -114,11 +156,12 @@ only inserts skills; it does not implement taxonomy tables or feature logic.
 
 ## Outstanding evidence
 
-- Automatically discovered PR build: tests/lint passed; final gate/result pending.
-- SonarQube analysis and successful gate: build 3, archived console/API evidence.
+- Automatically discovered GitHub PR build: final gate/result pending; the
+  latest successful Linux job is local/manual, not a substitute for this trigger.
+- Latest pipeline, analysis and gate: verified Linux build 1; full evidence saved.
 - Deliberate quality-gate failure: verified demo build 2; captured final excerpt
   and SonarQube gate JSON saved, full final console export pending.
-- Clean image rebuild: plugin-download network failure; not verified.
+- Clean image rebuild: verified with standard mirror routing on Linux Engine.
 - PR attachment: pending user push/upload; no GitHub mutation authorized.
 - GitHub required-check enforcement: left to Vansh, per user instruction.
 - PostgreSQL seed execution and idempotence: pending shared schema availability.

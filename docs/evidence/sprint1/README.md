@@ -4,6 +4,14 @@ All files are from real local Jenkins/SonarQube runs. No credentials or local
 bootstrap files are included. These files have not been uploaded to GitHub.
 Trailing whitespace on timestamp-only console lines was removed for Git hygiene.
 
+The latest successful verification is under `linux-final/`. It tests feature
+`0bf7aae` combined with updated main `83af45e`, with 14 passed, 6 expected
+failures, 76% pytest coverage, 68.0% SonarQube source coverage and gate OK.
+The exact Jenkinsfile executed from a local-only SCM validation merge; this
+does not prove automatic GitHub triggering or required-check enforcement.
+The Jenkins image also built cleanly on the independent Ubuntu Docker Engine.
+The older files below are retained as historical evidence, not current metrics.
+
 | Prefix | What the saved files prove |
 |---|---|
 | `pr4-manual-retry-*` | Completed successful Jenkins PR-merge build 3, console, 14-test JUnit report, and 89% pytest coverage report |

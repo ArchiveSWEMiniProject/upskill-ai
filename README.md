@@ -33,12 +33,14 @@ SonarQube, configure a webhook to `<Jenkins URL>/sonarqube-webhook/` (including
 the trailing slash) so Jenkins can receive the analysis completion event. The
 pipeline fails if the quality gate is not OK or the wait times out.
 
-One real PR-merge build passed lint, 14 tests, and the SonarQube quality gate.
-An isolated demonstration run also passed lint/tests, then failed specifically
-because its deliberately strict coverage gate returned ERROR. Successful
-automatic-trigger completion and final log export are still pending due to
-local Docker instability. See the evidence document for precise observations,
-saved evidence, and remaining dependencies. No server credentials belong here.
+The committed pipeline and clean Jenkins image were verified on an independent
+Docker Engine in Ubuntu WSL. Against current shared main, Jenkins passed Ruff,
+14 tests (plus 6 expected M2 fixture failures), and the SonarQube gate. Pytest
+coverage was 76%; SonarQube source coverage was 68.0%. An earlier isolated run
+also proved that a gate ERROR fails Jenkins. Full logs and reports are saved in
+the evidence folder. GitHub-trigger wiring and merge blocking remain separate
+team configuration tasks; pushing files alone does not configure them.
+No server credentials belong here.
 
 See [the local server and evidence checklist](docs/SPRINT1_CI_EVIDENCE.md)
 for the optional Docker setup and the evidence still required for review.
