@@ -14,13 +14,14 @@ Stack: Next.js (TypeScript), FastAPI (Python 3.12), PostgreSQL 16, SQLAlchemy + 
 
 ## Sprint 1 CI setup
 
-For UA-3, Jenkins checks out the repository, creates a Python virtual environment,
+For UA-3, Jenkins checks out the repository, creates a fresh Python 3.12 virtual environment with `uv`,
 installs `requirements-dev.txt` (and `requirements.txt` when present), and runs
 Ruff against `backend/` and pytest with coverage. Tests are discovered alongside
 their modules inside `backend/`. Test failures and zero collected tests fail the
 build; test and coverage reports are published/archived even after failure.
 
-Use a Unix Jenkins agent with Python 3 and the Python venv module.
+Use a Unix Jenkins agent with `uv` on the PATH (the image in `ci/jenkins/` installs
+it and CPython 3.12); the build fails if the venv is not Python 3.12.
 A managed SonarScanner installation named `SonarScanner` must be configured
 under Jenkins Tools. Install the Jenkins JUnit, Timestamper, GitHub Branch Source,
 and SonarQube Scanner plugins.

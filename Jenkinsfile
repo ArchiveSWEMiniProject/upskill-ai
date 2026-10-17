@@ -9,10 +9,12 @@ pipeline {
         stage('Backend checks') {
             steps {
                 script {
-                    sh 'python3 -m venv .venv'
-                    sh '.venv/bin/python -m pip install -r requirements-dev.txt'
+                    // Fresh 3.12 venv every build, matching the stack and the API image.
+                    sh 'uv venv --clear --python 3.12 .venv'
+                    sh '.venv/bin/python -c "import sys; assert sys.version_info[:2] == (3, 12), sys.version"'
+                    sh 'uv pip install --python .venv/bin/python -r requirements-dev.txt'
                     if (fileExists('requirements.txt')) {
-                        sh '.venv/bin/python -m pip install -r requirements.txt'
+                        sh 'uv pip install --python .venv/bin/python -r requirements.txt'
                     }
                     if (fileExists('backend')) {
                         sh '.venv/bin/python -m ruff check backend'
