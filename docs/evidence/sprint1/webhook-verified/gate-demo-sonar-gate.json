@@ -1,0 +1,27 @@
+{
+  "projectStatus": {
+    "status": "ERROR",
+    "conditions": [
+      {
+        "status": "ERROR",
+        "metricKey": "coverage",
+        "comparator": "LT",
+        "errorThreshold": "100",
+        "actualValue": "68.0"
+      },
+      {
+        "status": "OK",
+        "metricKey": "new_violations",
+        "comparator": "GT",
+        "errorThreshold": "0",
+        "actualValue": "0"
+      }
+    ],
+    "ignoredConditions": false,
+    "period": {
+      "mode": "PREVIOUS_VERSION",
+      "date": "2026-10-04T15:17:00+0000"
+    },
+    "caycStatus": "over-compliant"
+  }
+}

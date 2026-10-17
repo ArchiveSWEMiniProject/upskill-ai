@@ -1,0 +1,379 @@
+Started by user upskill-admin
+Obtained Jenkinsfile from git file:///validation.git
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/jenkins_home/jobs/UpSkill-Final-Revision/workspace
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+Cloning the remote Git repository
+Cloning repository file:///validation.git
+ > git init /var/jenkins_home/jobs/UpSkill-Final-Revision/workspace # timeout=10
+Fetching upstream changes from file:///validation.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+ > git fetch --tags --force --progress -- file:///validation.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git config remote.origin.url file:///validation.git # timeout=10
+ > git config --add remote.origin.fetch +refs/heads/*:refs/remotes/origin/* # timeout=10
+Avoid second fetch
+ > git rev-parse refs/remotes/origin/ci-validation^{commit} # timeout=10
+Checking out Revision 13949879249b20b47f9412da39ef34998287cc4b (refs/remotes/origin/ci-validation)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 13949879249b20b47f9412da39ef34998287cc4b # timeout=10
+Commit message: "Local-only final CI validation merge"
+First time build. Skipping changelog.
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] timestamps
+[Pipeline] {
+[Pipeline] timeout
+[2026-10-04T14:32:06.008Z] Timeout set to expire in 20 min
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Checkout)
+[Pipeline] checkout
+[2026-10-04T14:32:06.290Z] Selected Git installation does not exist. Using Default
+[2026-10-04T14:32:06.291Z] The recommended git tool is: NONE
+[2026-10-04T14:32:06.291Z] No credentials specified
+[2026-10-04T14:32:06.292Z]  > git rev-parse --resolve-git-dir /var/jenkins_home/jobs/UpSkill-Final-Revision/workspace/.git # timeout=10
+[2026-10-04T14:32:06.302Z] Fetching changes from the remote Git repository
+[2026-10-04T14:32:06.305Z]  > git config remote.origin.url file:///validation.git # timeout=10
+[2026-10-04T14:32:06.316Z] Fetching upstream changes from file:///validation.git
+[2026-10-04T14:32:06.316Z]  > git --version # timeout=10
+[2026-10-04T14:32:06.328Z]  > git --version # 'git version 2.47.3'
+[2026-10-04T14:32:06.329Z]  > git fetch --tags --force --progress -- file:///validation.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+[2026-10-04T14:32:06.436Z]  > git rev-parse refs/remotes/origin/ci-validation^{commit} # timeout=10
+[2026-10-04T14:32:06.445Z] Checking out Revision 13949879249b20b47f9412da39ef34998287cc4b (refs/remotes/origin/ci-validation)
+[2026-10-04T14:32:06.445Z]  > git config core.sparsecheckout # timeout=10
+[2026-10-04T14:32:06.458Z]  > git checkout -f 13949879249b20b47f9412da39ef34998287cc4b # timeout=10
+[2026-10-04T14:32:06.486Z] Commit message: "Local-only final CI validation merge"
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Backend checks)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
+[2026-10-04T14:32:07.228Z] + python3 -m venv .venv
+[Pipeline] sh
+[2026-10-04T14:32:14.246Z] + .venv/bin/python -m pip install -r requirements-dev.txt
+[2026-10-04T14:32:14.799Z] Collecting pytest<9,>=8.3 (from -r requirements-dev.txt (line 1))
+[2026-10-04T14:32:14.799Z]   Downloading pytest-8.4.2-py3-none-any.whl.metadata (7.7 kB)
+[2026-10-04T14:32:14.799Z] Collecting pytest-cov<7,>=5 (from -r requirements-dev.txt (line 2))
+[2026-10-04T14:32:14.799Z]   Downloading pytest_cov-6.3.0-py3-none-any.whl.metadata (30 kB)
+[2026-10-04T14:32:15.352Z] Collecting ruff<1,>=0.6 (from -r requirements-dev.txt (line 3))
+[2026-10-04T14:32:15.352Z]   Downloading ruff-0.16.10-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (20 kB)
+[2026-10-04T14:32:15.603Z] Collecting iniconfig>=1 (from pytest<9,>=8.3->-r requirements-dev.txt (line 1))
+[2026-10-04T14:32:15.603Z]   Downloading iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+[2026-10-04T14:32:15.603Z] Collecting packaging>=20 (from pytest<9,>=8.3->-r requirements-dev.txt (line 1))
+[2026-10-04T14:32:15.603Z]   Downloading packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+[2026-10-04T14:32:15.603Z] Collecting pluggy<2,>=1.5 (from pytest<9,>=8.3->-r requirements-dev.txt (line 1))
+[2026-10-04T14:32:15.603Z]   Downloading pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+[2026-10-04T14:32:15.855Z] Collecting pygments>=2.7.2 (from pytest<9,>=8.3->-r requirements-dev.txt (line 1))
+[2026-10-04T14:32:15.855Z]   Downloading pygments-2.21.0-py3-none-any.whl.metadata (2.5 kB)
+[2026-10-04T14:32:16.770Z] Collecting coverage>=7.5 (from coverage[toml]>=7.5->pytest-cov<7,>=5->-r requirements-dev.txt (line 2))
+[2026-10-04T14:32:16.770Z]   Downloading coverage-7.16.2-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (8.2 kB)
+[2026-10-04T14:32:16.770Z] Downloading pytest-8.4.2-py3-none-any.whl (365 kB)
+[2026-10-04T14:32:16.770Z] Downloading pytest_cov-6.3.0-py3-none-any.whl (25 kB)
+[2026-10-04T14:32:16.770Z] Downloading ruff-0.16.10-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (10.4 MB)
+[2026-10-04T14:32:18.118Z]    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.4/10.4 MB 8.0 MB/s eta 0:00:00
+[2026-10-04T14:32:18.119Z] Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+[2026-10-04T14:32:18.119Z] Downloading coverage-7.16.2-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (257 kB)
+[2026-10-04T14:32:18.370Z] Downloading iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+[2026-10-04T14:32:18.370Z] Downloading packaging-26.3-py3-none-any.whl (129 kB)
+[2026-10-04T14:32:18.370Z] Downloading pygments-2.21.0-py3-none-any.whl (1.3 MB)
+[2026-10-04T14:32:18.622Z]    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 13.7 MB/s eta 0:00:00
+[2026-10-04T14:32:18.622Z] Installing collected packages: ruff, pygments, pluggy, packaging, iniconfig, coverage, pytest, pytest-cov
+[2026-10-04T14:32:21.856Z]
+[2026-10-04T14:32:21.856Z] Successfully installed coverage-7.16.2 iniconfig-2.3.0 packaging-26.3 pluggy-1.6.0 pygments-2.21.0 pytest-8.4.2 pytest-cov-6.3.0 ruff-0.16.10
+[Pipeline] fileExists
+[Pipeline] sh
+[2026-10-04T14:32:22.260Z] + .venv/bin/python -m pip install -r requirements.txt
+[2026-10-04T14:32:23.172Z] Collecting fastapi<1.0.0,>=0.110.0 (from -r requirements.txt (line 1))
+[2026-10-04T14:32:23.424Z]   Downloading fastapi-0.142.2-py3-none-any.whl.metadata (27 kB)
+[2026-10-04T14:32:23.424Z] Collecting uvicorn<1.0.0,>=0.28.0 (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2))
+[2026-10-04T14:32:23.424Z]   Downloading uvicorn-0.54.0-py3-none-any.whl.metadata (6.6 kB)
+[2026-10-04T14:32:23.675Z] Collecting pydantic<3.0.0,>=2.6.0 (from -r requirements.txt (line 3))
+[2026-10-04T14:32:23.675Z]   Downloading pydantic-2.13.5-py3-none-any.whl.metadata (110 kB)
+[2026-10-04T14:32:23.675Z] Collecting starlette>=0.46.0 (from fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1))
+[2026-10-04T14:32:23.926Z]   Downloading starlette-1.7.0-py3-none-any.whl.metadata (6.6 kB)
+[2026-10-04T14:32:23.926Z] Collecting typing-extensions>=4.8.0 (from fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1))
+[2026-10-04T14:32:23.926Z]   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+[2026-10-04T14:32:23.926Z] Collecting typing-inspection>=0.4.2 (from fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1))
+[2026-10-04T14:32:23.926Z]   Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+[2026-10-04T14:32:23.926Z] Collecting annotated-doc>=0.0.2 (from fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1))
+[2026-10-04T14:32:23.926Z]   Downloading annotated_doc-0.0.5-py3-none-any.whl.metadata (6.5 kB)
+[2026-10-04T14:32:24.178Z] Collecting opentelemetry-api>=1.44.0 (from fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1))
+[2026-10-04T14:32:24.178Z]   Downloading opentelemetry_api-1.45.0-py3-none-any.whl.metadata (1.4 kB)
+[2026-10-04T14:32:24.178Z] Collecting click>=7.0 (from uvicorn<1.0.0,>=0.28.0->uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2))
+[2026-10-04T14:32:24.178Z]   Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+[2026-10-04T14:32:24.178Z] Collecting h11>=0.8 (from uvicorn<1.0.0,>=0.28.0->uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2))
+[2026-10-04T14:32:24.178Z]   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+[2026-10-04T14:32:24.429Z] Collecting annotated-types>=0.6.0 (from pydantic<3.0.0,>=2.6.0->-r requirements.txt (line 3))
+[2026-10-04T14:32:24.429Z]   Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+[2026-10-04T14:32:25.775Z] Collecting pydantic-core==2.46.5 (from pydantic<3.0.0,>=2.6.0->-r requirements.txt (line 3))
+[2026-10-04T14:32:25.775Z]   Downloading pydantic_core-2.46.5-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)
+[2026-10-04T14:32:25.775Z] Collecting httptools>=0.8.0 (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2))
+[2026-10-04T14:32:25.775Z]   Downloading httptools-0.8.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (3.5 kB)
+[2026-10-04T14:32:25.775Z] Collecting python-dotenv>=0.13 (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2))
+[2026-10-04T14:32:25.775Z]   Downloading python_dotenv-1.2.4-py3-none-any.whl.metadata (29 kB)
+[2026-10-04T14:32:25.775Z] Collecting pyyaml>=5.1 (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2))
+[2026-10-04T14:32:25.775Z]   Downloading pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+[2026-10-04T14:32:26.027Z] Collecting uvloop>=0.15.1 (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2))
+[2026-10-04T14:32:26.027Z]   Downloading uvloop-0.23.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (5.1 kB)
+[2026-10-04T14:32:26.027Z] Collecting watchfiles>=0.20 (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2))
+[2026-10-04T14:32:26.027Z]   Downloading watchfiles-1.3.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.9 kB)
+[2026-10-04T14:32:26.279Z] Collecting websockets>=13.0 (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2))
+[2026-10-04T14:32:26.279Z]   Downloading websockets-17.2-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.3 kB)
+[2026-10-04T14:32:26.530Z] Collecting anyio<5,>=4.0.0 (from starlette>=0.46.0->fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1))
+[2026-10-04T14:32:26.530Z]   Downloading anyio-4.15.1-py3-none-any.whl.metadata (4.7 kB)
+[2026-10-04T14:32:26.530Z] Collecting idna>=2.8 (from anyio<5,>=4.0.0->starlette>=0.46.0->fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1))
+[2026-10-04T14:32:26.530Z]   Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+[2026-10-04T14:32:26.530Z] Downloading fastapi-0.142.2-py3-none-any.whl (144 kB)
+[2026-10-04T14:32:26.556Z] Downloading uvicorn-0.54.0-py3-none-any.whl (87 kB)
+[2026-10-04T14:32:26.557Z] Downloading pydantic-2.13.5-py3-none-any.whl (472 kB)
+[2026-10-04T14:32:26.809Z] Downloading pydantic_core-2.46.5-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+[2026-10-04T14:32:27.062Z]    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 7.7 MB/s eta 0:00:00
+[2026-10-04T14:32:27.062Z] Downloading annotated_doc-0.0.5-py3-none-any.whl (5.3 kB)
+[2026-10-04T14:32:27.062Z] Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+[2026-10-04T14:32:27.062Z] Downloading click-8.5.0-py3-none-any.whl (125 kB)
+[2026-10-04T14:32:27.062Z] Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+[2026-10-04T14:32:27.062Z] Downloading httptools-0.8.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (486 kB)
+[2026-10-04T14:32:27.313Z] Downloading opentelemetry_api-1.45.0-py3-none-any.whl (60 kB)
+[2026-10-04T14:32:27.313Z] Downloading python_dotenv-1.2.4-py3-none-any.whl (23 kB)
+[2026-10-04T14:32:27.313Z] Downloading pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (801 kB)
+[2026-10-04T14:32:27.564Z]    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 801.6/801.6 kB 6.5 MB/s eta 0:00:00
+[2026-10-04T14:32:27.564Z] Downloading starlette-1.7.0-py3-none-any.whl (78 kB)
+[2026-10-04T14:32:27.564Z] Downloading anyio-4.15.1-py3-none-any.whl (132 kB)
+[2026-10-04T14:32:27.564Z] Downloading idna-3.20-py3-none-any.whl (69 kB)
+[2026-10-04T14:32:27.564Z] Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+[2026-10-04T14:32:27.564Z] Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+[2026-10-04T14:32:27.564Z] Downloading uvloop-0.23.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.5 MB)
+[2026-10-04T14:32:28.116Z]    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.5/4.5 MB 8.4 MB/s eta 0:00:00
+[2026-10-04T14:32:28.116Z] Downloading watchfiles-1.3.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (458 kB)
+[2026-10-04T14:32:28.368Z] Downloading websockets-17.2-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (225 kB)
+[2026-10-04T14:32:28.620Z] Installing collected packages: websockets, uvloop, typing-extensions, pyyaml, python-dotenv, idna, httptools, h11, click, annotated-types, annotated-doc, uvicorn, typing-inspection, pydantic-core, opentelemetry-api, anyio, watchfiles, starlette, pydantic, fastapi
+[2026-10-04T14:32:31.870Z]
+[2026-10-04T14:32:31.871Z] Successfully installed annotated-doc-0.0.5 annotated-types-0.8.0 anyio-4.15.1 click-8.5.0 fastapi-0.142.2 h11-0.16.0 httptools-0.8.0 idna-3.20 opentelemetry-api-1.45.0 pydantic-2.13.5 pydantic-core-2.46.5 python-dotenv-1.2.4 pyyaml-6.0.3 starlette-1.7.0 typing-extensions-4.16.0 typing-inspection-0.4.4 uvicorn-0.54.0 uvloop-0.23.0 watchfiles-1.3.0 websockets-17.2
+[Pipeline] fileExists
+[Pipeline] sh
+[2026-10-04T14:32:33.219Z] + .venv/bin/python -m ruff check backend
+[2026-10-04T14:32:33.219Z] All checks passed!
+[Pipeline] sh
+[2026-10-04T14:32:33.539Z] + .venv/bin/python -m pytest --junitxml=pytest-report.xml --cov=backend --cov-report=xml:coverage.xml --cov-report=html:htmlcov --cov-report=term-missing
+[2026-10-04T14:32:34.092Z] ============================= test session starts ==============================
+[2026-10-04T14:32:34.092Z] platform linux -- Python 3.13.5, pytest-8.4.2, pluggy-1.6.0
+[2026-10-04T14:32:34.092Z] rootdir: /var/jenkins_home/jobs/UpSkill-Final-Revision/workspace
+[2026-10-04T14:32:34.092Z] configfile: pyproject.toml
+[2026-10-04T14:32:34.092Z] testpaths: backend
+[2026-10-04T14:32:34.092Z] plugins: anyio-4.15.1, cov-6.3.0
+[2026-10-04T14:32:34.092Z] collected 20 items
+[2026-10-04T14:32:34.092Z]
+[2026-10-04T14:32:34.343Z] backend/gap/tests/test_compute_gap.py xxxxxx                             [ 30%]
+[2026-10-04T14:32:34.343Z] backend/taxonomy/test_resolver.py ..............                         [100%]
+[2026-10-04T14:32:34.343Z]
+[2026-10-04T14:32:34.343Z] - generated xml file: /var/jenkins_home/jobs/UpSkill-Final-Revision/workspace/pytest-report.xml -
+[2026-10-04T14:32:34.343Z] ================================ tests coverage ================================
+[2026-10-04T14:32:34.343Z] _______________ coverage: platform linux, python 3.13.5-final-0 ________________
+[2026-10-04T14:32:34.343Z]
+[2026-10-04T14:32:34.344Z] Name                                      Stmts   Miss  Cover   Missing
+[2026-10-04T14:32:34.344Z] -----------------------------------------------------------------------
+[2026-10-04T14:32:34.344Z] backend/__init__.py                           0      0   100%
+[2026-10-04T14:32:34.344Z] backend/gap/service.py                       19      0   100%
+[2026-10-04T14:32:34.344Z] backend/gap/tests/test_compute_gap.py        57     11    81%   158, 166-167, 175, 183-189, 197-198, 208
+[2026-10-04T14:32:34.344Z] backend/main.py                               8      8     0%   3-19
+[2026-10-04T14:32:34.344Z] backend/shared/shared_types_proposed.py      96     40    58%   34-35, 51, 54-56, 59-61, 64-66, 69-71, 88-90, 98, 100, 103, 125, 127, 129, 147-157, 162, 165, 168, 171-174
+[2026-10-04T14:32:34.344Z] backend/taxonomy/__init__.py                  0      0   100%
+[2026-10-04T14:32:34.344Z] backend/taxonomy/resolver.py                 27      0   100%
+[2026-10-04T14:32:34.344Z] backend/taxonomy/test_resolver.py            35      0   100%
+[2026-10-04T14:32:34.344Z] -----------------------------------------------------------------------
+[2026-10-04T14:32:34.344Z] TOTAL                                       242     59    76%
+[2026-10-04T14:32:34.344Z] Coverage HTML written to dir htmlcov
+[2026-10-04T14:32:34.344Z] Coverage XML written to file coverage.xml
+[2026-10-04T14:32:34.344Z] ======================== 14 passed, 6 xfailed in 0.28s =========================
+[Pipeline] }
+[Pipeline] // script
+Post stage
+[Pipeline] junit
+[2026-10-04T14:32:34.887Z] Recording test results
+[2026-10-04T14:32:35.077Z] [Checks API] No suitable checks publisher found.
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (SonarQube analysis)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] tool
+[Pipeline] withSonarQubeEnv
+[2026-10-04T14:32:35.515Z] Injecting SonarQube environment variables using the configuration: SonarQube
+[Pipeline] {
+[Pipeline] sh
+[2026-10-04T14:32:36.088Z] + /var/jenkins_home/tools/sonar-scanner-8.1.0.6389/bin/sonar-scanner
+[2026-10-04T14:32:36.641Z] 14:32:36.457 INFO  Scanner configuration file: /var/jenkins_home/tools/sonar-scanner-8.1.0.6389/conf/sonar-scanner.properties
+[2026-10-04T14:32:36.641Z] 14:32:36.462 INFO  Project root configuration file: /var/jenkins_home/jobs/UpSkill-Final-Revision/workspace/sonar-project.properties
+[2026-10-04T14:32:36.641Z] 14:32:36.485 INFO  SonarScanner CLI 8.1.0.6389
+[2026-10-04T14:32:36.641Z] 14:32:36.491 INFO  Linux 6.18.35.2-microsoft-standard-WSL2 amd64
+[2026-10-04T14:32:40.767Z] 14:32:40.517 INFO  Communicating with SonarQube Community Build 26.9.0.129388
+[2026-10-04T14:32:40.767Z] 14:32:40.518 INFO  JRE provisioning: os[linux], arch[x86_64]
+[2026-10-04T14:32:50.671Z] 14:32:50.273 INFO  SONAR_SCANNER_JAVA_OPTS=-Xmx384m -XX:ActiveProcessorCount=2
+[2026-10-04T14:32:54.726Z] 14:32:54.245 INFO  Starting SonarScanner Engine...
+[2026-10-04T14:32:54.726Z] 14:32:54.245 INFO  Java 21.0.11 Eclipse Adoptium (64-bit)
+[2026-10-04T14:32:59.925Z] 14:32:59.924 INFO  Load global settings
+[2026-10-04T14:33:00.839Z] 14:33:00.526 INFO  Load global settings (done) | time=597ms
+[2026-10-04T14:33:00.839Z] 14:33:00.530 INFO  Server id: 147B411E-AaEHSs-4EuGMw1jtxucP
+[2026-10-04T14:33:00.839Z] 14:33:00.546 INFO  Loading required plugins
+[2026-10-04T14:33:00.839Z] 14:33:00.547 INFO  Load plugins index
+[2026-10-04T14:33:00.839Z] 14:33:00.735 INFO  Load plugins index (done) | time=189ms
+[2026-10-04T14:33:00.839Z] 14:33:00.736 INFO  Load/download plugins
+[2026-10-04T14:33:02.189Z] 14:33:01.963 INFO  Load/download plugins (done) | time=1227ms
+[2026-10-04T14:33:03.102Z] 14:33:02.850 INFO  Process project properties
+[2026-10-04T14:33:03.102Z] 14:33:02.899 INFO  Process project properties (done) | time=49ms
+[2026-10-04T14:33:03.102Z] 14:33:02.919 INFO  Project key: upskill-ai
+[2026-10-04T14:33:03.102Z] 14:33:02.920 INFO  Base dir: /var/jenkins_home/jobs/UpSkill-Final-Revision/workspace
+[2026-10-04T14:33:03.102Z] 14:33:02.920 INFO  Working dir: /var/jenkins_home/jobs/UpSkill-Final-Revision/workspace/.scannerwork
+[2026-10-04T14:33:03.102Z] 14:33:02.937 INFO  Load project settings for component key: 'upskill-ai'
+[2026-10-04T14:33:03.102Z] 14:33:03.086 INFO  Load project settings for component key: 'upskill-ai' (done) | time=150ms
+[2026-10-04T14:33:03.354Z] 14:33:03.165 INFO  Load quality profiles
+[2026-10-04T14:33:04.700Z] 14:33:04.281 INFO  Load quality profiles (done) | time=1116ms
+[2026-10-04T14:33:04.700Z] 14:33:04.320 INFO  Auto-configuring with CI 'Jenkins'
+[2026-10-04T14:33:04.700Z] 14:33:04.417 INFO  Load active rules
+[2026-10-04T14:33:09.903Z] 14:33:08.885 INFO  Load active rules (done) | time=4467ms
+[2026-10-04T14:33:09.904Z] 14:33:08.898 INFO  Load analysis cache
+[2026-10-04T14:33:09.904Z] 14:33:08.981 INFO  Load analysis cache (404) | time=84ms
+[2026-10-04T14:33:09.904Z] 14:33:09.524 INFO  Preprocessing files...
+[2026-10-04T14:33:09.904Z] 14:33:09.821 INFO  2 languages detected in 19 preprocessed files (done) | time=292ms
+[2026-10-04T14:33:09.904Z] 14:33:09.823 INFO  2 files ignored because of inclusion/exclusion patterns
+[2026-10-04T14:33:09.904Z] 14:33:09.824 INFO  5 directories skipped because of exclusion patterns (content not counted)
+[2026-10-04T14:33:09.904Z] 14:33:09.825 INFO  0 files ignored because of scm ignore settings
+[2026-10-04T14:33:09.904Z] 14:33:09.828 INFO  Loading plugins for detected languages
+[2026-10-04T14:33:09.904Z] 14:33:09.829 INFO  Load/download plugins
+[2026-10-04T14:33:13.150Z] 14:33:12.514 INFO  Load/download plugins (done) | time=2685ms
+[2026-10-04T14:33:13.150Z] 14:33:12.916 INFO  Load project repositories
+[2026-10-04T14:33:14.064Z] 14:33:13.850 INFO  Load project repositories (done) | time=933ms
+[2026-10-04T14:33:14.064Z] 14:33:13.900 INFO  Indexing files...
+[2026-10-04T14:33:14.064Z] 14:33:13.901 INFO  Project configuration:
+[2026-10-04T14:33:14.064Z] 14:33:13.902 INFO    Excluded sources: **/__pycache__/**, **/.venv/**, **/node_modules/**, **/.next/**, **/coverage/**, **/test_*.py
+[2026-10-04T14:33:14.064Z] 14:33:13.902 INFO    Included tests: **/test_*.py
+[2026-10-04T14:33:14.064Z] 14:33:13.927 INFO  19 files indexed (done) | time=26ms
+[2026-10-04T14:33:14.064Z] 14:33:13.929 INFO  Quality profile for docker: Sonar way
+[2026-10-04T14:33:14.065Z] 14:33:13.930 INFO  Quality profile for py: Sonar way
+[2026-10-04T14:33:14.065Z] 14:33:13.930 INFO  ------------- Run sensors on module UpSkill-AI
+[2026-10-04T14:33:14.065Z] 14:33:14.007 INFO  Load metrics repository
+[2026-10-04T14:33:14.316Z] 14:33:14.089 INFO  Load metrics repository (done) | time=82ms
+[2026-10-04T14:33:16.233Z] 14:33:15.954 INFO  Sensor IaC YAML File Type Classification Sensor [iac]
+[2026-10-04T14:33:16.234Z] 14:33:16.017 INFO  Sensor IaC YAML File Type Classification Sensor [iac] (done) | time=63ms
+[2026-10-04T14:33:16.234Z] 14:33:16.018 INFO  Sensor IaC hadolint report Sensor [iac]
+[2026-10-04T14:33:16.234Z] 14:33:16.018 INFO  Sensor IaC hadolint report Sensor [iac] (done) | time=0ms
+[2026-10-04T14:33:16.234Z] 14:33:16.018 INFO  Sensor Java Config Sensor [iac]
+[2026-10-04T14:33:16.234Z] 14:33:16.044 INFO  There are no files to be analyzed for the Java language
+[2026-10-04T14:33:16.234Z] 14:33:16.045 INFO  Sensor Java Config Sensor [iac] (done) | time=25ms
+[2026-10-04T14:33:16.234Z] 14:33:16.046 INFO  Sensor IaC Docker Sensor [iac]
+[2026-10-04T14:33:16.234Z] 14:33:16.192 INFO  1 source file to be analyzed
+[2026-10-04T14:33:17.210Z] 14:33:17.056 INFO  1/1 source file has been analyzed
+[2026-10-04T14:33:17.210Z] 14:33:17.057 INFO  Sensor IaC Docker Sensor [iac] (done) | time=1012ms
+[2026-10-04T14:33:17.210Z] 14:33:17.057 INFO  Sensor Python Sensor [python]
+[2026-10-04T14:33:17.210Z] 14:33:17.061 WARN  Your code is analyzed as compatible with all Python 3 versions by default. You can get a more precise analysis by setting the Python version or version range in your configuration via the parameter "sonar.python.version"
+[2026-10-04T14:33:19.124Z] 14:33:18.830 INFO  Starting global symbols computation
+[2026-10-04T14:33:19.124Z] 14:33:18.839 INFO  6 source files to be analyzed
+[2026-10-04T14:33:19.678Z] 14:33:19.457 INFO  6/6 source files have been analyzed
+[2026-10-04T14:33:19.678Z] 14:33:19.459 INFO  Finished step global symbols computation in 622ms
+[2026-10-04T14:33:19.679Z] 14:33:19.528 INFO  Starting rules execution
+[2026-10-04T14:33:19.679Z] 14:33:19.530 INFO  6 source files to be analyzed
+[2026-10-04T14:33:21.544Z] 14:33:21.254 INFO  6/6 source files have been analyzed
+[2026-10-04T14:33:21.544Z] 14:33:21.254 INFO  Finished step rules execution in 1725ms
+[2026-10-04T14:33:21.544Z] 14:33:21.255 INFO  The Python analyzer was able to leverage cached data from previous analyses for 0 out of 6 files. These files were not parsed.
+[2026-10-04T14:33:21.544Z] 14:33:21.259 INFO  Sensor Python Sensor [python] (done) | time=4201ms
+[2026-10-04T14:33:21.544Z] 14:33:21.259 INFO  Sensor Cobertura Sensor for Python coverage [python]
+[2026-10-04T14:33:21.544Z] 14:33:21.310 INFO  Python test coverage
+[2026-10-04T14:33:21.544Z] 14:33:21.312 INFO  Parsing report '/var/jenkins_home/jobs/UpSkill-Final-Revision/workspace/coverage.xml'
+[2026-10-04T14:33:21.544Z] 14:33:21.420 INFO  Sensor Cobertura Sensor for Python coverage [python] (done) | time=160ms
+[2026-10-04T14:33:21.544Z] 14:33:21.420 INFO  Sensor PythonXUnitSensor [python]
+[2026-10-04T14:33:21.544Z] 14:33:21.463 INFO  Sensor PythonXUnitSensor [python] (done) | time=43ms
+[2026-10-04T14:33:21.544Z] 14:33:21.464 INFO  Sensor Python Dependency Sensor [python]
+[2026-10-04T14:33:21.544Z] 14:33:21.469 INFO  Sensor Python Dependency Sensor [python] (done) | time=5ms
+[2026-10-04T14:33:21.544Z] 14:33:21.471 INFO  Sensor TextAndSecretsSensor [text]
+[2026-10-04T14:33:21.544Z] 14:33:21.506 INFO  Available processors: 2
+[2026-10-04T14:33:21.544Z] 14:33:21.507 INFO  Using 2 threads for analysis.
+[2026-10-04T14:33:22.097Z] 14:33:21.865 INFO  The property "sonar.tests" is not set. To improve the analysis accuracy, we categorize a file as a test file if any of the following is true:
+[2026-10-04T14:33:22.097Z]   * The filename starts with "test"
+[2026-10-04T14:33:22.097Z]   * The filename contains "test." or "tests."
+[2026-10-04T14:33:22.097Z]   * Any directory in the file path is named: "doc", "docs", "test", "tests", "mock" or "mocks"
+[2026-10-04T14:33:22.097Z]   * Any directory in the file path has a name ending in "test" or "tests"
+[2026-10-04T14:33:22.097Z]
+[2026-10-04T14:33:22.097Z] 14:33:21.903 INFO  Start fetching files for the text and secrets analysis
+[2026-10-04T14:33:22.097Z] 14:33:21.920 INFO  Using Git CLI to retrieve dirty files
+[2026-10-04T14:33:22.097Z] 14:33:21.933 INFO  Retrieving language associated files and files included via "sonar.text.inclusions" that are tracked by git
+[2026-10-04T14:33:22.097Z] 14:33:21.935 INFO  Starting the text and secrets analysis
+[2026-10-04T14:33:22.097Z] 14:33:21.938 INFO  19 source files to be analyzed for the text and secrets analysis
+[2026-10-04T14:33:22.097Z] 14:33:21.967 INFO  19/19 source files have been analyzed for the text and secrets analysis
+[2026-10-04T14:33:22.097Z] 14:33:21.969 INFO  Sensor TextAndSecretsSensor [text] (done) | time=499ms
+[2026-10-04T14:33:22.097Z] 14:33:21.972 INFO  ------------- Run sensors on project
+[2026-10-04T14:33:22.649Z] 14:33:22.352 INFO  Sensor IaC Project Sensor [iac]
+[2026-10-04T14:33:22.649Z] 14:33:22.355 INFO  Sensor IaC Project Sensor [iac] (done) | time=2ms
+[2026-10-04T14:33:22.649Z] 14:33:22.355 INFO  Sensor Zero Coverage Sensor
+[2026-10-04T14:33:22.649Z] 14:33:22.356 INFO  Sensor Zero Coverage Sensor (done) | time=1ms
+[2026-10-04T14:33:22.649Z] 14:33:22.357 INFO  ------------- Gather SCA dependencies on project
+[2026-10-04T14:33:22.649Z] 14:33:22.376 INFO  Dependency analysis skipped
+[2026-10-04T14:33:22.649Z] 14:33:22.385 INFO  SCM Publisher SCM provider for this project is: git
+[2026-10-04T14:33:22.649Z] 14:33:22.388 INFO  SCM Publisher 5 source files to be analyzed
+[2026-10-04T14:33:22.901Z] 14:33:22.846 INFO  SCM Publisher 5/5 source files have been analyzed (done) | time=456ms
+[2026-10-04T14:33:22.901Z] 14:33:22.853 INFO  CPD Executor 2 files had no CPD blocks
+[2026-10-04T14:33:22.901Z] 14:33:22.854 INFO  CPD Executor Calculating CPD for 4 files
+[2026-10-04T14:33:22.901Z] 14:33:22.870 INFO  CPD Executor CPD calculation finished (done) | time=16ms
+[2026-10-04T14:33:22.901Z] 14:33:22.880 INFO  SCM revision ID '13949879249b20b47f9412da39ef34998287cc4b'
+[2026-10-04T14:33:23.153Z] 14:33:23.070 INFO  Analysis report generated in 185ms, dir size=329.3 kB
+[2026-10-04T14:33:23.153Z] 14:33:23.114 INFO  Analysis report compressed in 44ms, zip size=60.3 kB
+[2026-10-04T14:33:23.404Z] 14:33:23.363 INFO  Analysis report uploaded in 249ms
+[2026-10-04T14:33:23.405Z] 14:33:23.366 INFO  ANALYSIS SUCCESSFUL, you can find the results at: http://sonarqube:9000/dashboard?id=upskill-ai
+[2026-10-04T14:33:23.405Z] 14:33:23.367 INFO  Note that you will be able to access the updated dashboard once the server has processed the submitted analysis report
+[2026-10-04T14:33:23.405Z] 14:33:23.367 INFO  More about the report processing at http://sonarqube:9000/api/ce/task?id=c4484096-2079-46dc-86c4-fe7f49a1d8f6
+[2026-10-04T14:33:23.405Z] 14:33:23.382 INFO  Analysis total time: 21.056 s
+[2026-10-04T14:33:23.656Z] 14:33:23.441 INFO  SonarScanner Engine completed successfully
+[2026-10-04T14:33:23.656Z] 14:33:23.551 INFO  EXECUTION SUCCESS
+[2026-10-04T14:33:23.656Z] 14:33:23.553 INFO  Total time: 47.156s
+[Pipeline] }
+[Pipeline] // withSonarQubeEnv
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Quality gate)
+[Pipeline] timeout
+[2026-10-04T14:33:26.270Z] Timeout set to expire in 5 min 0 sec
+[Pipeline] {
+[Pipeline] script
+[Pipeline] {
+[Pipeline] waitForQualityGate
+[2026-10-04T14:33:29.488Z] Checking status of SonarQube task 'c4484096-2079-46dc-86c4-fe7f49a1d8f6' on server 'SonarQube'
+[2026-10-04T14:33:29.687Z] SonarQube task 'c4484096-2079-46dc-86c4-fe7f49a1d8f6' status is 'IN_PROGRESS'
+[2026-10-04T14:33:42.814Z] SonarQube task 'c4484096-2079-46dc-86c4-fe7f49a1d8f6' status is 'SUCCESS'
+[2026-10-04T14:33:42.814Z] SonarQube task 'c4484096-2079-46dc-86c4-fe7f49a1d8f6' completed. Quality gate is 'OK'
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // timeout
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] archiveArtifacts
+[2026-10-04T14:33:44.078Z] Archiving artifacts
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // timeout
+[Pipeline] }
+[Pipeline] // timestamps
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS
