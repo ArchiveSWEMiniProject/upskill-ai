@@ -1,0 +1,77 @@
+{
+  "total": 1,
+  "p": 1,
+  "ps": 100,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 100,
+    "total": 1
+  },
+  "effortTotal": 15,
+  "issues": [
+    {
+      "key": "50efa542-9645-4c3c-90be-1695e7f8d78c",
+      "rule": "docker:S6471",
+      "severity": "MINOR",
+      "component": "upskill-ai:backend/Dockerfile",
+      "project": "upskill-ai",
+      "line": 1,
+      "hash": "d19728c68446f20c711e59101d3cf0a5",
+      "textRange": {
+        "startLine": 1,
+        "endLine": 1,
+        "startOffset": 0,
+        "endOffset": 21
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "The \"python\" image runs with \"root\" as the default user. Make sure it is safe here.",
+      "effort": "15min",
+      "debt": "15min",
+      "author": "pradeepshubhika@gmail.com",
+      "tags": [
+        "cwe",
+        "dockerfile",
+        "former-hotspot"
+      ],
+      "creationDate": "2026-10-04T08:56:37+0000",
+      "updateDate": "2026-10-04T14:33:03+0000",
+      "type": "VULNERABILITY",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    }
+  ],
+  "components": [
+    {
+      "key": "upskill-ai",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "UpSkill-AI",
+      "longName": "UpSkill-AI"
+    },
+    {
+      "key": "upskill-ai:backend/Dockerfile",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "Dockerfile",
+      "longName": "backend/Dockerfile",
+      "path": "backend/Dockerfile"
+    }
+  ],
+  "facets": []
+}

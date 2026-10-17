@@ -1,0 +1,16 @@
+{
+  "projectStatus": {
+    "status": "ERROR",
+    "conditions": [
+      {
+        "status": "ERROR",
+        "metricKey": "coverage",
+        "comparator": "LT",
+        "errorThreshold": "100",
+        "actualValue": "77.1"
+      }
+    ],
+    "ignoredConditions": false,
+    "caycStatus": "over-compliant"
+  }
+}

@@ -1,0 +1,22 @@
+# Override for the Jenkinsfile's deploy smoke test. Removes host ports and
+# fixed container names so the throwaway stack cannot clash with a developer's
+# running stack or with another build. Used as:
+#   COMPOSE_FILE=docker-compose.yml:ci/compose.smoke.yml
+services:
+  upskill-db:
+    container_name: !reset null
+    ports: !reset []
+  upskill-api:
+    container_name: !reset null
+    ports: !reset []
+    restart: "no"
+  upskill-web:
+    container_name: !reset null
+    ports: !reset []
+    restart: "no"
+
+# docker-compose.yml names its volume globally ("pgdata"). Without this, the
+# smoke test's `down -v` would delete a developer's real database volume.
+volumes:
+  pgdata:
+    name: !reset null
