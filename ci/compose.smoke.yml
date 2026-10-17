@@ -14,3 +14,9 @@ services:
     container_name: !reset null
     ports: !reset []
     restart: "no"
+
+# docker-compose.yml names its volume globally ("pgdata"). Without this, the
+# smoke test's `down -v` would delete a developer's real database volume.
+volumes:
+  pgdata:
+    name: !reset null
