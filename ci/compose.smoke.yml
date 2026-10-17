@@ -1,0 +1,16 @@
+# Override for the Jenkinsfile's deploy smoke test. Removes host ports and
+# fixed container names so the throwaway stack cannot clash with a developer's
+# running stack or with another build. Used as:
+#   COMPOSE_FILE=docker-compose.yml:ci/compose.smoke.yml
+services:
+  upskill-db:
+    container_name: !reset null
+    ports: !reset []
+  upskill-api:
+    container_name: !reset null
+    ports: !reset []
+    restart: "no"
+  upskill-web:
+    container_name: !reset null
+    ports: !reset []
+    restart: "no"
