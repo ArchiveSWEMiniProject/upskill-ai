@@ -3,14 +3,26 @@ __pycache__/
 .venv/
 .env
 .pytest_cache/
+.ruff_cache/
 .coverage
 htmlcov/
+coverage.xml
 node_modules/
 .next/
+frontend/node_modules/
+frontend/.next/
+frontend/coverage/
 uploads/
 pgdata/
 .idea/
 .vscode/
+.ci-local/
+*.db
+*.sqlite
+*.sqlite3
+*.swp
+*.swo
+*~
 
 # Personal / internal planning files (not shared in the repo)
 /plan.md
