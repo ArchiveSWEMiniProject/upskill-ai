@@ -117,7 +117,7 @@ INSERT INTO career_role (role_name, description) VALUES
 ON CONFLICT (role_name) DO NOTHING;
 
 INSERT INTO role_skill_requirement (role_id, skill_id, required_level, weight)
-SELECT r.role_id, s.skill_id, req.required_level, req.weight FROM
+SELECT r.role_id, s.skill_id, req.required_level::skill_level, req.weight FROM
 (VALUES
   ('Python',                           'intermediate', 5),
   ('REST API Design',                  'intermediate', 4),
