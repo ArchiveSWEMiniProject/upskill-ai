@@ -1,7 +1,9 @@
 # Continuous integration (UA-3, UA-4)
 
 Every pull request and every push to `main` runs the repository's `Jenkinsfile`
-on a fresh **Jenkins LTS** server with its own **SonarQube**. The result is
+on a fresh **Jenkins LTS** server with its own **SonarQube**, and so does a
+weekly scheduled run on `main` (Mondays, 08:47 IST) that catches breakage from
+new dependency releases or removed images before a PR does. The result is
 reported on the pull request as the **`Jenkins pipeline`** check, and `main`
 only accepts a merge when that check passes.
 
