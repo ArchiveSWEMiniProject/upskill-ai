@@ -26,8 +26,13 @@ def db_engine() -> Iterator[Engine]:
         pytest.skip("TEST_DATABASE_URL is not set; skipping database tests")
     # The schema is dropped and rebuilt, so never touch a database that is not
     # obviously a test one.
-    if "test" not in (make_url(url).database or ""):
+    parsed = make_url(url)
+    if "test" not in (parsed.database or ""):
         raise RuntimeError("TEST_DATABASE_URL must name a database containing 'test'")
+    # Fail fast instead of hanging when the server cannot be reached.
+    if "connect_timeout" not in parsed.query:
+        parsed = parsed.update_query_dict({"connect_timeout": "10"})
+    url = parsed.render_as_string(hide_password=False)
     # backend/migrations/env.py takes its URL from DATABASE_URL.
     previous = os.environ.get("DATABASE_URL")
     os.environ["DATABASE_URL"] = url
