@@ -2,11 +2,15 @@
 
 from fastapi import FastAPI
 
+from backend.profile.routes import router as profile_router
+
 app = FastAPI(
     title="UpSkill-AI API",
     description="AI-powered upskilling recommendation and automation system",
     version="0.1.0",
 )
+
+app.include_router(profile_router)
 
 
 @app.get("/")
