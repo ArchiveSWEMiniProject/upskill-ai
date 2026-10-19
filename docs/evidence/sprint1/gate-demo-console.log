@@ -1,0 +1,251 @@
+Started by user upskill-admin
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/jenkins_home/workspace/UpSkill-UA4-Gate-Demo
+[Pipeline] {
+[Pipeline] timestamps
+[Pipeline] {
+[Pipeline] timeout
+[2026-10-04T12:05:26.880Z] Timeout set to expire in 20 min
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Checkout PR merge revision)
+[Pipeline] checkout
+[2026-10-04T12:05:27.172Z] The recommended git tool is: NONE
+[2026-10-04T12:05:27.181Z] using credential github-sprint1
+[2026-10-04T12:05:27.277Z]  > git rev-parse --resolve-git-dir /var/jenkins_home/workspace/UpSkill-UA4-Gate-Demo/.git # timeout=10
+[2026-10-04T12:05:27.497Z] Fetching changes from the remote Git repository
+[2026-10-04T12:05:27.559Z]  > git config remote.origin.url https://github.com/ArchiveSWEMiniProject/upskill-ai.git # timeout=10
+[2026-10-04T12:05:27.596Z] Fetching upstream changes from https://github.com/ArchiveSWEMiniProject/upskill-ai.git
+[2026-10-04T12:05:27.597Z]  > git --version # timeout=10
+[2026-10-04T12:05:27.623Z]  > git --version # 'git version 2.47.3'
+[2026-10-04T12:05:27.625Z] using GIT_ASKPASS to set credentials GitHub repository access
+[2026-10-04T12:05:27.674Z]  > git fetch --tags --force --progress -- https://github.com/ArchiveSWEMiniProject/upskill-ai.git +refs/pull/4/merge:refs/remotes/origin/pr/4 # timeout=10
+[2026-10-04T12:05:29.361Z]  > git rev-parse refs/remotes/origin/refs/remotes/origin/pr/4^{commit} # timeout=10
+[2026-10-04T12:05:29.377Z]  > git rev-parse refs/remotes/origin/pr/4^{commit} # timeout=10
+[2026-10-04T12:05:29.390Z] Checking out Revision 3ee0584e8f030285295d9f25435d54d9dc4b339e (refs/remotes/origin/pr/4)
+[2026-10-04T12:05:29.391Z]  > git config core.sparsecheckout # timeout=10
+[2026-10-04T12:05:29.404Z]  > git checkout -f 3ee0584e8f030285295d9f25435d54d9dc4b339e # timeout=10
+[2026-10-04T12:05:29.607Z] Commit message: "Merge b0efee07999f102a1a53a3529e4c5330fcbc0f52 into b2c33fb2f0c586729a5d1673dfe8d8f77abb4fff"
+[2026-10-04T12:05:29.617Z]  > git rev-list --no-walk 3ee0584e8f030285295d9f25435d54d9dc4b339e # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Backend checks)
+[Pipeline] sh
+[2026-10-04T12:05:31.299Z] + python3 -m venv .venv
+[Pipeline] sh
+[2026-10-04T12:05:34.105Z] + .venv/bin/python -m pip install -r requirements-dev.txt
+[2026-10-04T12:05:34.668Z] Requirement already satisfied: pytest<9,>=8.3 in ./.venv/lib/python3.13/site-packages (from -r requirements-dev.txt (line 1)) (8.4.2)
+[2026-10-04T12:05:34.669Z] Requirement already satisfied: pytest-cov<7,>=5 in ./.venv/lib/python3.13/site-packages (from -r requirements-dev.txt (line 2)) (6.3.0)
+[2026-10-04T12:05:34.669Z] Requirement already satisfied: ruff<1,>=0.6 in ./.venv/lib/python3.13/site-packages (from -r requirements-dev.txt (line 3)) (0.16.10)
+[2026-10-04T12:05:34.669Z] Requirement already satisfied: iniconfig>=1 in ./.venv/lib/python3.13/site-packages (from pytest<9,>=8.3->-r requirements-dev.txt (line 1)) (2.3.0)
+[2026-10-04T12:05:34.669Z] Requirement already satisfied: packaging>=20 in ./.venv/lib/python3.13/site-packages (from pytest<9,>=8.3->-r requirements-dev.txt (line 1)) (26.3)
+[2026-10-04T12:05:34.669Z] Requirement already satisfied: pluggy<2,>=1.5 in ./.venv/lib/python3.13/site-packages (from pytest<9,>=8.3->-r requirements-dev.txt (line 1)) (1.6.0)
+[2026-10-04T12:05:34.669Z] Requirement already satisfied: pygments>=2.7.2 in ./.venv/lib/python3.13/site-packages (from pytest<9,>=8.3->-r requirements-dev.txt (line 1)) (2.21.0)
+[2026-10-04T12:05:34.669Z] Requirement already satisfied: coverage>=7.5 in ./.venv/lib/python3.13/site-packages (from coverage[toml]>=7.5->pytest-cov<7,>=5->-r requirements-dev.txt (line 2)) (7.16.2)
+[Pipeline] sh
+[2026-10-04T12:05:35.291Z] + .venv/bin/python -m pip install -r requirements.txt
+[2026-10-04T12:05:35.849Z] Requirement already satisfied: fastapi<1.0.0,>=0.110.0 in ./.venv/lib/python3.13/site-packages (from -r requirements.txt (line 1)) (0.142.2)
+[2026-10-04T12:05:35.849Z] Requirement already satisfied: uvicorn<1.0.0,>=0.28.0 in ./.venv/lib/python3.13/site-packages (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2)) (0.54.0)
+[2026-10-04T12:05:35.849Z] Requirement already satisfied: pydantic<3.0.0,>=2.6.0 in ./.venv/lib/python3.13/site-packages (from -r requirements.txt (line 3)) (2.13.5)
+[2026-10-04T12:05:35.849Z] Requirement already satisfied: starlette>=0.46.0 in ./.venv/lib/python3.13/site-packages (from fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1)) (1.7.0)
+[2026-10-04T12:05:35.849Z] Requirement already satisfied: typing-extensions>=4.8.0 in ./.venv/lib/python3.13/site-packages (from fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1)) (4.16.0)
+[2026-10-04T12:05:35.850Z] Requirement already satisfied: typing-inspection>=0.4.2 in ./.venv/lib/python3.13/site-packages (from fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1)) (0.4.4)
+[2026-10-04T12:05:35.850Z] Requirement already satisfied: annotated-doc>=0.0.2 in ./.venv/lib/python3.13/site-packages (from fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1)) (0.0.5)
+[2026-10-04T12:05:35.850Z] Requirement already satisfied: opentelemetry-api>=1.44.0 in ./.venv/lib/python3.13/site-packages (from fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1)) (1.45.0)
+[2026-10-04T12:05:36.103Z] Requirement already satisfied: click>=7.0 in ./.venv/lib/python3.13/site-packages (from uvicorn<1.0.0,>=0.28.0->uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2)) (8.5.0)
+[2026-10-04T12:05:36.103Z] Requirement already satisfied: h11>=0.8 in ./.venv/lib/python3.13/site-packages (from uvicorn<1.0.0,>=0.28.0->uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2)) (0.16.0)
+[2026-10-04T12:05:36.103Z] Requirement already satisfied: annotated-types>=0.6.0 in ./.venv/lib/python3.13/site-packages (from pydantic<3.0.0,>=2.6.0->-r requirements.txt (line 3)) (0.8.0)
+[2026-10-04T12:05:36.103Z] Requirement already satisfied: pydantic-core==2.46.5 in ./.venv/lib/python3.13/site-packages (from pydantic<3.0.0,>=2.6.0->-r requirements.txt (line 3)) (2.46.5)
+[2026-10-04T12:05:36.103Z] Requirement already satisfied: httptools>=0.8.0 in ./.venv/lib/python3.13/site-packages (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2)) (0.8.0)
+[2026-10-04T12:05:36.103Z] Requirement already satisfied: python-dotenv>=0.13 in ./.venv/lib/python3.13/site-packages (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2)) (1.2.4)
+[2026-10-04T12:05:36.103Z] Requirement already satisfied: pyyaml>=5.1 in ./.venv/lib/python3.13/site-packages (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2)) (6.0.3)
+[2026-10-04T12:05:36.103Z] Requirement already satisfied: uvloop>=0.15.1 in ./.venv/lib/python3.13/site-packages (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2)) (0.23.0)
+[2026-10-04T12:05:36.103Z] Requirement already satisfied: watchfiles>=0.20 in ./.venv/lib/python3.13/site-packages (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2)) (1.3.0)
+[2026-10-04T12:05:36.103Z] Requirement already satisfied: websockets>=13.0 in ./.venv/lib/python3.13/site-packages (from uvicorn[standard]<1.0.0,>=0.28.0->-r requirements.txt (line 2)) (17.2)
+[2026-10-04T12:05:36.103Z] Requirement already satisfied: anyio<5,>=4.0.0 in ./.venv/lib/python3.13/site-packages (from starlette>=0.46.0->fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1)) (4.15.1)
+[2026-10-04T12:05:36.103Z] Requirement already satisfied: idna>=2.8 in ./.venv/lib/python3.13/site-packages (from anyio<5,>=4.0.0->starlette>=0.46.0->fastapi<1.0.0,>=0.110.0->-r requirements.txt (line 1)) (3.20)
+[Pipeline] sh
+[2026-10-04T12:05:36.673Z] + .venv/bin/python -m ruff check backend
+[2026-10-04T12:05:36.673Z] All checks passed!
+[Pipeline] sh
+[2026-10-04T12:05:37.012Z] + .venv/bin/python -m pytest --junitxml=pytest-report.xml --cov=backend --cov-report=xml:coverage.xml --cov-report=term-missing
+[2026-10-04T12:05:39.563Z] ============================= test session starts ==============================
+[2026-10-04T12:05:39.563Z] platform linux -- Python 3.13.5, pytest-8.4.2, pluggy-1.6.0
+[2026-10-04T12:05:39.563Z] rootdir: /var/jenkins_home/workspace/UpSkill-UA4-Gate-Demo
+[2026-10-04T12:05:39.563Z] configfile: pyproject.toml
+[2026-10-04T12:05:39.563Z] testpaths: backend
+[2026-10-04T12:05:39.563Z] plugins: cov-6.3.0, anyio-4.15.1
+[2026-10-04T12:05:39.563Z] collected 14 items
+[2026-10-04T12:05:39.563Z]
+[2026-10-04T12:05:39.816Z] backend/taxonomy/test_resolver.py ..............                         [100%]
+[2026-10-04T12:05:39.817Z]
+[2026-10-04T12:05:39.817Z] - generated xml file: /var/jenkins_home/workspace/UpSkill-UA4-Gate-Demo/pytest-report.xml -
+[2026-10-04T12:05:39.817Z] ================================ tests coverage ================================
+[2026-10-04T12:05:39.817Z] _______________ coverage: platform linux, python 3.13.5-final-0 ________________
+[2026-10-04T12:05:39.817Z]
+[2026-10-04T12:05:39.817Z] Name                                Stmts   Miss  Cover   Missing
+[2026-10-04T12:05:39.817Z] -----------------------------------------------------------------
+[2026-10-04T12:05:39.817Z] backend/__init__.py                     0      0   100%
+[2026-10-04T12:05:39.817Z] backend/main.py                         8      8     0%   3-19
+[2026-10-04T12:05:39.817Z] backend/taxonomy/__init__.py            0      0   100%
+[2026-10-04T12:05:39.817Z] backend/taxonomy/resolver.py           27      0   100%
+[2026-10-04T12:05:39.817Z] backend/taxonomy/test_resolver.py      35      0   100%
+[2026-10-04T12:05:39.817Z] -----------------------------------------------------------------
+[2026-10-04T12:05:39.817Z] TOTAL                                  70      8    89%
+[2026-10-04T12:05:39.817Z] Coverage XML written to file coverage.xml
+[2026-10-04T12:05:39.817Z] ============================== 14 passed in 1.31s ==============================
+Post stage
+[Pipeline] junit
+[2026-10-04T12:05:40.164Z] Recording test results
+[2026-10-04T12:05:40.249Z] [Checks API] No suitable checks publisher found.
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (SonarQube analysis - isolated demo project)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] tool
+[Pipeline] withSonarQubeEnv
+[2026-10-04T12:05:41.117Z] Injecting SonarQube environment variables using the configuration: SonarQube
+[Pipeline] {
+[Pipeline] sh
+[2026-10-04T12:05:41.530Z] + /var/jenkins_home/tools/sonar-scanner-8.1.0.6389/bin/sonar-scanner -Dsonar.projectKey=upskill-ai-ua4-demo -Dsonar.projectName=UpSkill-UA4-Demo
+[2026-10-04T12:05:43.413Z] 12:05:43.163 INFO  Scanner configuration file: /var/jenkins_home/tools/sonar-scanner-8.1.0.6389/conf/sonar-scanner.properties
+[2026-10-04T12:05:43.413Z] 12:05:43.177 INFO  Project root configuration file: /var/jenkins_home/workspace/UpSkill-UA4-Gate-Demo/sonar-project.properties
+[2026-10-04T12:05:43.413Z] 12:05:43.387 INFO  SonarScanner CLI 8.1.0.6389
+[2026-10-04T12:05:43.665Z] 12:05:43.413 INFO  Linux 6.18.35.2-microsoft-standard-WSL2 amd64
+[2026-10-04T12:05:51.700Z] 12:05:51.622 INFO  Communicating with SonarQube Community Build 26.9.0.129388
+[2026-10-04T12:05:51.700Z] 12:05:51.623 INFO  JRE provisioning: os[linux], arch[x86_64]
+[2026-10-04T12:05:58.250Z] 12:05:57.171 INFO  SONAR_SCANNER_JAVA_OPTS=-Xmx384m -XX:ActiveProcessorCount=2
+[2026-10-04T12:05:59.171Z] 12:05:58.968 INFO  Starting SonarScanner Engine...
+[2026-10-04T12:05:59.171Z] 12:05:58.975 INFO  Java 21.0.11 Eclipse Adoptium (64-bit)
+[2026-10-04T12:06:11.772Z] 12:06:10.782 INFO  Load global settings
+[2026-10-04T12:06:11.772Z] 12:06:11.763 INFO  Load global settings (done) | time=989ms
+[2026-10-04T12:06:11.772Z] 12:06:11.770 INFO  Server id: 147B411E-AaEGqlk48DYktN-5kanb
+[2026-10-04T12:06:12.023Z] 12:06:11.801 INFO  Loading required plugins
+[2026-10-04T12:06:12.024Z] 12:06:11.801 INFO  Load plugins index
+[2026-10-04T12:06:12.582Z] 12:06:12.380 INFO  Load plugins index (done) | time=576ms
+[2026-10-04T12:06:12.584Z] 12:06:12.392 INFO  Load/download plugins
+[2026-10-04T12:06:12.836Z] 12:06:12.775 INFO  Load/download plugins (done) | time=394ms
+[2026-10-04T12:06:14.186Z] 12:06:14.172 INFO  Process project properties
+[2026-10-04T12:06:14.439Z] 12:06:14.206 INFO  Process project properties (done) | time=35ms
+[2026-10-04T12:06:14.439Z] 12:06:14.269 INFO  Project key: upskill-ai-ua4-demo
+[2026-10-04T12:06:14.439Z] 12:06:14.270 INFO  Base dir: /var/jenkins_home/workspace/UpSkill-UA4-Gate-Demo
+[2026-10-04T12:06:14.439Z] 12:06:14.272 INFO  Working dir: /var/jenkins_home/workspace/UpSkill-UA4-Gate-Demo/.scannerwork
+[2026-10-04T12:06:14.439Z] 12:06:14.320 INFO  Load project settings for component key: 'upskill-ai-ua4-demo'
+[2026-10-04T12:06:14.994Z] 12:06:14.861 INFO  Load project settings for component key: 'upskill-ai-ua4-demo' (done) | time=539ms
+[2026-10-04T12:06:15.246Z] 12:06:15.154 INFO  Load quality profiles
+[2026-10-04T12:06:25.271Z] 12:06:24.234 INFO  Load quality profiles (done) | time=9021ms
+[2026-10-04T12:06:25.529Z] 12:06:25.319 INFO  Load active rules
+[2026-10-04T12:06:34.248Z] 12:06:32.558 INFO  Load active rules (done) | time=7186ms
+[2026-10-04T12:06:34.250Z] 12:06:32.648 INFO  Load analysis cache
+[2026-10-04T12:06:34.251Z] 12:06:33.537 INFO  Load analysis cache (404) | time=1023ms
+[2026-10-04T12:06:35.372Z] 12:06:35.017 INFO  Preprocessing files...
+[2026-10-04T12:06:35.930Z] 12:06:35.665 INFO  2 languages detected in 17 preprocessed files (done) | time=645ms
+[2026-10-04T12:06:35.930Z] 12:06:35.668 INFO  1 file ignored because of inclusion/exclusion patterns
+[2026-10-04T12:06:35.930Z] 12:06:35.677 INFO  2 directories skipped because of exclusion patterns (content not counted)
+[2026-10-04T12:06:35.930Z] 12:06:35.681 INFO  0 files ignored because of scm ignore settings
+[2026-10-04T12:06:35.930Z] 12:06:35.699 INFO  Loading plugins for detected languages
+[2026-10-04T12:06:35.931Z] 12:06:35.703 INFO  Load/download plugins
+[2026-10-04T12:06:35.931Z] 12:06:35.735 INFO  Load/download plugins (done) | time=34ms
+[2026-10-04T12:06:36.853Z] 12:06:36.751 INFO  Load project repositories
+[2026-10-04T12:06:38.755Z] 12:06:38.303 INFO  Load project repositories (done) | time=1518ms
+[2026-10-04T12:06:38.755Z] 12:06:38.442 INFO  Indexing files...
+[2026-10-04T12:06:38.755Z] 12:06:38.445 INFO  Project configuration:
+[2026-10-04T12:06:38.755Z] 12:06:38.449 INFO    Excluded sources: **/__pycache__/**, **/.venv/**, **/node_modules/**, **/.next/**, **/coverage/**, **/test_*.py
+[2026-10-04T12:06:38.755Z] 12:06:38.451 INFO    Included tests: **/test_*.py
+[2026-10-04T12:06:38.755Z] 12:06:38.551 INFO  17 files indexed (done) | time=101ms
+[2026-10-04T12:06:38.755Z] 12:06:38.554 INFO  Quality profile for docker: Sonar way
+[2026-10-04T12:06:38.755Z] 12:06:38.557 INFO  Quality profile for py: Sonar way
+[2026-10-04T12:06:38.756Z] 12:06:38.559 INFO  ------------- Run sensors on module UpSkill-UA4-Demo
+[2026-10-04T12:06:39.344Z] 12:06:39.158 INFO  Load metrics repository
+[2026-10-04T12:06:42.026Z] 12:06:41.748 INFO  Load metrics repository (done) | time=2535ms
+[2026-10-04T12:06:47.504Z] 12:06:47.377 INFO  Sensor IaC YAML File Type Classification Sensor [iac]
+[2026-10-04T12:06:47.505Z] 12:06:47.384 INFO  Sensor IaC YAML File Type Classification Sensor [iac] (done) | time=11ms
+[2026-10-04T12:06:47.505Z] 12:06:47.385 INFO  Sensor IaC hadolint report Sensor [iac]
+[2026-10-04T12:06:47.505Z] 12:06:47.387 INFO  Sensor IaC hadolint report Sensor [iac] (done) | time=2ms
+[2026-10-04T12:06:47.505Z] 12:06:47.388 INFO  Sensor Java Config Sensor [iac]
+[2026-10-04T12:06:47.505Z] 12:06:47.391 INFO  There are no files to be analyzed for the Java language
+[2026-10-04T12:06:47.505Z] 12:06:47.392 INFO  Sensor Java Config Sensor [iac] (done) | time=3ms
+[2026-10-04T12:06:47.505Z] 12:06:47.392 INFO  Sensor IaC Docker Sensor [iac]
+[2026-10-04T12:06:47.758Z] 12:06:47.658 INFO  1 source file to be analyzed
+[2026-10-04T12:06:48.708Z] 12:06:48.476 INFO  1/1 source file has been analyzed
+[2026-10-04T12:06:48.710Z] 12:06:48.480 INFO  Sensor IaC Docker Sensor [iac] (done) | time=1084ms
+[2026-10-04T12:06:48.711Z] 12:06:48.485 INFO  Sensor Python Sensor [python]
+[2026-10-04T12:06:48.711Z] 12:06:48.541 WARN  Your code is analyzed as compatible with all Python 3 versions by default. You can get a more precise analysis by setting the Python version or version range in your configuration via the parameter "sonar.python.version"
+[2026-10-04T12:06:54.057Z] 12:06:52.986 INFO  Starting global symbols computation
+[2026-10-04T12:06:54.059Z] 12:06:53.005 INFO  4 source files to be analyzed
+[2026-10-04T12:06:54.975Z] 12:06:54.661 INFO  4/4 source files have been analyzed
+[2026-10-04T12:06:54.975Z] 12:06:54.681 INFO  Finished step global symbols computation in 1695ms
+[2026-10-04T12:06:55.530Z] 12:06:55.311 INFO  Starting rules execution
+[2026-10-04T12:06:55.531Z] 12:06:55.318 INFO  4 source files to be analyzed
+[2026-10-04T12:07:03.888Z] 12:07:03.527 INFO  4/4 source files have been analyzed
+[2026-10-04T12:07:03.888Z] 12:07:03.532 INFO  Finished step rules execution in 8167ms
+[2026-10-04T12:07:03.888Z] 12:07:03.534 INFO  The Python analyzer was able to leverage cached data from previous analyses for 0 out of 4 files. These files were not parsed.
+[2026-10-04T12:07:03.888Z] 12:07:03.547 INFO  Sensor Python Sensor [python] (done) | time=15046ms
+[2026-10-04T12:07:03.888Z] 12:07:03.550 INFO  Sensor Cobertura Sensor for Python coverage [python]
+[2026-10-04T12:07:06.418Z] 12:07:05.779 INFO  Python test coverage
+[2026-10-04T12:07:06.419Z] 12:07:05.785 INFO  Parsing report '/var/jenkins_home/workspace/UpSkill-UA4-Gate-Demo/coverage.xml'
+[2026-10-04T12:07:06.419Z] 12:07:06.372 INFO  Sensor Cobertura Sensor for Python coverage [python] (done) | time=2830ms
+[2026-10-04T12:07:06.419Z] 12:07:06.376 INFO  Sensor PythonXUnitSensor [python]
+[2026-10-04T12:07:07.342Z] 12:07:07.132 INFO  Sensor PythonXUnitSensor [python] (done) | time=742ms
+[2026-10-04T12:07:07.342Z] 12:07:07.137 INFO  Sensor Python Dependency Sensor [python]
+[2026-10-04T12:07:07.342Z] 12:07:07.237 INFO  Sensor Python Dependency Sensor [python] (done) | time=131ms
+[2026-10-04T12:07:07.342Z] 12:07:07.239 INFO  Sensor TextAndSecretsSensor [text]
+[2026-10-04T12:07:07.593Z] 12:07:07.507 INFO  Available processors: 2
+[2026-10-04T12:07:07.594Z] 12:07:07.511 INFO  Using 2 threads for analysis.
+[2026-10-04T12:07:15.065Z] 12:07:14.411 INFO  The property "sonar.tests" is not set. To improve the analysis accuracy, we categorize a file as a test file if any of the following is true:
+[2026-10-04T12:07:15.065Z]   * The filename starts with "test"
+[2026-10-04T12:07:15.065Z]   * The filename contains "test." or "tests."
+[2026-10-04T12:07:15.066Z]   * Any directory in the file path is named: "doc", "docs", "test", "tests", "mock" or "mocks"
+[2026-10-04T12:07:15.066Z]   * Any directory in the file path has a name ending in "test" or "tests"
+[2026-10-04T12:07:15.066Z]
+[2026-10-04T12:07:15.066Z] 12:07:14.580 INFO  Start fetching files for the text and secrets analysis
+[2026-10-04T12:07:15.067Z] 12:07:14.810 INFO  Using Git CLI to retrieve dirty files
+[2026-10-04T12:07:15.067Z] 12:07:14.990 INFO  Retrieving language associated files and files included via "sonar.text.inclusions" that are tracked by git
+[2026-10-04T12:07:15.067Z] 12:07:15.002 INFO  Starting the text and secrets analysis
+[2026-10-04T12:07:15.072Z] 12:07:15.043 INFO  17 source files to be analyzed for the text and secrets analysis
+[2026-10-04T12:07:15.325Z] 12:07:15.167 INFO  17/17 source files have been analyzed for the text and secrets analysis
+[2026-10-04T12:07:15.325Z] 12:07:15.179 INFO  Sensor TextAndSecretsSensor [text] (done) | time=7942ms
+[2026-10-04T12:07:15.325Z] 12:07:15.190 INFO  ------------- Run sensors on project
+[2026-10-04T12:07:18.845Z] 12:07:18.425 INFO  Sensor IaC Project Sensor [iac]
+[2026-10-04T12:07:18.845Z] 12:07:18.442 INFO  Sensor IaC Project Sensor [iac] (done) | time=19ms
+[2026-10-04T12:07:18.845Z] 12:07:18.444 INFO  Sensor Zero Coverage Sensor
+[2026-10-04T12:07:18.845Z] 12:07:18.451 INFO  Sensor Zero Coverage Sensor (done) | time=6ms
+[2026-10-04T12:07:18.845Z] 12:07:18.453 INFO  ------------- Gather SCA dependencies on project
+[2026-10-04T12:07:18.845Z] 12:07:18.485 INFO  Dependency analysis skipped
+[2026-10-04T12:07:18.845Z] 12:07:18.500 INFO  SCM Publisher SCM provider for this project is: git
+[2026-10-04T12:07:18.845Z] 12:07:18.504 INFO  SCM Publisher 3 source files to be analyzed
+[2026-10-04T12:07:19.412Z] 12:07:19.409 INFO  SCM Publisher 3/3 source files have been analyzed (done) | time=851ms
+[2026-10-04T12:07:19.681Z] 12:07:19.412 INFO  CPD Executor 2 files had no CPD blocks
+[2026-10-04T12:07:19.681Z] 12:07:19.414 INFO  CPD Executor Calculating CPD for 2 files
+[2026-10-04T12:07:19.681Z] 12:07:19.451 INFO  CPD Executor CPD calculation finished (done) | time=31ms
+[2026-10-04T12:07:19.681Z] 12:07:19.487 INFO  SCM revision ID '3ee0584e8f030285295d9f25435d54d9dc4b339e'
+[2026-10-04T12:07:20.948Z] 12:07:20.579 INFO  Analysis report generated in 653ms, dir size=304.9 kB
+[2026-10-04T12:07:21.907Z] 12:07:21.866 INFO  Analysis report compressed in 1359ms, zip size=43.1 kB
+[2026-10-04T12:07:23.912Z] 12:07:23.713 INFO  Analysis report uploaded in 1711ms
+[2026-10-04T12:07:23.913Z] 12:07:23.721 INFO  ANALYSIS SUCCESSFUL, you can find the results at: http://sonarqube:9000/dashboard?id=upskill-ai-ua4-demo
+[2026-10-04T12:07:23.923Z] 12:07:23.723 INFO  Note that you will be able to access the updated dashboard once the server has processed the submitted analysis report
+[2026-10-04T12:07:23.925Z] 12:07:23.726 INFO  More about the report processing at http://sonarqube:9000/api/ce/task?id=cf873ace-82c3-43af-a1e4-ffe5f6bd0f82
+[2026-10-04T12:07:23.925Z] 12:07:23.857 INFO  Analysis total time: 1:10.695 s
+[2026-10-04T12:07:24.826Z] 12:07:24.523 INFO  SonarScanner Engine completed successfully
+[2026-10-04T12:07:25.452Z] 12:07:25.193 INFO  EXECUTION SUCCESS
+[2026-10-04T12:07:25.706Z] 12:07:25.555 INFO  Total time: 1:42.611s
+[Pipeline] }
+[Pipeline] // withSonarQubeEnv
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Quality gate - expected failure)
+[Pipeline] timeout
+[2026-10-04T12:07:32.179Z] Timeout set to expire in 5 min 0 sec
+[Pipeline] {
+[Pipeline] script
+[Pipeline] {
+[Pipeline] waitForQualityGate
+[2026-10-04T12:07:33.052Z] Checking status of SonarQube task 'cf873ace-82c3-43af-a1e4-ffe5f6bd0f82' on server 'SonarQube'
+[2026-10-04T12:07:33.754Z] SonarQube task 'cf873ace-82c3-43af-a1e4-ffe5f6bd0f82' status is 'IN_PROGRESS'

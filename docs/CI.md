@@ -1,0 +1,78 @@
+# Continuous integration (UA-3, UA-4)
+
+Every pull request and every push to `main` runs the repository's `Jenkinsfile`
+on a fresh **Jenkins LTS** server with its own **SonarQube**. The result is
+reported on the pull request as the **`Jenkins pipeline`** check, and `main`
+only accepts a merge when that check passes.
+
+## How it runs
+
+There is no long-running team server to keep alive. For each run, GitHub
+Actions (free for this public repository) provides a machine, and
+`ci/run-pipeline.sh` on it:
+
+1. Starts SonarQube (the same pinned image as `ci/compose.yml`), sets a random
+   admin password, generates an analysis token and creates the **UpSkill CI**
+   quality gate.
+2. Builds the Jenkins image from `ci/jenkins/` and starts it with
+   `ci/jenkins/casc.yaml` (Jenkins configuration as code): local CI user,
+   SonarQube server `SonarQube`, scanner tool `SonarScanner`, and the
+   `upskill-ai` pipeline job pointing at the commit under test.
+3. Triggers the job, streams its console output into the Actions log, and exits
+   with the Jenkins build result.
+4. Saves the Jenkins console log, the archived reports and the SonarQube gate,
+   measures and issues to `ci-out/`, uploaded as the run's
+   `jenkins-build-<n>` artifact (kept 30 days). That artifact is the evidence
+   for any given build.
+
+All credentials are generated per run and disappear with the machine; nothing
+secret is stored in the repository or in GitHub settings.
+
+## Pipeline stages (Jenkinsfile)
+
+| Stage | What it does | Fails the build when |
+|---|---|---|
+| Checkout | Checks out the exact commit | |
+| Backend checks | Fresh Python 3.12 venv (`uv`), installs requirements, `ruff check backend`, `pytest` with coverage | Lint error, failing test, no tests collected, wrong Python |
+| SonarQube analysis | Scans `backend/`; test files are classified as tests | Scanner error |
+| Quality gate | Polls SonarQube until the analysis is processed, then reads the gate (no webhook needed) | Gate is not OK |
+| Docker build | Builds the API and web images | Image build error |
+| Deploy smoke test | Starts the whole compose stack with throwaway secrets, no host ports and its own volume (`ci/compose.smoke.yml`), checks `GET /api/v1/health` returns `{"status": "ok"}` and Postgres is ready, then removes it | Stack does not start or is unhealthy |
+
+The two Docker stages run only when the Jenkins agent can reach a Docker
+daemon. A Jenkins without one (for example the interactive local server from
+`ci/compose.yml`) skips them with a message.
+
+## Quality gate: UpSkill CI
+
+A fresh SonarQube has no history, so the built-in gate, which only checks
+*new* code, would always pass. **UpSkill CI** checks overall code:
+
+| Condition | Fails when |
+|---|---|
+| Coverage | below 60% |
+| Reliability rating | worse than A (any bug) |
+| Security rating | worse than A (any vulnerability) |
+| Maintainability rating | worse than A |
+
+The 60% coverage threshold is a starting point that the current code passes.
+Raise it in `ci/run-pipeline.sh` once more modules have landed; changing it
+affects everyone, so agree it as a team.
+
+## Running it yourself
+
+```
+ci/run-pipeline.sh                   # with Docker
+DOCKER=podman ci/run-pipeline.sh     # with Podman
+CI_KEEP=1 ci/run-pipeline.sh         # keep Jenkins and SonarQube running afterwards
+```
+
+It needs about 4 GB of free memory. The Docker stages need the daemon socket
+(`/var/run/docker.sock`, or set `DOCKER_SOCK`, for example to the Podman user
+socket). Reports go to `ci-out/` (gitignored).
+
+## Interactive local server
+
+`ci/compose.yml` still starts a long-running Jenkins and SonarQube on
+`localhost` for exploring the UI; see `docs/SPRINT1_CI_EVIDENCE.md`. It is not
+needed for pull request checks.

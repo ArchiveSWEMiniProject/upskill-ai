@@ -1,0 +1,40 @@
+# Runs the repository's Jenkinsfile on a fresh Jenkins LTS server with its own
+# SonarQube, for every pull request and every push to main. The pipeline itself
+# (lint, tests, coverage, SonarQube gate, Docker build, deploy smoke test) lives
+# in the Jenkinsfile; this workflow only provides the machine. See docs/CI.md.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  jenkins:
+    # This name is the required status check on main.
+    name: Jenkins pipeline
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Run Jenkinsfile on Jenkins LTS + SonarQube
+        run: ci/run-pipeline.sh
+
+      - name: Upload Jenkins log and reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: jenkins-build-${{ github.run_number }}
+          path: ci-out/
+          retention-days: 30

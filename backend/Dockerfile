@@ -14,6 +14,10 @@ COPY backend/ ./backend/
 
 RUN chmod +x /app/backend/entrypoint.sh
 
+# Run the API (and its startup migration) as an unprivileged user, not root.
+RUN useradd --no-create-home --uid 10001 app
+USER app
+
 EXPOSE 8000
 
 ENTRYPOINT ["/app/backend/entrypoint.sh"]
