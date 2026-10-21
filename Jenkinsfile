@@ -74,8 +74,10 @@ pipeline {
             steps {
                 // Throwaway secrets for this run only; compose refuses to start without them.
                 sh '''
+                    set +x  # keep the throwaway secrets out of the console log
                     export POSTGRES_PASSWORD="$(head -c 32 /dev/urandom | base64 | tr -dc A-Za-z0-9)"
                     export JWT_SECRET="$(head -c 48 /dev/urandom | base64 | tr -dc A-Za-z0-9)"
+                    set -x
                     docker compose up -d --build --wait --wait-timeout 180
                     docker compose exec -T upskill-api python -c "
 import json, time, urllib.request
