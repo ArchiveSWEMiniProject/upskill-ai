@@ -16,7 +16,7 @@ plan, not a bug in these fixtures.
 import pytest
 
 from backend.gap.service import GapItem, RoleSkillRequirement, compute_gap
-from backend.shared.shared_types_proposed import Level, SkillVectorEntry
+from backend.shared.skill_vector import Level, SkillVectorEntry
 
 # ---------------------------------------------------------------------
 # Skill ids below mirror taxonomy_seed.sql's Backend Developer role.
