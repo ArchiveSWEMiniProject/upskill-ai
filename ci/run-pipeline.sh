@@ -114,6 +114,7 @@ fi
     -e CI_ADMIN_USER=ci -e CI_ADMIN_PASSWORD="$CI_ADMIN_PASSWORD" \
     -e SONAR_HOST_URL=http://sonarqube:9000 -e SONAR_TOKEN="$SONAR_TOKEN" \
     -e CI_COMMIT="$COMMIT" \
+    -e CI_DOCKER_NETWORK="$NET" \
     "$JENKINS_IMAGE" > /dev/null
 
 JENKINS_URL="http://$("$DOCKER" port "$JENKINS_NAME" 8080/tcp | head -n 1 | sed 's/0\.0\.0\.0/127.0.0.1/')"
