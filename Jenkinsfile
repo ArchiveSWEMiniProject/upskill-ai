@@ -91,6 +91,11 @@ assert body == {'status': 'ok'}, body
 print('health:', body)
 "
                     docker compose exec -T upskill-db pg_isready -U upskill
+                    # The API container migrates on start; the schema must be at head.
+                    if [ -f alembic.ini ]; then
+                        docker compose exec -T upskill-api alembic current 2>&1 | tee alembic-current.txt
+                        grep -q '(head)' alembic-current.txt
+                    fi
                 '''
             }
             post {

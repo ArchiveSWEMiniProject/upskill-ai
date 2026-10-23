@@ -37,7 +37,7 @@ secret is stored in the repository or in GitHub settings.
 | SonarQube analysis | Scans `backend/`; test files are classified as tests | Scanner error |
 | Quality gate | Polls SonarQube until the analysis is processed, then reads the gate (no webhook needed) | Gate is not OK |
 | Docker build | Builds the API and web images | Image build error |
-| Deploy smoke test | Starts the whole compose stack with throwaway secrets, no host ports and its own volume (`ci/compose.smoke.yml`), checks `GET /api/v1/health` returns `{"status": "ok"}` and Postgres is ready, then removes it | Stack does not start or is unhealthy |
+| Deploy smoke test | Starts the whole compose stack with throwaway secrets, no host ports and its own volume (`ci/compose.smoke.yml`), checks `GET /api/v1/health` returns `{"status": "ok"}`, Postgres is ready and the schema is migrated to head, then removes it | Stack does not start or is unhealthy |
 
 The two Docker stages run only when the Jenkins agent can reach a Docker
 daemon. A Jenkins without one (for example the interactive local server from
