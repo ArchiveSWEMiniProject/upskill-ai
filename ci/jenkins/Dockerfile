@@ -21,12 +21,12 @@ RUN uv python install 3.12 \
     && git config --system --add safe.directory '*'
 
 USER jenkins
-RUN jenkins-plugin-cli \
-    --plugins workflow-aggregator:608.v67378e9d3db_1 git:5.10.1 \
-    github-branch-source:1983.vfa_27ed961853 junit:1432.v3f9a_b_73dd986 \
-    sonar:2.19.0 timestamper:1.30 \
-    configuration-as-code:2136.veb_3a_554550b_f job-dsl:3732.v9a_c49a_61a_313 \
-    plain-credentials:199.v9f8e1f741799
+# Exact plugin set from plugins.lock (regenerate with lock-plugins.py), each
+# file checked against its SHA-256. Installing from the lock instead of with
+# jenkins-plugin-cli means the build never needs updates.jenkins.io, whose
+# outages otherwise break every CI run.
+COPY --chown=jenkins:jenkins plugins.lock install-plugins.sh /usr/share/jenkins/
+RUN /usr/share/jenkins/install-plugins.sh /usr/share/jenkins/plugins.lock /usr/share/jenkins/ref/plugins
 
 # Configuration as code for the ephemeral CI server: SonarQube connection,
 # scanner tool and the pipeline job. Applied only when CASC_JENKINS_CONFIG
