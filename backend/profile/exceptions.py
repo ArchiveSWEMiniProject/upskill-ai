@@ -1,0 +1,14 @@
+class ProfileError(Exception):
+    """Base class for M1 profile errors."""
+
+
+class ProfileAlreadyExistsError(ProfileError):
+    """The account already has a profile (REQ-F1-01: exactly one per account)."""
+
+    message = "Profile already exists"
+
+
+class ProfileNotFoundError(ProfileError):
+    """The account has not created a profile yet."""
+
+    message = "Profile not found"
