@@ -3,6 +3,7 @@
 from fastapi import FastAPI
 
 from backend.profile.routes import router as profile_router
+from backend.skills.routes import router as skills_router
 
 app = FastAPI(
     title="UpSkill-AI API",
@@ -11,6 +12,7 @@ app = FastAPI(
 )
 
 app.include_router(profile_router)
+app.include_router(skills_router)
 
 
 @app.get("/")
