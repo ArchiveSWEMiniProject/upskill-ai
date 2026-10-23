@@ -12,42 +12,19 @@ UE24CS341A Software Engineering, Team 18, Project ID 22.
 
 Stack: Next.js (TypeScript), FastAPI (Python 3.12), PostgreSQL 16, SQLAlchemy + Alembic, pytest, Jenkins, SonarQube, Docker Compose.
 
-## Sprint 1 CI setup
+## Continuous integration
 
-For UA-3, Jenkins checks out the repository, creates a fresh Python 3.12 virtual environment with `uv`,
-installs `requirements-dev.txt` (and `requirements.txt` when present), and runs
-Ruff against `backend/` and pytest with coverage. Tests are discovered alongside
-their modules inside `backend/`. Test failures and zero collected tests fail the
-build; test and coverage reports are published/archived even after failure.
+Every pull request and every push to `main` runs the `Jenkinsfile` on a fresh
+Jenkins LTS server with its own SonarQube (GitHub Actions provides the machine).
+The stages are lint, unit tests with coverage, SonarQube analysis and quality
+gate, Docker image build, and a deploy smoke test of the full compose stack.
+The result is the **Jenkins pipeline** check on the pull request, and `main`
+only accepts a merge with that check green and one approving review.
 
-Use a Unix Jenkins agent with `uv` on the PATH (the image in `ci/jenkins/` installs
-it and CPython 3.12); the build fails if the venv is not Python 3.12.
-A managed SonarScanner installation named `SonarScanner` must be configured
-under Jenkins Tools. Install the Jenkins JUnit, Timestamper, GitHub Branch Source,
-and SonarQube Scanner plugins.
-Configure a multibranch Pipeline job for this repository with PR discovery and
-the repository webhook so PR updates trigger a build.
-
-For UA-4, configure the Jenkins SonarQube installation as `SonarQube`, with its
-server URL and token supplied through Jenkins configuration/credentials. On
-SonarQube, configure a webhook to `<Jenkins URL>/sonarqube-webhook/` (including
-the trailing slash) so Jenkins can receive the analysis completion event. The
-pipeline fails if the quality gate is not OK or the wait times out.
-
-The committed pipeline and clean Jenkins image were verified on an independent
-Docker Engine in Ubuntu WSL. Against current shared main, Jenkins passed Ruff,
-14 tests (plus 6 expected M2 fixture failures), and the SonarQube gate. Pytest
-coverage was 76%; SonarQube source coverage was 68.0%. A real GitHub webhook
-automatically triggered PR #4's successful build and Jenkins published its
-success status. An isolated demo also proved that a gate ERROR fails Jenkins.
-Full logs and reports are saved in `docs/evidence/sprint1/webhook-verified/`.
-The verification receiver uses a temporary tunnel and the Jenkins job discovers
-only PR #4. A stable team endpoint and wider PR discovery are still needed for
-repository-wide continuous CI; branch protection remains user-managed.
-No server credentials belong here.
-
-See [the local server and evidence checklist](docs/SPRINT1_CI_EVIDENCE.md)
-for the optional Docker setup, review evidence and operational limitations.
+Details, the quality gate, and how to run it yourself: [docs/CI.md](docs/CI.md).
+The interactive local Jenkins and SonarQube from `ci/compose.yml`, and the
+Sprint 1 verification evidence, are described in
+[docs/SPRINT1_CI_EVIDENCE.md](docs/SPRINT1_CI_EVIDENCE.md).
 
 ## Repository layout
 
