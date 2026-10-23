@@ -13,4 +13,8 @@ ignore = ["B008"]
 
 [tool.coverage.run]
 # Measure production code only, so the pytest figure matches SonarQube's.
-omit = ["*/test_*.py", "*/tests/*"]
+omit = ["*/test_*.py", "*/tests/*", "*/conftest.py", "*/migrations/*"]
+
+[tool.ruff.lint.per-file-ignores]
+# Alembic migrations: one column definition per line reads better than wrapped.
+"backend/migrations/**" = ["E501"]
