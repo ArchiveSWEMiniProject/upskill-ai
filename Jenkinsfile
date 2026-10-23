@@ -18,7 +18,16 @@ pipeline {
                     }
                     if (fileExists('backend')) {
                         sh '.venv/bin/python -m ruff check backend'
-                        sh '.venv/bin/python -m pytest --junitxml=pytest-report.xml --cov=backend --cov-report=xml:coverage.xml --cov-report=html:htmlcov --cov-report=term-missing'
+                        // Database tests get a throwaway Postgres when Docker is available;
+                        // without one they are skipped (and the log says so).
+                        def testDb = startTestDatabase()
+                        try {
+                            withEnv(testDb ? ["TEST_DATABASE_URL=${testDb}"] : []) {
+                                sh '.venv/bin/python -m pytest --junitxml=pytest-report.xml --cov=backend --cov-report=xml:coverage.xml --cov-report=html:htmlcov --cov-report=term-missing'
+                            }
+                        } finally {
+                            stopTestDatabase()
+                        }
                     } else { error 'Backend directory is missing; backend checks cannot run.' }
                 }
             }
@@ -91,6 +100,11 @@ assert body == {'status': 'ok'}, body
 print('health:', body)
 "
                     docker compose exec -T upskill-db pg_isready -U upskill
+                    # The API container migrates on start; the schema must be at head.
+                    if [ -f alembic.ini ]; then
+                        docker compose exec -T upskill-api alembic current 2>&1 | tee alembic-current.txt
+                        grep -q '(head)' alembic-current.txt
+                    fi
                 '''
             }
             post {
@@ -112,4 +126,40 @@ def dockerAvailable() {
     def ok = sh(returnStatus: true, script: 'docker info > /dev/null 2>&1') == 0
     if (!ok) { echo 'No Docker daemon reachable from this agent; skipping Docker stages.' }
     return ok
+}
+
+def testDatabaseName() { "upskill-test-db-${env.BUILD_NUMBER}" }
+
+// Starts Postgres on the CI server's Docker network (ci/run-pipeline.sh sets
+// CI_DOCKER_NETWORK) and returns its URL, or null when that is not possible.
+def startTestDatabase() {
+    if (!env.CI_DOCKER_NETWORK || !dockerAvailable()) {
+        echo 'No CI Docker network; database tests will be skipped.'
+        return null
+    }
+    def password = sh(returnStdout: true,
+        script: 'head -c 48 /dev/urandom | base64 | tr -dc A-Za-z0-9 | head -c 24').trim()
+    withEnv(["TEST_DB_NAME=${testDatabaseName()}", "TEST_DB_PASSWORD=${password}"]) {
+        sh '''
+            set +x  # keep the throwaway password out of the console log
+            echo "Starting test database $TEST_DB_NAME"
+            docker run -d --rm --name "$TEST_DB_NAME" --network "$CI_DOCKER_NETWORK" \
+                -e POSTGRES_USER=upskill -e POSTGRES_PASSWORD="$TEST_DB_PASSWORD" \
+                -e POSTGRES_DB=upskill_test docker.io/library/postgres:16-alpine > /dev/null
+            # TCP only comes up once initialisation has finished.
+            for attempt in $(seq 1 60); do
+                docker exec "$TEST_DB_NAME" pg_isready -q -h 127.0.0.1 -U upskill -d upskill_test && exit 0
+                sleep 1
+            done
+            echo "Test database did not start" >&2
+            exit 1
+        '''
+    }
+    return "postgresql://upskill:${password}@${testDatabaseName()}:5432/upskill_test"
+}
+
+def stopTestDatabase() {
+    if (env.CI_DOCKER_NETWORK) {
+        sh "docker rm -f ${testDatabaseName()} > /dev/null 2>&1 || true"
+    }
 }
