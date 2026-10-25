@@ -90,3 +90,12 @@ class LearningItemResponse(BaseModel):
     skill_tags: list[SkillTagResponse] = []
 
     model_config = {"from_attributes": True}
+
+
+class PaginatedLearningItemResponse(BaseModel):
+    """Paginated list of catalogue learning resources (NFR-PERF-04)."""
+
+    total: int
+    limit: int
+    offset: int
+    items: list[LearningItemResponse]
