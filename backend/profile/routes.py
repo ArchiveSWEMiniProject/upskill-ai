@@ -4,15 +4,22 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from backend.database import get_session
-from backend.profile.courses import CourseService
 from backend.profile.dependencies import current_user_id, profile_service
+from backend.profile.entries import CourseService, EntryService, ProjectService
 from backend.profile.exceptions import (
     ProfileAlreadyExistsError,
     ProfileError,
     ProfileNotFoundError,
 )
 from backend.profile.repository import ProfileItemRepository, StudentRepository
-from backend.profile.schemas import CourseIn, CourseOut, ProfileCreate, ProfileOut
+from backend.profile.schemas import (
+    CourseIn,
+    CourseOut,
+    ProfileCreate,
+    ProfileOut,
+    ProjectIn,
+    ProjectOut,
+)
 from backend.profile.service import ProfileService
 
 router = APIRouter(prefix="/api/v1/profile", tags=["profile"])
@@ -46,77 +53,66 @@ def get_profile(user_id: UserId, service: Service) -> ProfileOut:
         raise HTTPException(status.HTTP_404_NOT_FOUND, error.message) from error
 
 
-# --- Course entries (UP-3) ---------------------------------------------------
+# --- Course and project entries (UP-3, UP-4) -------------------------------
 
-
-def course_service(session: Annotated[Session, Depends(get_session)]) -> CourseService:
-    return CourseService(StudentRepository(session), ProfileItemRepository(session))
-
-
-Courses = Annotated[CourseService, Depends(course_service)]
-NOT_FOUND = {404: {"description": "No profile yet, or no such course on the caller's profile"}}
+NOT_FOUND = {404: {"description": "No profile yet, or no such entry on the caller's profile"}}
 
 
 def _not_found(error: ProfileError) -> HTTPException:
     return HTTPException(status.HTTP_404_NOT_FOUND, error.message)
 
 
-@router.get("/courses", response_model=list[CourseOut], responses=NOT_FOUND)
-def list_courses(user_id: UserId, courses: Courses) -> list[CourseOut]:
-    """The caller's course entries, oldest first."""
-    try:
-        return courses.list_courses(user_id)
-    except ProfileError as error:
-        raise _not_found(error) from error
+def add_entry_routes(path: str, service_type: type[EntryService], body_type, out_type) -> None:
+    """GET/POST {path} and PUT/DELETE {path}/{entry_id} for one entry type."""
+    label = service_type.item_type
+
+    def service(session: Annotated[Session, Depends(get_session)]) -> EntryService:
+        return service_type(StudentRepository(session), ProfileItemRepository(session))
+
+    Service = Annotated[EntryService, Depends(service)]
+    SessionDep = Annotated[Session, Depends(get_session)]
+
+    @router.get(path, response_model=list[out_type], responses=NOT_FOUND,
+                summary=f"List the caller's {label}s")
+    def list_entries(user_id: UserId, entries: Service):
+        try:
+            return entries.list(user_id)
+        except ProfileError as error:
+            raise _not_found(error) from error
+
+    @router.post(path, status_code=status.HTTP_201_CREATED, response_model=out_type,
+                 responses=NOT_FOUND, summary=f"Add a {label}")
+    def add_entry(body: body_type, user_id: UserId, entries: Service, session: SessionDep):
+        try:
+            entry = entries.add(user_id, body)
+        except ProfileError as error:
+            raise _not_found(error) from error
+        session.commit()
+        return entry
+
+    @router.put(f"{path}/{{entry_id}}", response_model=out_type, responses=NOT_FOUND,
+                summary=f"Edit a {label} (the body replaces every field)")
+    def replace_entry(
+        entry_id: int, body: body_type, user_id: UserId, entries: Service, session: SessionDep
+    ):
+        try:
+            entry = entries.replace(user_id, entry_id, body)
+        except ProfileError as error:
+            raise _not_found(error) from error
+        session.commit()
+        return entry
+
+    @router.delete(f"{path}/{{entry_id}}", status_code=status.HTTP_204_NO_CONTENT,
+                   responses=NOT_FOUND, summary=f"Delete a {label}")
+    def delete_entry(entry_id: int, user_id: UserId, entries: Service, session: SessionDep):
+        try:
+            entries.delete(user_id, entry_id)
+        except ProfileError as error:
+            raise _not_found(error) from error
+        session.commit()
 
 
-@router.post(
-    "/courses", status_code=status.HTTP_201_CREATED, response_model=CourseOut, responses=NOT_FOUND
-)
-def add_course(
-    body: CourseIn,
-    user_id: UserId,
-    courses: Courses,
-    session: Annotated[Session, Depends(get_session)],
-) -> CourseOut:
-    """Add a completed course (REQ-F1-02). Missing fields or a grade outside
-    S-F / 0-100 return 422 naming the field, and nothing is saved (REQ-F1-35, F1-36)."""
-    try:
-        course = courses.add_course(user_id, body)
-    except ProfileError as error:
-        raise _not_found(error) from error
-    session.commit()
-    return course
-
-
-@router.put("/courses/{course_id}", response_model=CourseOut, responses=NOT_FOUND)
-def replace_course(
-    course_id: int,
-    body: CourseIn,
-    user_id: UserId,
-    courses: Courses,
-    session: Annotated[Session, Depends(get_session)],
-) -> CourseOut:
-    """Edit a course: the body replaces every field."""
-    try:
-        course = courses.replace_course(user_id, course_id, body)
-    except ProfileError as error:
-        raise _not_found(error) from error
-    session.commit()
-    return course
-
-
-@router.delete(
-    "/courses/{course_id}", status_code=status.HTTP_204_NO_CONTENT, responses=NOT_FOUND
-)
-def delete_course(
-    course_id: int,
-    user_id: UserId,
-    courses: Courses,
-    session: Annotated[Session, Depends(get_session)],
-) -> None:
-    try:
-        courses.delete_course(user_id, course_id)
-    except ProfileError as error:
-        raise _not_found(error) from error
-    session.commit()
+# REQ-F1-02, F1-35, F1-36
+add_entry_routes("/courses", CourseService, CourseIn, CourseOut)
+# REQ-F1-03, F1-37
+add_entry_routes("/projects", ProjectService, ProjectIn, ProjectOut)
