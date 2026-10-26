@@ -138,7 +138,106 @@ SELECT r.role_id, s.skill_id, req.required_level::skill_level, req.weight FROM
 JOIN skill s ON s.skill_name = req.skill_name
 JOIN career_role r ON r.role_name = req.role_name
 ON CONFLICT (role_id, skill_id) DO NOTHING;
+-- ===== UA-7 expansion: skills 26-40 =====
+INSERT INTO skill (skill_name, category, created_at) VALUES
+  ('HTML & CSS',                    'Web',          now()),
+  ('JavaScript',                    'Languages',    now()),
+  ('React',                         'Web',          now()),
+  ('Next.js',                       'Web',          now()),
+  ('Linux & Command Line',          'Tooling',      now()),
+  ('NoSQL Databases',               'Databases',    now()),
+  ('Statistics Fundamentals',       'Data/AI',      now()),
+  ('Data Analysis with Pandas',     'Data/AI',      now()),
+  ('Data Visualization',            'Data/AI',      now()),
+  ('Monitoring & Logging',          'DevOps',       now()),
+  ('Web Security Basics',           'Security',     now()),
+  ('Secure Coding Practices',       'Security',     now()),
+  ('Agile & Scrum',                 'Process',      now()),
+  ('Technical Communication',       'Soft Skills',  now()),
+  ('Code Review Practices',         'Quality',      now())
+ON CONFLICT (skill_name) DO NOTHING;
 
+INSERT INTO skill_alias (skill_id, alias_text)
+SELECT skill.skill_id, aliases.alias FROM skill
+JOIN (VALUES
+  ('HTML & CSS',                'html'),
+  ('HTML & CSS',                'css'),
+  ('JavaScript',                'js'),
+  ('React',                     'reactjs'),
+  ('React',                     'react.js'),
+  ('Next.js',                   'nextjs'),
+  ('Linux & Command Line',      'linux'),
+  ('Linux & Command Line',      'bash'),
+  ('NoSQL Databases',           'nosql'),
+  ('NoSQL Databases',           'mongodb'),
+  ('Statistics Fundamentals',   'statistics'),
+  ('Data Analysis with Pandas', 'pandas'),
+  ('Data Visualization',        'data viz'),
+  ('Monitoring & Logging',      'observability'),
+  ('Web Security Basics',       'web security'),
+  ('Secure Coding Practices',   'secure coding'),
+  ('Agile & Scrum',             'agile'),
+  ('Agile & Scrum',             'scrum'),
+  ('Technical Communication',   'communication skills'),
+  ('Code Review Practices',     'code review')
+) AS aliases(skill_name, alias) ON skill.skill_name = aliases.skill_name
+ON CONFLICT (alias_text) DO NOTHING;
+INSERT INTO skill_prerequisite (skill_id, prerequisite_skill_id)
+SELECT s.skill_id, p.skill_id FROM
+(VALUES
+  ('JavaScript',                'Programming Fundamentals'),
+  ('React',                     'JavaScript'),
+  ('React',                     'HTML & CSS'),
+  ('Next.js',                   'React'),
+  ('NoSQL Databases',           'SQL Basics'),
+  ('Data Analysis with Pandas', 'Python'),
+  ('Data Analysis with Pandas', 'Statistics Fundamentals'),
+  ('Data Visualization',        'Data Analysis with Pandas'),
+  ('Monitoring & Logging',      'Linux & Command Line'),
+  ('Monitoring & Logging',      'Docker & Containerization'),
+  ('Web Security Basics',       'HTTP & Web Fundamentals'),
+  ('Secure Coding Practices',   'Web Security Basics'),
+  ('Secure Coding Practices',   'Programming Fundamentals'),
+  ('Code Review Practices',     'Git & Version Control'),
+  ('Code Review Practices',     'Unit Testing')
+) AS edges(skill_name, prereq_name)
+JOIN skill s ON s.skill_name = edges.skill_name
+JOIN skill p ON p.skill_name = edges.prereq_name
+ON CONFLICT (skill_id, prerequisite_skill_id) DO NOTHING;
+-- ===== UA-7 expansion: skills 36-40 =====
+INSERT INTO skill (skill_name, category, created_at) VALUES
+  ('CI/CD Pipelines',                  'DevOps',    now()),
+  ('Cloud Fundamentals',               'DevOps',    now()),
+  ('API Testing',                      'Quality',   now()),
+  ('Query Optimization & Indexing',    'Databases', now()),
+  ('Data Cleaning & Wrangling',        'Data/AI',   now())
+ON CONFLICT (skill_name) DO NOTHING;
+
+INSERT INTO skill_alias (skill_id, alias_text)
+SELECT skill.skill_id, aliases.alias FROM skill
+JOIN (VALUES
+  ('CI/CD Pipelines',               'cicd'),
+  ('Cloud Fundamentals',            'cloud computing'),
+  ('API Testing',                   'api testing'),
+  ('Query Optimization & Indexing', 'query optimization'),
+  ('Data Cleaning & Wrangling',     'data wrangling')
+) AS aliases(skill_name, alias) ON skill.skill_name = aliases.skill_name
+ON CONFLICT (alias_text) DO NOTHING;
+
+INSERT INTO skill_prerequisite (skill_id, prerequisite_skill_id)
+SELECT s.skill_id, p.skill_id FROM
+(VALUES
+  ('CI/CD Pipelines',               'Git & Version Control'),
+  ('CI/CD Pipelines',               'Docker & Containerization'),
+  ('Cloud Fundamentals',            'Linux & Command Line'),
+  ('API Testing',                   'Unit Testing'),
+  ('API Testing',                   'HTTP & Web Fundamentals'),
+  ('Query Optimization & Indexing', 'SQL Basics'),
+  ('Data Cleaning & Wrangling',     'Data Analysis with Pandas')
+) AS edges(skill_name, prereq_name)
+JOIN skill s ON s.skill_name = edges.skill_name
+JOIN skill p ON p.skill_name = edges.prereq_name
+ON CONFLICT (skill_id, prerequisite_skill_id) DO NOTHING;
 COMMIT;
 
 -- =====================================================================
