@@ -6,8 +6,10 @@ Implements:
 - NFR-SEC-03: Argon2id password hashing on registration (TC-F4-03)
 """
 
+from functools import lru_cache
+
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from backend.auth.dependencies import get_current_user
@@ -50,10 +52,10 @@ def login(
     normalized_email = credentials.email.strip().lower()
     user = db.query(UserAccount).filter(UserAccount.email == normalized_email).first()
 
-    if not user:
-        raise generic_auth_exception
-
-    if not verify_password(credentials.password, user.password_hash):
+    # Check a password either way, so an unknown email takes as long as a wrong
+    # password and response timing does not reveal which emails are registered.
+    stored_hash = user.password_hash if user else _dummy_hash()
+    if not verify_password(credentials.password, stored_hash) or not user:
         raise generic_auth_exception
 
     if not user.is_active:
@@ -112,45 +114,50 @@ def register(
     user_in: RegisterRequest,
     db: Session = Depends(get_db),
 ) -> UserResponse:
-    """Register a new user account.
+    """Public sign-up (UP-1, REQ-F4-01). Always creates a student account.
 
-    Complies with:
-    - TC-F4-03: Stored passwords are never held in plaintext, using Argon2id.
+    - Asking for any other role is refused (403): faculty and administrator
+      accounts are created by an administrator, never by self-registration.
+    - The email must be well-formed and the password must meet the strength
+      rule (422 otherwise).
+    - Only the user account is created here. The student profile belongs to
+      M1 (architecture rule R4) and is created with POST /api/v1/profile.
+    - TC-F4-03: the password is stored as an Argon2id hash, never in plaintext.
     """
-    normalized_email = user_in.email.strip().lower()
-    existing_user = db.query(UserAccount).filter(UserAccount.email == normalized_email).first()
-    if existing_user:
+    if user_in.role != UserRole.STUDENT:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="A user with this email already exists",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Self-registration creates student accounts only",
         )
-
-    # Argon2id password hash (never stored or logged in plaintext)
-    hashed_password = hash_password(user_in.password)
+    duplicate = HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="A user with this email already exists",
+    )
+    if db.query(UserAccount).filter(UserAccount.email == user_in.email).first():
+        raise duplicate
 
     new_user = UserAccount(
-        email=normalized_email,
-        password_hash=hashed_password,
-        role=user_in.role,
+        email=user_in.email,
+        password_hash=hash_password(user_in.password),
+        role=UserRole.STUDENT,
         is_active=True,
     )
     db.add(new_user)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:  # a concurrent registration with the same email won
+        db.rollback()
+        raise duplicate from None
     db.refresh(new_user)
 
-    # If role is student, create student row
-    if new_user.role == UserRole.STUDENT:
-        student_name = user_in.name.strip() if user_in.name else user_in.email.split("@")[0]
-        db.execute(
-            text("INSERT INTO student (user_id, name) VALUES (:uid, :name)"),
-            {"uid": new_user.user_id, "name": student_name},
-        )
-        db.commit()
-
-    role_str = new_user.role.value if hasattr(new_user.role, "value") else str(new_user.role)
     return UserResponse(
         user_id=new_user.user_id,
         email=new_user.email,
-        role=UserRole(role_str),
+        role=UserRole.STUDENT,
         is_active=new_user.is_active,
     )
+
+
+@lru_cache(maxsize=1)
+def _dummy_hash() -> str:
+    return hash_password("timing-equaliser-not-a-real-password-1")

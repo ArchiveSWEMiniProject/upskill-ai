@@ -1,9 +1,9 @@
 """Authentication models and schemas for UpSkill-AI."""
 
+import re
 from enum import Enum
-from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import (
     Boolean,
     Column,
@@ -100,13 +100,38 @@ class LoginRequest(BaseModel):
     password: str = Field(..., min_length=1)
 
 
-class RegisterRequest(BaseModel):
-    """User registration payload."""
+_EMAIL_PATTERN = re.compile(
+    r"^[a-z0-9._%+-]{1,64}@(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$"
+)
+PASSWORD_MIN, PASSWORD_MAX = 8, 128
 
-    email: str = Field(..., min_length=3, max_length=120)
-    password: str = Field(..., min_length=8)
+
+class RegisterRequest(BaseModel):
+    """Public sign-up (UP-1, REQ-F4-01). Always creates a student account: the
+    `role` field is only accepted so that asking for another role can be
+    refused explicitly (403), never granted. The student's profile, including
+    their name, is created afterwards with POST /api/v1/profile (UP-2)."""
+
+    email: str = Field(..., max_length=120)
+    password: str = Field(..., min_length=PASSWORD_MIN, max_length=PASSWORD_MAX)
     role: UserRole = UserRole.STUDENT
-    name: Optional[str] = Field(None, max_length=60)
+
+    @field_validator("email")
+    @classmethod
+    def email_has_valid_format(cls, value: str) -> str:
+        email = value.strip().lower()
+        if not _EMAIL_PATTERN.match(email):
+            raise ValueError("Enter a valid email address")
+        return email
+
+    @field_validator("password")
+    @classmethod
+    def password_is_strong_enough(cls, value: str) -> str:
+        """At least 8 characters (checked above) with a letter and a digit. The
+        128-character cap bounds the cost of hashing attacker-chosen input."""
+        if not any(c.isalpha() for c in value) or not any(c.isdigit() for c in value):
+            raise ValueError("Password must contain at least one letter and one digit")
+        return value
 
 
 class TokenResponse(BaseModel):
