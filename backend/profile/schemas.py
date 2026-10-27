@@ -24,3 +24,19 @@ class ProfileOut(BaseModel):
     education_level: str | None
     target_role_id: int | None
     created_at: datetime
+
+
+# --- Resume upload (UP-6) ----------------------------------------------------
+
+
+class ResumeOut(BaseModel):
+    upload_id: int
+    file_name: str
+    file_type: str
+    size_bytes: int
+    status: str  # extracted | unreadable | failed
+    message: str | None = None
+    manual_entry: str | None = None  # where to add skills instead (REQ-F1-11)
+    uploaded_at: datetime
+    delete_after: datetime
+    deleted: bool

@@ -12,3 +12,9 @@ class ProfileNotFoundError(ProfileError):
     """The account has not created a profile yet."""
 
     message = "Profile not found"
+
+
+class ResumeNotFoundError(ProfileError):
+    """No such upload on the caller's profile (it may belong to someone else)."""
+
+    message = "Resume not found"
