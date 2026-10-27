@@ -60,6 +60,37 @@ def test_progress_seed_does_not_overwrite_existing_taxonomy_metadata(db_session)
     assert existing == original
 
 
+def test_progress_aliases_are_normalised_and_idempotent(db_session):
+    apply_seed(db_session, "taxonomy_seed_progress.sql")
+    query = text("SELECT alias_id, skill_id, alias_text FROM skill_alias ORDER BY alias_text")
+    first = db_session.execute(query).all()
+    assert len(first) == 5
+    assert all(row.alias_text == row.alias_text.strip().lower() for row in first)
+    apply_seed(db_session, "taxonomy_seed_progress.sql")
+    assert db_session.execute(query).all() == first
+
+
+def test_combined_prerequisite_graph_is_acyclic_and_edges_are_idempotent(db_session):
+    apply_seed(db_session, "taxonomy_seed.sql")
+    previous = db_session.execute(text("SELECT count(*) FROM skill_prerequisite")).scalar_one()
+    apply_seed(db_session, "taxonomy_seed_progress.sql")
+    query = text("SELECT skill_id, prerequisite_skill_id FROM skill_prerequisite ORDER BY 1, 2")
+    first = db_session.execute(query).all()
+    assert len(first) == previous + 4
+    apply_seed(db_session, "taxonomy_seed_progress.sql")
+    assert db_session.execute(query).all() == first
+    cyclic = db_session.execute(text("""
+        WITH RECURSIVE reachable(root, dependency) AS (
+            SELECT skill_id, prerequisite_skill_id FROM skill_prerequisite
+            UNION
+            SELECT r.root, p.prerequisite_skill_id
+            FROM reachable r JOIN skill_prerequisite p ON p.skill_id = r.dependency
+        )
+        SELECT EXISTS (SELECT 1 FROM reachable WHERE root = dependency)
+    """)).scalar_one()
+    assert not cyclic
+
+
 @pytest.mark.parametrize("progress_first", [False, True])
 def test_progress_seed_coexists_with_shared_seed_in_either_order(db_session, progress_first):
     names = ["taxonomy_seed.sql", "taxonomy_seed_progress.sql"]
