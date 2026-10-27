@@ -12,42 +12,33 @@ UE24CS341A Software Engineering, Team 18, Project ID 22.
 
 Stack: Next.js (TypeScript), FastAPI (Python 3.12), PostgreSQL 16, SQLAlchemy + Alembic, pytest, Jenkins, SonarQube, Docker Compose.
 
-## Sprint 1 CI setup
+## Continuous integration
 
-For UA-3, Jenkins checks out the repository, creates a fresh Python 3.12 virtual environment with `uv`,
-installs `requirements-dev.txt` (and `requirements.txt` when present), and runs
-Ruff against `backend/` and pytest with coverage. Tests are discovered alongside
-their modules inside `backend/`. Test failures and zero collected tests fail the
-build; test and coverage reports are published/archived even after failure.
+Every pull request and push to `main` starts a fresh Jenkins LTS server and
+SonarQube on a GitHub-hosted runner. The workflow runs the repository's
+`Jenkinsfile` and reports the `Jenkins pipeline` check required by branch
+protection. No always-on laptop, external CI VM or temporary webhook tunnel is
+needed for these checks.
 
-Use a Unix Jenkins agent with `uv` on the PATH (the image in `ci/jenkins/` installs
-it and CPython 3.12); the build fails if the venv is not Python 3.12.
-A managed SonarScanner installation named `SonarScanner` must be configured
-under Jenkins Tools. Install the Jenkins JUnit, Timestamper, GitHub Branch Source,
-and SonarQube Scanner plugins.
-Configure a multibranch Pipeline job for this repository with PR discovery and
-the repository webhook so PR updates trigger a build.
+The pipeline creates a Python 3.12 virtual environment with `uv`, installs the
+requirements, runs Ruff and pytest with coverage, and checks the SonarQube gate.
+Database tests use a disposable PostgreSQL 16 database rebuilt from the real
+Alembic migrations. Docker-capable agents also build the API/web images and
+smoke-test the deployed stack. Failing tests, zero collected tests and a failing
+quality gate fail the build. Logs and reports are uploaded as workflow artifacts.
 
-For UA-4, configure the Jenkins SonarQube installation as `SonarQube`, with its
-server URL and token supplied through Jenkins configuration/credentials. On
-SonarQube, configure a webhook to `<Jenkins URL>/sonarqube-webhook/` (including
-the trailing slash) so Jenkins can receive the analysis completion event. The
-pipeline fails if the quality gate is not OK or the wait times out.
+See [the current CI setup](docs/CI.md) for execution, gate conditions and local
+testing. The optional interactive local servers and older Sprint 1 evidence are
+documented in [the historical evidence checklist](docs/SPRINT1_CI_EVIDENCE.md);
+their temporary PR-4-only setup is not the current PR-check infrastructure.
+Credentials must never be committed.
 
-The committed pipeline and clean Jenkins image were verified on an independent
-Docker Engine in Ubuntu WSL. Against current shared main, Jenkins passed Ruff,
-14 tests (plus 6 expected M2 fixture failures), and the SonarQube gate. Pytest
-coverage was 76%; SonarQube source coverage was 68.0%. A real GitHub webhook
-automatically triggered PR #4's successful build and Jenkins published its
-success status. An isolated demo also proved that a gate ERROR fails Jenkins.
-Full logs and reports are saved in `docs/evidence/sprint1/webhook-verified/`.
-The verification receiver uses a temporary tunnel and the Jenkins job discovers
-only PR #4. A stable team endpoint and wider PR discovery are still needed for
-repository-wide continuous CI; branch protection remains user-managed.
-No server credentials belong here.
+## Sprint 2 reference data
 
-See [the local server and evidence checklist](docs/SPRINT1_CI_EVIDENCE.md)
-for the optional Docker setup, review evidence and operational limitations.
+See [the seed guide](docs/SPRINT2_SEEDS.md) for Hemanth's five taxonomy skills,
+aliases/prerequisites and five catalogue resources, load order, idempotence and
+real-database regression checks. These are personal contributions to shared
+UA-7/UA-8 tasks, not a claim that the full team seed targets are complete.
 
 ## Repository layout
 
