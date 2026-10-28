@@ -12,19 +12,6 @@ UE24CS341A Software Engineering, Team 18, Project ID 22.
 
 Stack: Next.js (TypeScript), FastAPI (Python 3.12), PostgreSQL 16, SQLAlchemy + Alembic, pytest, Jenkins, SonarQube, Docker Compose.
 
-## Web app
-
-`frontend/` is a Next.js app with one route group per module (`app/(m1)/` holds M1's pages).
-The browser calls `/api/*` on the web app, which forwards it to the API, so the API needs no
-CORS rules. Jest and React Testing Library tests run on every web image build, so CI's Docker
-build stage fails when they do.
-
-```
-cd frontend && npm ci
-API_URL=http://localhost:8000 npm run dev   # http://localhost:3000
-npm test
-```
-
 ## Sprint 1 CI setup
 
 For UA-3, Jenkins checks out the repository, creates a fresh Python 3.12 virtual environment with `uv`,
