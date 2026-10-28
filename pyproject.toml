@@ -18,3 +18,8 @@ omit = ["*/test_*.py", "*/tests/*", "*/conftest.py", "*/migrations/*"]
 [tool.ruff.lint.per-file-ignores]
 # Alembic migrations: one column definition per line reads better than wrapped.
 "backend/migrations/**" = ["E501"]
+
+[tool.coverage.report]
+# Abstract method bodies are never executed by design.
+exclude_also = ["@abstractmethod"]
+

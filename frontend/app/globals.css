@@ -1,0 +1,38 @@
+:root {
+  --text: #1d2433;
+  --muted: #5b6475;
+  --line: #d7dce5;
+  --surface: #ffffff;
+  --page: #f4f6fa;
+  --accent: #2753c9;
+  --error: #b42318;
+  color-scheme: light;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--text);
+  background: var(--page);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; line-height: 1.5; }
+header { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: var(--surface); border-bottom: 1px solid var(--line); }
+header h1 { font-size: 1.1rem; margin: 0; }
+main { max-width: 46rem; margin: 0 auto; padding: 1rem; display: grid; gap: 1rem; }
+section { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 1rem 1.25rem; }
+section h2 { font-size: 1.05rem; margin: 0 0 0.75rem; }
+section h3 { font-size: 0.95rem; margin: 0.75rem 0 0.25rem; }
+form { display: grid; gap: 0.75rem; }
+label { display: grid; gap: 0.25rem; font-weight: 600; font-size: 0.95rem; }
+input, textarea, select { font: inherit; padding: 0.5rem 0.6rem; border: 1px solid var(--line); border-radius: 6px; width: 100%; background: #fff; }
+textarea { min-height: 8rem; resize: vertical; }
+[aria-invalid="true"] { border-color: var(--error); }
+button { font: inherit; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; justify-self: start; }
+button.secondary { background: transparent; color: var(--accent); }
+button:disabled { opacity: 0.6; cursor: progress; }
+.hint, .muted { color: var(--muted); font-size: 0.875rem; font-weight: 400; }
+.field-error, .form-error { color: var(--error); font-size: 0.875rem; font-weight: 400; margin: 0; }
+.over-limit { color: var(--error); font-weight: 600; }
+.row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.entries { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.entries li { border: 1px solid var(--line); border-radius: 6px; padding: 0.6rem 0.75rem; display: grid; gap: 0.35rem; }
+.split { max-width: 60rem; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); align-items: start; }
+.description { white-space: pre-wrap; overflow-wrap: anywhere; }
