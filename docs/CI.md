@@ -83,6 +83,15 @@ docker run -d --name upskill-test-db -p 127.0.0.1:55433:5432 \
 TEST_DATABASE_URL=postgresql://upskill:test@127.0.0.1:55433/upskill_test pytest
 ```
 
+## Sprint 2 seed checks
+
+`backend/seed_tests/test_progress_seeds.py` runs against the same migrated
+throwaway PostgreSQL database as the other database tests. It checks the
+progress taxonomy and catalogue contributions, including repeatability and
+missing-dependency rejection. No external course website is contacted by the
+automated tests. See [the Sprint 2 seed guide](SPRINT2_SEEDS.md) for load order,
+ownership limits and full-script psql checks.
+
 ## Interactive local server
 
 `ci/compose.yml` still starts a long-running Jenkins and SonarQube on
