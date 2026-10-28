@@ -23,10 +23,18 @@ _hasher = PasswordHasher(
     type=argon2.Type.ID,
 )
 
-# JWT Configuration
-JWT_SECRET = os.getenv("JWT_SECRET", "upskill-ai-dev-secret-key-change-in-production")
+# JWT Configuration. There is deliberately no default secret: anyone who knew
+# it could sign their own administrator token. jwt_secret() raises if it is
+# missing, and backend/main.py calls it at startup so the API refuses to start.
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # 24 hours
+
+
+def jwt_secret() -> str:
+    secret = os.environ.get("JWT_SECRET", "")
+    if not secret.strip():
+        raise RuntimeError("JWT_SECRET is not set; refusing to issue or accept tokens")
+    return secret
 
 
 def hash_password(password: str) -> str:
@@ -59,7 +67,7 @@ def create_access_token(data: dict[str, Any], expires_delta: Optional[timedelta]
         expire = now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
     to_encode.update({"iat": now, "exp": expire})
-    encoded_jwt = jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, jwt_secret(), algorithm=JWT_ALGORITHM)
     return encoded_jwt
 
 
@@ -68,4 +76,4 @@ def decode_access_token(token: str) -> dict[str, Any]:
 
     Raises jwt.PyJWTError on failure.
     """
-    return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    return jwt.decode(token, jwt_secret(), algorithms=[JWT_ALGORITHM])
