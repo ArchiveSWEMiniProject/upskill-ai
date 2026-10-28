@@ -29,3 +29,17 @@ class SkillSuggestion(BaseModel):
 class UnknownSkillDetail(BaseModel):
     message: str
     suggestions: list[SkillSuggestion]
+
+
+class SkillVectorEntryOut(BaseModel):
+    """One entry in the frozen skill vector format (docs/CONTRACTS.md, section 1)."""
+
+    canonical_skill_id: int
+    canonical_skill_name: str
+    level: Level
+    confidence: float | None  # 0.00 to 1.00; null for manually declared skills
+    source: Literal["manual", "course", "resume", "completion"]
+
+
+class SkillVectorOut(BaseModel):
+    entries: list[SkillVectorEntryOut]
