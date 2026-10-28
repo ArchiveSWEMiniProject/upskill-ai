@@ -1,16 +1,25 @@
-"""Minimal FastAPI application entrypoint for UpSkill-AI."""
+"""FastAPI application entrypoint for UpSkill-AI."""
 
 from fastapi import FastAPI
 
+from backend.auth.faculty_views import faculty_router
+from backend.auth.views import auth_router
+from backend.catalogue.views import catalogue_router
 from backend.profile.routes import router as profile_router
+from backend.skills.routes import router as skills_router
 
 app = FastAPI(
     title="UpSkill-AI API",
     description="AI-powered upskilling recommendation and automation system",
-    version="0.1.0",
+    version="0.2.0",
 )
 
+# Mount module routers
 app.include_router(profile_router)
+app.include_router(skills_router)
+app.include_router(auth_router)
+app.include_router(faculty_router)
+app.include_router(catalogue_router)
 
 
 @app.get("/")
