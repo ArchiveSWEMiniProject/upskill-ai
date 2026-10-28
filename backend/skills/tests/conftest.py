@@ -4,7 +4,6 @@ from sqlalchemy import text
 
 from backend.database import get_session
 from backend.main import app
-from backend.profile.dependencies import DEV_AUTH_ENV
 
 TAXONOMY = {
     "React": ["reactjs", "react.js"],
@@ -31,16 +30,15 @@ def skill_ids(db_session) -> dict[str, int]:
 
 
 @pytest.fixture
-def client(db_session, monkeypatch):
-    monkeypatch.setenv(DEV_AUTH_ENV, "1")
+def client(db_session):
     app.dependency_overrides[get_session] = lambda: db_session
     yield TestClient(app)
     app.dependency_overrides.clear()
 
 
 @pytest.fixture
-def student(client, make_user) -> dict:
+def student(client, make_user, bearer) -> dict:
     """A user with a profile; returns the request headers for that user."""
-    headers = {"X-User-Id": str(make_user())}
+    headers = bearer(make_user())
     assert client.post("/api/v1/profile", json={"name": "Asha"}, headers=headers).status_code == 201
     return headers
