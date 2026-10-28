@@ -14,6 +14,12 @@ class ProfileNotFoundError(ProfileError):
     message = "Profile not found"
 
 
+class ProfileItemNotFoundError(ProfileError):
+    """No such entry on the caller's profile (it may belong to someone else)."""
+
+    message = "Entry not found"
+
+
 class ResumeNotFoundError(ProfileError):
     """No such upload on the caller's profile (it may belong to someone else)."""
 

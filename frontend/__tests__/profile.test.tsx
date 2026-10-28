@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 import ProfilePage from "@/app/(m1)/profile/page";
 import { getToken, setToken } from "@/lib/api";
-import { mockApi, PROFILE } from "@/test-utils/api";
+import { EMPTY_SECTIONS, mockApi, PROFILE } from "@/test-utils/api";
 
 const mockReplace = jest.fn();
 // Next's useRouter returns the same object on every render; so must the mock.
@@ -21,10 +21,10 @@ test("without a token the page sends the visitor to log in", () => {
 });
 
 test("the profile is requested with the token and shown", async () => {
-  const calls = mockApi({ "GET /profile": { status: 200, body: PROFILE } });
+  const calls = mockApi({ "GET /profile": { status: 200, body: PROFILE }, ...EMPTY_SECTIONS });
   render(<ProfilePage />);
   expect(await screen.findByRole("heading", { name: "Asha Rao" })).toBeInTheDocument();
-  expect(calls).toHaveLength(1);
+  expect(calls.filter((call) => call.path === "/profile")).toHaveLength(1);
   expect(calls[0].headers.Authorization).toBe("Bearer signed.jwt.token");
 });
 
@@ -35,6 +35,7 @@ test("a new student creates their profile, and blank fields are reported", async
       { status: 422, body: { detail: [{ loc: ["body", "name"], msg: "String should have at least 1 character" }] } },
       { status: 201, body: PROFILE },
     ],
+    ...EMPTY_SECTIONS,
   });
   const user = userEvent.setup();
   render(<ProfilePage />);
@@ -46,7 +47,10 @@ test("a new student creates their profile, and blank fields are reported", async
   await user.type(screen.getByRole("textbox", { name: /Name/ }), "  Asha Rao ");
   await user.click(create);
   expect(await screen.findByRole("heading", { name: "Asha Rao" })).toBeInTheDocument();
-  expect(calls.at(-1)?.body).toEqual({ name: "Asha Rao", education_level: null });
+  expect(calls.find((c) => c.method === "POST" && c.body?.name)?.body).toEqual({
+    name: "Asha Rao",
+    education_level: null,
+  });
 });
 
 test("an expired token logs the student out", async () => {
@@ -65,7 +69,7 @@ test("a non-student account is told the page is for students", async () => {
 });
 
 test("log out clears the token", async () => {
-  mockApi({ "GET /profile": { status: 200, body: PROFILE } });
+  mockApi({ "GET /profile": { status: 200, body: PROFILE }, ...EMPTY_SECTIONS });
   render(<ProfilePage />);
   await userEvent.setup().click(screen.getByRole("button", { name: "Log out" }));
   expect(getToken()).toBeNull();
