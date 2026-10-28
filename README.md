@@ -12,15 +12,6 @@ UE24CS341A Software Engineering, Team 18, Project ID 22.
 
 Stack: Next.js (TypeScript), FastAPI (Python 3.12), PostgreSQL 16, SQLAlchemy + Alembic, pytest, Jenkins, SonarQube, Docker Compose.
 
-## Running the stack
-
-```
-cp .env.example .env        # then replace every change-me value
-docker compose up --build
-```
-
-`docker compose` refuses to start if `POSTGRES_PASSWORD` or `JWT_SECRET` is unset, so there are no built-in default secrets. The database is not published to the host; only the API (port 8000) and web (port 3000) are.
-
 ## Sprint 1 CI setup
 
 For UA-3, Jenkins checks out the repository, creates a fresh Python 3.12 virtual environment with `uv`,
@@ -73,6 +64,15 @@ The layout mirrors module boundaries, so a cross-module import shows up in revie
 | `frontend/` | Next.js app, one route group per module | Per module |
 | `docs/` | SRS, architecture, backlog, test plan, work allocation, frozen contracts | Vansh |
 | `docker-compose.yml`, `Jenkinsfile` | Infrastructure | Shubhika / Hemanth |
+
+## Running the stack
+
+```
+cp .env.example .env        # then replace every change-me value
+docker compose up --build
+```
+
+`docker compose` refuses to start if `POSTGRES_PASSWORD` or `JWT_SECRET` is unset, so there are no built-in default secrets. The database is not published to the host; only the API (port 8000) and web (port 3000) are.
 
 ## Module interaction rules
 
