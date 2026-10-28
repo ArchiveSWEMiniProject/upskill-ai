@@ -6,6 +6,7 @@ from backend.auth.faculty_views import faculty_router
 from backend.auth.views import auth_router
 from backend.catalogue.views import catalogue_router
 from backend.profile.routes import router as profile_router
+from backend.skills.routes import router as skills_router
 
 app = FastAPI(
     title="UpSkill-AI API",
@@ -15,6 +16,7 @@ app = FastAPI(
 
 # Mount module routers
 app.include_router(profile_router)
+app.include_router(skills_router)
 app.include_router(auth_router)
 app.include_router(faculty_router)
 app.include_router(catalogue_router)
