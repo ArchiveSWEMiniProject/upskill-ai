@@ -82,3 +82,26 @@ def make_user(db_session: Session):
         ).scalar_one()
 
     return _make_user
+
+
+@pytest.fixture(autouse=True)
+def jwt_secret_for_tests(monkeypatch):
+    """The API refuses to sign or accept tokens without JWT_SECRET; give every
+    test a throwaway one unless the environment already provides it."""
+    if not os.environ.get("JWT_SECRET"):
+        monkeypatch.setenv("JWT_SECRET", "test-only-secret-not-used-outside-pytest")
+    # The API's own resume cleanup (UP-6) would purge whatever DATABASE_URL
+    # points at; tests that need it turn it back on.
+    monkeypatch.setenv("RESUME_CLEANUP_INTERVAL_SECONDS", "0")
+
+
+@pytest.fixture
+def bearer():
+    """Authorization headers carrying a real signed token for a user id."""
+    from backend.auth.security import create_access_token
+
+    def _bearer(user_id: int, role: str = "student") -> dict[str, str]:
+        token = create_access_token({"sub": str(user_id), "user_id": user_id, "role": role})
+        return {"Authorization": f"Bearer {token}"}
+
+    return _bearer

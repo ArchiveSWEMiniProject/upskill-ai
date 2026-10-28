@@ -95,8 +95,10 @@ def test_unrelated_unknown_skill_has_no_suggestions(client, skill_ids, student):
     assert response.json()["detail"]["suggestions"] == []
 
 
-def test_skills_are_kept_per_student(client, db_session, skill_ids, make_user, student):
-    other = {"X-User-Id": str(make_user())}
+def test_skills_are_kept_per_student(
+    client, db_session, skill_ids, make_user, bearer, student
+):
+    other = bearer(make_user())
     client.post("/api/v1/profile", json={"name": "Ravi"}, headers=other)
 
     client.post(URL, json={"skill": "sql", "level": "beginner"}, headers=student)
@@ -106,8 +108,8 @@ def test_skills_are_kept_per_student(client, db_session, skill_ids, make_user, s
     assert levels == ["advanced", "beginner"]
 
 
-def test_declaring_without_a_profile_returns_404(client, make_user, skill_ids):
-    headers = {"X-User-Id": str(make_user())}
+def test_declaring_without_a_profile_returns_404(client, make_user, bearer, skill_ids):
+    headers = bearer(make_user())
     response = client.post(URL, json={"skill": "Python", "level": "beginner"}, headers=headers)
     assert response.status_code == 404
     assert response.json() == {"detail": "Profile not found"}
