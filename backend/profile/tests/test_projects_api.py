@@ -6,7 +6,6 @@ from sqlalchemy import func, select
 
 from backend.database import get_session
 from backend.main import app
-from backend.profile.dependencies import DEV_AUTH_ENV
 from backend.profile.models import ProfileItem
 
 URL = "/api/v1/profile/projects"
@@ -18,16 +17,15 @@ PROJECT = {
 
 
 @pytest.fixture
-def client(db_session, monkeypatch):
-    monkeypatch.setenv(DEV_AUTH_ENV, "1")
+def client(db_session):
     app.dependency_overrides[get_session] = lambda: db_session
     yield TestClient(app)
     app.dependency_overrides.clear()
 
 
 @pytest.fixture
-def student(client, make_user):
-    headers = {"X-User-Id": str(make_user())}
+def student(client, make_user, bearer):
+    headers = bearer(make_user())
     assert client.post("/api/v1/profile", json={"name": "Asha"}, headers=headers).status_code == 201
     return headers
 
@@ -131,9 +129,9 @@ def test_edit_and_delete(client, student):
     assert client.get(URL, headers=student).json() == []
 
 
-def test_another_students_project_behaves_as_missing(client, make_user, student):
+def test_another_students_project_behaves_as_missing(client, make_user, bearer, student):
     project = client.post(URL, json=PROJECT, headers=student).json()
-    other = {"X-User-Id": str(make_user())}
+    other = bearer(make_user())
     client.post("/api/v1/profile", json={"name": "Ravi"}, headers=other)
 
     path = f"{URL}/{project['project_id']}"
@@ -156,8 +154,8 @@ def test_courses_and_projects_do_not_mix(client, student):
     assert len(client.get("/api/v1/profile/courses", headers=student).json()) == 1
 
 
-def test_without_a_profile_returns_404(client, make_user):
-    headers = {"X-User-Id": str(make_user())}
+def test_without_a_profile_returns_404(client, make_user, bearer):
+    headers = bearer(make_user())
     assert client.post(URL, json=PROJECT, headers=headers).status_code == 404
 
 
