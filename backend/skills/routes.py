@@ -9,8 +9,16 @@ from backend.profile.exceptions import ProfileNotFoundError
 from backend.profile.repository import StudentRepository
 from backend.skills.exceptions import UnknownSkillError
 from backend.skills.repository import StudentSkillRepository
-from backend.skills.schemas import SkillDeclare, SkillOut, SkillSuggestion, UnknownSkillDetail
+from backend.skills.schemas import (
+    SkillDeclare,
+    SkillOut,
+    SkillSuggestion,
+    SkillVectorEntryOut,
+    SkillVectorOut,
+    UnknownSkillDetail,
+)
 from backend.skills.service import SkillService
+from backend.skills.vector import compute_skill_vector
 from backend.taxonomy.reader import TaxonomyReader
 
 router = APIRouter(prefix="/api/v1/profile", tags=["skills"])
@@ -60,4 +68,33 @@ def declare_skill(
     return SkillOut(
         skill_id=result.skill_id, skill_name=result.skill_name, level=result.level,
         source=result.source,
+    )
+
+
+@router.get(
+    "/skill-vector",
+    response_model=SkillVectorOut,
+    responses={404: {"description": "The caller has no profile yet"}},
+)
+def read_skill_vector(
+    user_id: Annotated[int, Depends(current_user_id)], session: SessionDep
+) -> SkillVectorOut:
+    """The caller's skill vector in the frozen contract format (REQ-F1-25, F1-27):
+    one entry per skill at the highest level any source gives it (REQ-F1-28).
+    Computed from the current skills on every request (REQ-F1-26)."""
+    student = StudentRepository(session).get_by_user_id(user_id)
+    if student is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, ProfileNotFoundError.message)
+    vector = compute_skill_vector(session, student.student_id)
+    return SkillVectorOut(
+        entries=[
+            SkillVectorEntryOut(
+                canonical_skill_id=entry.canonical_skill_id,
+                canonical_skill_name=entry.canonical_skill_name,
+                level=entry.level.value,
+                confidence=None if entry.confidence is None else float(entry.confidence),
+                source=entry.source.value,
+            )
+            for entry in vector
+        ]
     )
