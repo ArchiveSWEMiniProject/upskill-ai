@@ -90,6 +90,9 @@ def jwt_secret_for_tests(monkeypatch):
     test a throwaway one unless the environment already provides it."""
     if not os.environ.get("JWT_SECRET"):
         monkeypatch.setenv("JWT_SECRET", "test-only-secret-not-used-outside-pytest")
+    # The API's own resume cleanup (UP-6) would purge whatever DATABASE_URL
+    # points at; tests that need it turn it back on.
+    monkeypatch.setenv("RESUME_CLEANUP_INTERVAL_SECONDS", "0")
 
 
 @pytest.fixture

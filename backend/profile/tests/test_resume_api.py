@@ -1,5 +1,7 @@
 """UP-6 resume upload against real Postgres (see backend/conftest.py)."""
 
+import asyncio
+import threading
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -243,6 +245,44 @@ def test_cleanup_command_deletes_expired_files(client, db_session, storage, stud
 
     assert resume_cleanup.main() == 1
     assert stored_files(storage) == []
+
+
+def test_cleanup_runs_periodically_and_survives_a_failed_run(monkeypatch):
+    runs, sleeps = [], []
+
+    def purge_once():
+        runs.append(1)
+        if len(runs) == 1:
+            raise RuntimeError("database unavailable")
+        return 2
+
+    async def sleep(seconds):
+        sleeps.append(seconds)
+        if len(sleeps) == 3:
+            raise asyncio.CancelledError
+
+    monkeypatch.setattr(resume_cleanup, "purge_once", purge_once)
+    monkeypatch.setattr(resume_cleanup.asyncio, "sleep", sleep)
+    with pytest.raises(asyncio.CancelledError):
+        asyncio.run(resume_cleanup.purge_periodically(60))
+    assert len(runs) == 3  # the failed first run did not stop the next ones
+    assert sleeps == [60, 60, 60]
+
+
+def test_the_api_purges_at_startup_without_any_cron_job(monkeypatch):
+    purged = threading.Event()
+    monkeypatch.setattr(resume_cleanup, "purge_once", lambda: purged.set() or 0)
+    monkeypatch.setenv("RESUME_CLEANUP_INTERVAL_SECONDS", "3600")
+    with TestClient(app):
+        assert purged.wait(timeout=5)
+
+
+def test_cleanup_can_be_turned_off(monkeypatch):
+    purged = threading.Event()
+    monkeypatch.setattr(resume_cleanup, "purge_once", lambda: purged.set() or 0)
+    monkeypatch.setenv("RESUME_CLEANUP_INTERVAL_SECONDS", "0")
+    with TestClient(app):
+        assert not purged.wait(timeout=0.5)
 
 
 # --- Extraction details and failure safety ------------------------------------------
