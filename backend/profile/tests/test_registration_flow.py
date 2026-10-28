@@ -117,6 +117,22 @@ def test_unknown_email_and_wrong_password_get_the_same_error(client):
     assert unknown.json() == wrong.json() == {"detail": "Invalid email or password"}
 
 
+@pytest.mark.parametrize(
+    "credentials",
+    [
+        {"email": "", "password": ASHA["password"]},
+        {"email": ASHA["email"], "password": ""},
+        {"email": "a" * 300 + "@pes.edu", "password": ASHA["password"]},
+        {"email": "not-an-email", "password": "x"},
+    ],
+)
+def test_blank_or_malformed_credentials_get_the_same_generic_error(client, credentials):
+    client.post(REGISTER, json=ASHA)
+    response = client.post(LOGIN, json=credentials)
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Invalid email or password"}
+
+
 # --- Signing secret (review of #76) -----------------------------------------------
 
 
