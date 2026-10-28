@@ -94,10 +94,12 @@ class UserContext(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    """User login payload."""
+    """User login payload. Deliberately unconstrained: a blank or over-long
+    value cannot belong to any account, so it gets the same generic 401 as a
+    wrong password instead of a 422 naming the field (UP-1)."""
 
-    email: str = Field(..., min_length=3, max_length=120)
-    password: str = Field(..., min_length=1)
+    email: str
+    password: str
 
 
 _EMAIL_PATTERN = re.compile(
