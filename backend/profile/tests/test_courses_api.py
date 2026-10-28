@@ -6,7 +6,6 @@ from sqlalchemy import func, select
 
 from backend.database import get_session
 from backend.main import app
-from backend.profile.dependencies import DEV_AUTH_ENV
 from backend.profile.models import ProfileItem
 
 URL = "/api/v1/profile/courses"
@@ -19,16 +18,15 @@ DATA_STRUCTURES = {
 
 
 @pytest.fixture
-def client(db_session, monkeypatch):
-    monkeypatch.setenv(DEV_AUTH_ENV, "1")
+def client(db_session):
     app.dependency_overrides[get_session] = lambda: db_session
     yield TestClient(app)
     app.dependency_overrides.clear()
 
 
 @pytest.fixture
-def student(client, make_user):
-    headers = {"X-User-Id": str(make_user())}
+def student(client, make_user, bearer):
+    headers = bearer(make_user())
     assert client.post("/api/v1/profile", json={"name": "Asha"}, headers=headers).status_code == 201
     return headers
 
@@ -114,6 +112,15 @@ def test_invalid_course_is_rejected_naming_the_field(
     assert course_count(db_session) == 0
 
 
+def test_every_invalid_field_is_reported_at_once(client, db_session, student):
+    response = client.post(URL, json={"course_code": "UE23CS251A", "grade": "Z"}, headers=student)
+
+    assert response.status_code == 422
+    fields = sorted(e["loc"][-1] for e in response.json()["detail"])
+    assert fields == ["completion_term", "course_name", "grade"]
+    assert course_count(db_session) == 0
+
+
 def test_course_code_is_optional_and_blank_means_none(client, student):
     without = {k: v for k, v in DATA_STRUCTURES.items() if k != "course_code"}
     assert client.post(URL, json=without, headers=student).json()["course_code"] is None
@@ -163,9 +170,9 @@ def test_courses_are_listed_oldest_first(client, student):
 # --- Ownership (REQ-F1-39) -----------------------------------------------------
 
 
-def test_another_students_course_behaves_as_missing(client, make_user, student):
+def test_another_students_course_behaves_as_missing(client, make_user, bearer, student):
     course = client.post(URL, json=DATA_STRUCTURES, headers=student).json()
-    other = {"X-User-Id": str(make_user())}
+    other = bearer(make_user())
     client.post("/api/v1/profile", json={"name": "Ravi"}, headers=other)
 
     assert client.get(URL, headers=other).json() == []
@@ -181,8 +188,8 @@ def test_unknown_course_id_returns_404(client, student):
     assert client.put(f"{URL}/999999", json=DATA_STRUCTURES, headers=student).status_code == 404
 
 
-def test_without_a_profile_returns_404(client, make_user):
-    headers = {"X-User-Id": str(make_user())}
+def test_without_a_profile_returns_404(client, make_user, bearer):
+    headers = bearer(make_user())
     assert client.get(URL, headers=headers).status_code == 404
     response = client.post(URL, json=DATA_STRUCTURES, headers=headers)
     assert response.status_code == 404
