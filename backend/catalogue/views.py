@@ -167,6 +167,43 @@ def moderate_catalogue_item(
 
 
 @catalogue_router.get(
+    "/{item_id}",
+    response_model=LearningItemResponse,
+    summary="Get a single catalogue resource by ID",
+)
+def get_catalogue_item(
+    item_id: int,
+    current_user: UserContext = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> LearningItemResponse:
+    """Fetch a single catalogue item by ID.
+    Non-administrators can only view approved items (REQ-F4-12, TC-F4-10).
+    """
+    item = (
+        db.query(LearningItem)
+        .options(joinedload(LearningItem.skills).joinedload(LearningItemSkill.skill))
+        .filter(LearningItem.item_id == item_id)
+        .first()
+    )
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Resource with ID {item_id} not found",
+        )
+
+    if (
+        current_user.role != UserRole.ADMINISTRATOR
+        and item.moderation_state != ModerationState.APPROVED
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Resource with ID {item_id} not found",
+        )
+
+    return _format_item_response(item)
+
+
+@catalogue_router.get(
     "",
     response_model=list[LearningItemResponse],
     summary="Search, filter, and paginate catalogue resources",

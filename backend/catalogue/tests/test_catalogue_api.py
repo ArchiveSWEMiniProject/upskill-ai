@@ -160,6 +160,74 @@ def test_tc_f4_10_inactive_resource_excluded_from_student_results(
     assert "Inactive Deprecated Python" in admin_titles
 
 
+def test_ca5_moderate_catalogue_resource_lifecycle(client, admin_token, student1_token):
+    """CA-5 / REQ-F4-11 / REQ-F4-12: Admin moderates resource state; student view reacts."""
+    # 1. Create a pending resource
+    resp = client.post(
+        "/api/v1/catalogue",
+        headers={"Authorization": f"Bearer {admin_token}"},
+        json={
+            "title": "Pending Moderation Go Course",
+            "description": "Newly submitted Go course pending review.",
+            "item_type": "course",
+            "level": "intermediate",
+            "source_url": "https://example.com/pending-go",
+            "moderation_state": "pending",
+            "skill_tags": [{"skill_id": 2, "coverage_level": "intermediate"}],
+        },
+    )
+    assert resp.status_code == 201
+    item_id = resp.json()["item_id"]
+
+    # Student cannot see pending resource
+    student_resp = client.get(
+        f"/api/v1/catalogue/{item_id}",
+        headers={"Authorization": f"Bearer {student1_token}"},
+    )
+    assert student_resp.status_code == 404
+
+    # Student cannot moderate resource
+    forbidden_resp = client.patch(
+        f"/api/v1/catalogue/{item_id}/moderate",
+        headers={"Authorization": f"Bearer {student1_token}"},
+        json={"moderation_state": "approved"},
+    )
+    assert forbidden_resp.status_code == 403
+
+    # Admin approves resource
+    approve_resp = client.patch(
+        f"/api/v1/catalogue/{item_id}/moderate",
+        headers={"Authorization": f"Bearer {admin_token}"},
+        json={"moderation_state": "approved"},
+    )
+    assert approve_resp.status_code == 200
+    assert approve_resp.json()["moderation_state"] == "approved"
+
+    # Now student can see and fetch it
+    student_approved_resp = client.get(
+        f"/api/v1/catalogue/{item_id}",
+        headers={"Authorization": f"Bearer {student1_token}"},
+    )
+    assert student_approved_resp.status_code == 200
+    assert student_approved_resp.json()["title"] == "Pending Moderation Go Course"
+
+    # Admin deactivates it
+    deact_resp = client.patch(
+        f"/api/v1/catalogue/{item_id}/moderate",
+        headers={"Authorization": f"Bearer {admin_token}"},
+        json={"moderation_state": "inactive"},
+    )
+    assert deact_resp.status_code == 200
+    assert deact_resp.json()["moderation_state"] == "inactive"
+
+    # Student can no longer see it
+    student_after = client.get(
+        f"/api/v1/catalogue/{item_id}",
+        headers={"Authorization": f"Bearer {student1_token}"},
+    )
+    assert student_after.status_code == 404
+
+
 def test_tc_f4_09_search_matches_on_skill_tag_only(client, admin_token, student1_token):
     """TC-F4-09: Search matches on skill tag even when term is not in title or description."""
     # 1. Resource with term "Docker" ONLY in the skill tag (skill_id=1 is Docker)
