@@ -62,6 +62,17 @@ The layout mirrors module boundaries, so a cross-module import shows up in revie
 
 Review pairs: Vansh → Yajat, Yajat → Hemanth, Hemanth → Shubhika, Shubhika → Vansh (author → reviewer).
 
+## Seed data
+
+Load after `alembic upgrade head`, the taxonomy before the catalogue. Every file is safe to run again.
+
+```
+psql "$DATABASE_URL" -f taxonomy_seed.sql            # then any other taxonomy_seed_*.sql
+psql "$DATABASE_URL" -f catalogue_seed.sql           # then any other catalogue_seed_*.sql
+```
+
+The seed tests load them all into the migrated test database on every CI run.
+
 ## Frozen contracts
 
 Full copies live in [docs/CONTRACTS.md](docs/CONTRACTS.md). Status: **final and frozen** (UA-6). Changes need all four owners.
