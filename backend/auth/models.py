@@ -1,5 +1,6 @@
 """Authentication models and schemas for UpSkill-AI."""
 
+from datetime import datetime
 from enum import Enum
 from typing import Optional
 
@@ -115,3 +116,52 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserResponse
+
+
+class MenteeSummaryResponse(BaseModel):
+    """Summary of an assigned mentee for faculty listing (CA-6, REQ-F4-13)."""
+
+    student_id: int
+    user_id: int
+    name: str
+    email: Optional[str] = None
+    education_level: Optional[str] = None
+    target_role_id: Optional[int] = None
+    target_role_name: Optional[str] = None
+    assigned_at: Optional[datetime] = None
+
+
+class MenteeSkillSummary(BaseModel):
+    """Summary of a mentee's skill."""
+
+    skill_id: int
+    skill_name: str
+    level: str
+    source: Optional[str] = None
+
+
+class MenteeItemSummary(BaseModel):
+    """Summary of a mentee's course or project."""
+
+    item_id: int
+    item_type: str
+    title: str
+    description: Optional[str] = None
+    grade: Optional[str] = None
+    completion_term: Optional[str] = None
+
+
+class MenteeDetailResponse(BaseModel):
+    """Comprehensive view of an assigned mentee (CA-6, REQ-F4-13, REQ-F1-40)."""
+
+    student_id: int
+    user_id: int
+    name: str
+    email: Optional[str] = None
+    education_level: Optional[str] = None
+    target_role_id: Optional[int] = None
+    target_role_name: Optional[str] = None
+    assigned_at: Optional[datetime] = None
+    skills: list[MenteeSkillSummary] = Field(default_factory=list)
+    profile_items: list[MenteeItemSummary] = Field(default_factory=list)
+
