@@ -65,6 +65,15 @@ The layout mirrors module boundaries, so a cross-module import shows up in revie
 | `docs/` | SRS, architecture, backlog, test plan, work allocation, frozen contracts | Vansh |
 | `docker-compose.yml`, `Jenkinsfile` | Infrastructure | Shubhika / Hemanth |
 
+## Running the stack
+
+```
+cp .env.example .env        # then replace every change-me value
+docker compose up --build
+```
+
+`docker compose` refuses to start if `POSTGRES_PASSWORD` or `JWT_SECRET` is unset, so there are no built-in default secrets. The database is not published to the host; only the API (port 8000) and web (port 3000) are.
+
 ## Module interaction rules
 
 - **R1** A module calls another only through its published service interface.
