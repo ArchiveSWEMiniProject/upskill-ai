@@ -78,6 +78,31 @@ The 60% coverage threshold is a starting point that the current code passes.
 Raise it in `ci/run-pipeline.sh` once more modules have landed; changing it
 affects everyone, so agree it as a team.
 
+## Branch protection on `main`
+
+- Changes reach `main` only through a pull request; nobody can push directly,
+  administrators included.
+- A pull request needs **one approving review** and a green **Jenkins
+  pipeline** check (accepted only from GitHub Actions, so it cannot be faked by
+  another status).
+- Force pushes and deleting `main` are blocked.
+
+Branch rules (`feature/<module>-<story-id>-<slug>`, review pairs) are in the
+README.
+
+## Evidence
+
+| What | Where |
+|---|---|
+| First green run of the full pipeline, including Docker build and deploy smoke test | PR #13, Actions run 39063184464 |
+| First green run on `main` | Actions run 39063879110 (push of PR #13's merge) |
+| Gate failing on a real issue (API container running as root, `security_rating` 2) | Local run before the Dockerfile fix; described in PR #13 |
+| A failing test blocks the merge | PR #14: the check failed at Backend checks (`1 failed, 14 passed`), and GitHub refused the merge with "Required status check \"Jenkins pipeline\" is failing." PR closed unmerged |
+
+Each run's Jenkins console log and SonarQube results are in its
+`jenkins-build-<n>` artifact (kept 30 days); the Actions log keeps the full
+console output for as long as GitHub retains the run.
+
 ## Running it yourself
 
 ```
