@@ -29,6 +29,40 @@ def db_session():
     Base.metadata.create_all(bind=test_engine)
     session = TestingSessionLocal()
 
+    # Create tables not owned by M4 that exist in 001_initial_schema.py
+    session.execute(
+        text(
+            """
+            CREATE TABLE IF NOT EXISTS student_skill (
+                student_id INTEGER,
+                skill_id INTEGER,
+                level VARCHAR(20),
+                source VARCHAR(50),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (student_id, skill_id)
+            )
+            """
+        )
+    )
+    session.execute(
+        text(
+            """
+            CREATE TABLE IF NOT EXISTS profile_item (
+                item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id INTEGER,
+                item_type VARCHAR(20),
+                title VARCHAR(100),
+                description TEXT,
+                grade VARCHAR(10),
+                completion_term VARCHAR(20),
+                url TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+    )
+    session.commit()
+
     # Seed canonical skills for tests
     docker_skill = Skill(skill_id=1, skill_name="Docker", category="DevOps")
     python_skill = Skill(skill_id=2, skill_name="Python", category="Backend")
