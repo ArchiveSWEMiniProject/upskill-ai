@@ -2,7 +2,7 @@
 // after /api/v1). A list of replies is used in order; the last one repeats.
 type Reply = { status: number; body?: unknown };
 
-export type Call = { method: string; path: string; body: unknown; headers: Record<string, string> };
+export type Call = { method: string; path: string; body: any; headers: Record<string, string> };
 
 export function mockApi(routes: Record<string, Reply | Reply[]>): Call[] {
   const calls: Call[] = [];
@@ -25,4 +25,9 @@ export const PROFILE = {
   education_level: "UG",
   target_role_id: null,
   created_at: "2026-10-28T10:00:00Z",
+};
+
+// Replies for the sections the profile page loads once the profile exists.
+export const EMPTY_SECTIONS = {
+  "GET /profile/courses": { status: 200, body: [] },
 };
