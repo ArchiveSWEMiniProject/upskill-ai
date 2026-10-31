@@ -158,3 +158,254 @@ def test_tc_f4_10_inactive_resource_excluded_from_student_results(
     admin_titles = [item["title"] for item in admin_search.json()]
     assert "Active Python Programming" in admin_titles
     assert "Inactive Deprecated Python" in admin_titles
+
+
+def test_ca5_moderate_catalogue_resource_lifecycle(client, admin_token, student1_token):
+    """CA-5 / REQ-F4-11 / REQ-F4-12: Admin moderates resource state; student view reacts."""
+    # 1. Create a pending resource
+    resp = client.post(
+        "/api/v1/catalogue",
+        headers={"Authorization": f"Bearer {admin_token}"},
+        json={
+            "title": "Pending Moderation Go Course",
+            "description": "Newly submitted Go course pending review.",
+            "item_type": "course",
+            "level": "intermediate",
+            "source_url": "https://example.com/pending-go",
+            "moderation_state": "pending",
+            "skill_tags": [{"skill_id": 2, "coverage_level": "intermediate"}],
+        },
+    )
+    assert resp.status_code == 201
+    item_id = resp.json()["item_id"]
+
+    # Student cannot see pending resource
+    student_resp = client.get(
+        f"/api/v1/catalogue/{item_id}",
+        headers={"Authorization": f"Bearer {student1_token}"},
+    )
+    assert student_resp.status_code == 404
+
+    # Student cannot moderate resource
+    forbidden_resp = client.patch(
+        f"/api/v1/catalogue/{item_id}/moderate",
+        headers={"Authorization": f"Bearer {student1_token}"},
+        json={"moderation_state": "approved"},
+    )
+    assert forbidden_resp.status_code == 403
+
+    # Admin approves resource
+    approve_resp = client.patch(
+        f"/api/v1/catalogue/{item_id}/moderate",
+        headers={"Authorization": f"Bearer {admin_token}"},
+        json={"moderation_state": "approved"},
+    )
+    assert approve_resp.status_code == 200
+    assert approve_resp.json()["moderation_state"] == "approved"
+
+    # Now student can see and fetch it
+    student_approved_resp = client.get(
+        f"/api/v1/catalogue/{item_id}",
+        headers={"Authorization": f"Bearer {student1_token}"},
+    )
+    assert student_approved_resp.status_code == 200
+    assert student_approved_resp.json()["title"] == "Pending Moderation Go Course"
+
+    # Admin deactivates it
+    deact_resp = client.patch(
+        f"/api/v1/catalogue/{item_id}/moderate",
+        headers={"Authorization": f"Bearer {admin_token}"},
+        json={"moderation_state": "inactive"},
+    )
+    assert deact_resp.status_code == 200
+    assert deact_resp.json()["moderation_state"] == "inactive"
+
+    # Student can no longer see it
+    student_after = client.get(
+        f"/api/v1/catalogue/{item_id}",
+        headers={"Authorization": f"Bearer {student1_token}"},
+    )
+    assert student_after.status_code == 404
+
+
+def test_tc_f4_09_search_matches_on_skill_tag_only(client, admin_token, student1_token):
+    """TC-F4-09: Search matches on skill tag even when term is not in title or description."""
+    # 1. Resource with term "Docker" ONLY in the skill tag (skill_id=1 is Docker)
+    resp_docker = client.post(
+        "/api/v1/catalogue",
+        headers={"Authorization": f"Bearer {admin_token}"},
+        json={
+            "title": "Container Orchestration Engine",
+            "description": "Production clustering and deployment architectures.",
+            "item_type": "course",
+            "level": "intermediate",
+            "source_url": "https://example.com/containers",
+            "moderation_state": "approved",
+            "skill_tags": [{"skill_id": 1, "coverage_level": "intermediate"}],
+        },
+    )
+    assert resp_docker.status_code == 201
+
+    # 2. Unrelated resource with no Docker tag
+    resp_algo = client.post(
+        "/api/v1/catalogue",
+        headers={"Authorization": f"Bearer {admin_token}"},
+        json={
+            "title": "Algorithms and Data Structures",
+            "description": "Asymptotic analysis, trees, graphs, and dynamic programming.",
+            "item_type": "course",
+            "level": "intermediate",
+            "source_url": "https://example.com/algo",
+            "moderation_state": "approved",
+            "skill_tags": [{"skill_id": 2, "coverage_level": "intermediate"}],
+        },
+    )
+    assert resp_algo.status_code == 201
+
+    # 3. Search for "Docker"
+    search_resp = client.get(
+        "/api/v1/catalogue?q=Docker",
+        headers={"Authorization": f"Bearer {student1_token}"},
+    )
+    assert search_resp.status_code == 200
+    results = search_resp.json()
+    titles = [item["title"] for item in results]
+
+    # Docker-tagged resource is returned, unrelated is excluded
+    assert "Container Orchestration Engine" in titles
+    assert "Algorithms and Data Structures" not in titles
+
+
+def test_nfr_perf_04_catalogue_pagination(client, admin_token, student1_token):
+    """NFR-PERF-04: Catalogue responses are paginated with limit and offset."""
+    # Seed 3 items
+    for i in range(1, 4):
+        client.post(
+            "/api/v1/catalogue",
+            headers={"Authorization": f"Bearer {admin_token}"},
+            json={
+                "title": f"Resource Number {i}",
+                "description": f"Detailed description for resource {i}.",
+                "item_type": "course",
+                "level": "beginner",
+                "source_url": f"https://example.com/r{i}",
+                "moderation_state": "approved",
+                "skill_tags": [{"skill_id": 2, "coverage_level": "beginner"}],
+            },
+        )
+
+    # Page 1: limit 2, offset 0
+    page1 = client.get(
+        "/api/v1/catalogue?limit=2&offset=0",
+        headers={"Authorization": f"Bearer {student1_token}"},
+    )
+    assert page1.status_code == 200
+    assert len(page1.json()) == 2
+    assert "X-Total-Count" in page1.headers
+    assert page1.headers["X-Limit"] == "2"
+    assert page1.headers["X-Offset"] == "0"
+
+    # Page 2: limit 2, offset 2
+    page2 = client.get(
+        "/api/v1/catalogue?limit=2&offset=2",
+        headers={"Authorization": f"Bearer {student1_token}"},
+    )
+    assert page2.status_code == 200
+    assert len(page2.json()) >= 1
+    assert page2.headers["X-Offset"] == "2"
+
+
+def test_get_resources_for_skill_service(db_session):
+    """Verify internal module interface get_resources_for_skill per CONTRACTS.md §5.2."""
+    from backend.catalogue.models import (
+        LearningItem,
+        LearningItemSkill,
+        LearningItemType,
+        ModerationState,
+        SkillLevel,
+    )
+    from backend.catalogue.service import get_resources_for_skill
+
+    # Seed an approved item and an inactive item for Skill 1 (Docker)
+    approved_item = LearningItem(
+        title="Production Docker",
+        description="Master Docker in production systems.",
+        item_type=LearningItemType.COURSE,
+        level=SkillLevel.INTERMEDIATE,
+        source_url="https://example.com/docker-prod",
+        moderation_state=ModerationState.APPROVED,
+    )
+    db_session.add(approved_item)
+    db_session.flush()
+
+    link1 = LearningItemSkill(
+        item_id=approved_item.item_id,
+        skill_id=1,
+        coverage_level=SkillLevel.INTERMEDIATE,
+    )
+    db_session.add(link1)
+
+    inactive_item = LearningItem(
+        title="Inactive Docker",
+        description="Outdated material.",
+        item_type=LearningItemType.COURSE,
+        level=SkillLevel.BEGINNER,
+        source_url="https://example.com/docker-old",
+        moderation_state=ModerationState.INACTIVE,
+    )
+    db_session.add(inactive_item)
+    db_session.flush()
+
+    link2 = LearningItemSkill(
+        item_id=inactive_item.item_id,
+        skill_id=1,
+        coverage_level=SkillLevel.BEGINNER,
+    )
+    db_session.add(link2)
+    db_session.commit()
+
+    # Query for Skill 1
+    resources = get_resources_for_skill(skill_ids=[1], db=db_session)
+    assert len(resources) == 1
+    assert resources[0]["title"] == "Production Docker"
+
+    # Query with level filter
+    res_inter = get_resources_for_skill(skill_ids=[1], level="intermediate", db=db_session)
+    assert len(res_inter) == 1
+
+    res_adv = get_resources_for_skill(skill_ids=[1], level="advanced", db=db_session)
+    assert len(res_adv) == 0
+
+    # Non-existent skill returns empty
+    empty_res = get_resources_for_skill(skill_ids=[9999], db=db_session)
+    assert empty_res == []
+
+
+def test_tc_f4_13_error_sanitization_and_correlation_id(client):
+    """TC-F4-13: Unhandled errors return sanitized response with correlation ID (NFR-SEC-10)."""
+    # Request without correlation ID gets one generated
+    resp = client.get("/api/v1/test/trigger-error")
+    assert resp.status_code == 500
+    assert "X-Correlation-ID" in resp.headers
+
+    data = resp.json()
+    assert data["detail"] == "An internal server error occurred"
+    assert "correlation_id" in data
+    assert data["correlation_id"] == resp.headers["X-Correlation-ID"]
+
+    # Verify sensitive data was not leaked
+    response_text = resp.text
+    assert "secret_token" not in response_text
+    assert "XYZ123" not in response_text
+    assert "db_internal_id" not in response_text
+    assert "Traceback" not in response_text
+
+    # Request with custom correlation ID preserves it
+    custom_id = "test-corr-id-456"
+    resp_custom = client.get(
+        "/api/v1/test/trigger-error",
+        headers={"X-Correlation-ID": custom_id},
+    )
+    assert resp_custom.status_code == 500
+    assert resp_custom.headers["X-Correlation-ID"] == custom_id
+    assert resp_custom.json()["correlation_id"] == custom_id
