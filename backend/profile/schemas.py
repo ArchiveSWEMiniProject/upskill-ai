@@ -1,7 +1,16 @@
 from datetime import datetime
 from typing import Annotated
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, StringConstraints, field_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    HttpUrl,
+    StringConstraints,
+    TypeAdapter,
+    ValidationError,
+    field_validator,
+)
 
 # Lengths from SRS Appendix B. Surrounding whitespace is stripped first, so a
 # name of only spaces counts as empty (REQ-F1-35).
@@ -68,3 +77,71 @@ class CourseOut(BaseModel):
     course_code: str | None
     grade: str
     completion_term: str
+
+
+# --- Project entries (UP-4) --------------------------------------------------
+
+DESCRIPTION_MAX = 2000
+_http_url = TypeAdapter(HttpUrl)
+
+ProjectTitle = CourseName  # same rule: required, at most 100 characters
+
+
+class ProjectIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    title: ProjectTitle
+    description: str
+    repository_url: str | None = None
+
+    @field_validator("description")
+    @classmethod
+    def description_within_limit(cls, value: str) -> str:
+        """Required, at most 2000 characters; the error carries the current count
+        so the client can show it (REQ-F1-37)."""
+        if not value.strip():
+            raise ValueError("Description is required")
+        if len(value) > DESCRIPTION_MAX:
+            raise ValueError(
+                f"Description is {len(value)} characters; the maximum is {DESCRIPTION_MAX}"
+            )
+        return value
+
+    @field_validator("repository_url")
+    @classmethod
+    def repository_url_is_http(cls, value: str | None) -> str | None:
+        """Optional; when given it must be an http(s) URL of at most 255 characters.
+        Stored as entered, not rewritten."""
+        if value is None or not value.strip():
+            return None
+        url = value.strip()
+        if len(url) > 255:
+            raise ValueError("Repository URL must be at most 255 characters")
+        try:
+            _http_url.validate_python(url)
+        except ValidationError:
+            raise ValueError("Repository URL must be a valid http(s) address") from None
+        return url
+
+
+class ProjectOut(BaseModel):
+    project_id: int
+    title: str
+    description: str
+    repository_url: str | None
+
+
+# --- Resume upload (UP-6) ----------------------------------------------------
+
+
+class ResumeOut(BaseModel):
+    upload_id: int
+    file_name: str
+    file_type: str
+    size_bytes: int
+    status: str  # extracted | unreadable | failed
+    message: str | None = None
+    manual_entry: str | None = None  # where to add skills instead (REQ-F1-11)
+    uploaded_at: datetime
+    delete_after: datetime
+    deleted: bool

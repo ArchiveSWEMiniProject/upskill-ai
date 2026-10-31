@@ -13,6 +13,8 @@ import type { Profile } from "@/lib/types";
 import { CourseSection } from "../_components/CourseSection";
 import { CreateProfileForm } from "../_components/CreateProfileForm";
 import { FormError } from "../_components/FormMessages";
+import { ProjectSection } from "../_components/ProjectSection";
+import { ResumeSection } from "../_components/ResumeSection";
 
 type State =
   | { kind: "loading" }
@@ -80,6 +82,8 @@ export default function ProfilePage() {
               </p>
             </section>
             <CourseSection onUnauthorized={onUnauthorized} />
+            <ProjectSection onUnauthorized={onUnauthorized} />
+            <ResumeSection onUnauthorized={onUnauthorized} />
           </>
         )}
       </main>

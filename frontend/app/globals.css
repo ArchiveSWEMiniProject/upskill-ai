@@ -35,3 +35,7 @@ button:disabled { opacity: 0.6; cursor: progress; }
 .entries { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
 .entries li { border: 1px solid var(--line); border-radius: 6px; padding: 0.6rem 0.75rem; display: grid; gap: 0.35rem; }
 .split { max-width: 60rem; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); align-items: start; }
+.description { white-space: pre-wrap; overflow-wrap: anywhere; }
+.progress { display: flex; gap: 0.5rem; align-items: center; min-height: 1.5rem; margin-top: 0.5rem; }
+.progress progress { width: 12rem; }
+.ok { color: #067647; font-weight: 600; }

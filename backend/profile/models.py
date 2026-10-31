@@ -58,3 +58,31 @@ class ProfileItem(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+
+class ResumeUpload(Base):
+    """An uploaded resume (UP-6). The file itself lives outside the web root,
+    under a random name; this row records where, and when it must be deleted
+    (REQ-F1-18)."""
+
+    __tablename__ = "resume_upload"
+    __mapper_args__ = {"eager_defaults": True}
+
+    upload_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    student_id: Mapped[int] = mapped_column(Integer)
+    original_filename: Mapped[str] = mapped_column(String(255))
+    stored_path: Mapped[str] = mapped_column(String(255))
+    file_type: Mapped[str] = mapped_column(
+        ENUM("pdf", "docx", name="resume_file_type", create_type=False)
+    )
+    size_bytes: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(
+        ENUM("uploaded", "processing", "extracted", "unreadable", "failed",
+             name="resume_status", create_type=False)
+    )
+    uploaded_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    delete_after: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

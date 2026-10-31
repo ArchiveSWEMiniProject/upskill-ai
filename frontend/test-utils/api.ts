@@ -30,4 +30,6 @@ export const PROFILE = {
 // Replies for the sections the profile page loads once the profile exists.
 export const EMPTY_SECTIONS = {
   "GET /profile/courses": { status: 200, body: [] },
+  "GET /profile/projects": { status: 200, body: [] },
+  "GET /profile/resume": { status: 200, body: [] },
 };
