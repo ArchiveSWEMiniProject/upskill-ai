@@ -45,6 +45,23 @@ The two Docker stages run only when the Jenkins agent can reach a Docker
 daemon. A Jenkins without one (for example the interactive local server from
 `ci/compose.yml`) skips them with a message.
 
+## Jenkins plugins
+
+The CI Jenkins image installs an exact, checksummed plugin set and never
+contacts `updates.jenkins.io`, so an outage of Jenkins' update service (as on
+19 October 2026) does not break pull request checks.
+
+| File | Purpose |
+|---|---|
+| `ci/jenkins/plugins.txt` | The plugins we choose, with versions, and the Jenkins core version |
+| `ci/jenkins/plugins.lock` | Generated: every plugin including dependencies, with version, Maven group and SHA-256 |
+| `ci/jenkins/lock-plugins.py` | Regenerates the lock from `plugins.txt`, reading only download mirrors and plugin manifests |
+| `ci/jenkins/install-plugins.sh` | Image build step: downloads each locked file from Jenkins' Maven repository or a mirror and rejects any checksum mismatch |
+
+To add or upgrade a plugin, edit `plugins.txt`, run `ci/jenkins/lock-plugins.py`,
+and commit both files. When changing the Jenkins base image, update the
+`jenkins-core` line too, so dependencies are resolved for that core.
+
 ## Quality gate: UpSkill CI
 
 A fresh SonarQube has no history, so the built-in gate, which only checks
