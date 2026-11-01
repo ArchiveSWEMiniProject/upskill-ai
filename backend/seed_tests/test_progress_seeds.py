@@ -2,7 +2,7 @@
 
 The shared db_session fixture rolls everything back. Only the SQL files' outer
 BEGIN/COMMIT lines are omitted here to keep that test transaction in control;
-all data statements execute unchanged. The documented psql check also executes
+all data statements execute unchanged. The documented full-script check also executes
 the complete files, including their own transaction boundaries.
 """
 
@@ -96,14 +96,19 @@ def test_combined_prerequisite_graph_is_acyclic_and_edges_are_idempotent(db_sess
 
 @pytest.mark.parametrize("progress_first", [False, True])
 def test_progress_seed_coexists_with_shared_seed_in_either_order(db_session, progress_first):
+    # Compare canonical identities with the current shared seed, not an old total.
+    baseline = db_session.begin_nested()
+    apply_seed(db_session, "taxonomy_seed.sql")
+    shared_names = {row.skill_name for row in skill_snapshot(db_session)}
+    baseline.rollback()
+
     names = ["taxonomy_seed.sql", "taxonomy_seed_progress.sql"]
     if progress_first:
         names.reverse()
     for filename in names:
         apply_seed(db_session, filename)
     first = skill_snapshot(db_session)
-    assert len(first) == 25  # Current shared 20 plus Hemanth's five, not the team target.
-    assert PROGRESS_SKILLS <= {row.skill_name for row in first}
+    assert {row.skill_name for row in first} == shared_names | PROGRESS_SKILLS
     for filename in reversed(names):
         apply_seed(db_session, filename)
     assert skill_snapshot(db_session) == first

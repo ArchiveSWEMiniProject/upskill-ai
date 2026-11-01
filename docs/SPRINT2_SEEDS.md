@@ -6,7 +6,9 @@ here; the current GitHub milestones put them in Sprint 3 or Sprint 4.
 
 ## Ownership and scope
 
-- UA-7: the five Quality skills already on main are retained. This contribution
+- UA-7: the five progress-testing skills already in the progress seed are retained.
+  API Testing is now also in the shared seed and reuses the same canonical row;
+  the other four are inserted only when absent. This contribution
   adds five normalized aliases and four acyclic prerequisite edges, without
   changing their IDs or overwriting existing taxonomy metadata.
 - UA-8: five curated courses, six canonical skill links, coverage levels,
@@ -20,13 +22,19 @@ here; the current GitHub milestones put them in Sprint 3 or Sprint 4.
 - No student accounts, skill vectors, recommendations, progress states or
   completion/evidence records are created or changed.
 
-The shared UA-7 issue still requests 40 skills and two roles; the older Kickoff
-Plan specifies 30 skills. This branch does not resolve that team-wide conflict
-or change either target: Hemanth's documented share is five skills. At base
-`274e7cd`, the two committed taxonomy scripts together provide 25 skills and two
-roles. The remaining skill contributions are still required. Likewise these five
-resources are a contribution to UA-8's team-wide target of 25, not the entire
-catalogue. Do not close the shared issues solely on the basis of this branch.
+Current shared `main` (`873e277`) provides 40 canonical skills and two roles in
+`taxonomy_seed.sql`, meeting the numeric UA-7 target. With the progress taxonomy
+script the union is 44 skills, because API Testing overlaps. Loading the profile
+seed as well adds its five distinct skills (49 in all). These are five
+progress-testing skill definitions, not five newly added shared canonical skills.
+The older Kickoff Plan's 30-skill target is superseded for validation by the
+current issue's 40-skill acceptance criterion, already covered by the shared seed.
+
+The shared `catalogue_seed.sql` now supplies the team catalogue contribution;
+this branch adds five testing resources alongside it. Shared acceptance tests
+load all taxonomy and catalogue seed files and check the team criteria. Review,
+CI and merge remain necessary; this branch does not independently close shared
+issues or claim their overall completion.
 
 ## Run against the shared schema
 
@@ -38,7 +46,9 @@ not a SQLAlchemy URL containing a `+psycopg` driver suffix.
 ```sh
 alembic upgrade head
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f taxonomy_seed.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f taxonomy_seed_profile.sql
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f taxonomy_seed_progress.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f catalogue_seed.sql
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f catalogue_seed_progress.sql
 ```
 
@@ -85,12 +95,13 @@ Without `TEST_DATABASE_URL`, database tests are skipped, not passed. Existing
 Jenkins CI supplies a throwaway PostgreSQL 16 database and discovers these tests
 under `backend/`, so no duplicate database provisioning is added.
 
-The tests check exact seed counts and valid foreign keys, stable IDs/timestamps,
+The tests check isolated contribution counts, the union with current shared
+canonical names, and valid foreign keys, stable IDs/timestamps,
 reruns, either taxonomy load order, canonical aliases, graph acyclicity, missing
 dependencies, and preservation of unrelated resources and moderation edits.
 To preserve fixture rollback isolation, pytest omits only the outer BEGIN and
-COMMIT lines. The full-script psql validation must additionally exercise those
-transaction boundaries on a disposable migrated database.
+COMMIT lines. Full-script validation through psql or a PostgreSQL driver also
+exercises those transaction boundaries on a disposable migrated database.
 
 These checks do not demonstrate later M3 enrolment, evidence, dashboard or
 adaptive-recommendation functionality, nor a complete system test.

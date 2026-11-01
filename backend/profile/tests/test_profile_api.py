@@ -1,13 +1,14 @@
 """UP-2 against real Postgres (see backend/conftest.py)."""
 
+import jwt
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
+from backend.auth.security import create_access_token
 from backend.database import get_session
 from backend.main import app
-from backend.profile.dependencies import DEV_AUTH_ENV
 from backend.profile.exceptions import ProfileAlreadyExistsError
 from backend.profile.models import Student
 from backend.profile.repository import StudentRepository
@@ -16,15 +17,16 @@ VALID = {"name": "Test Student", "education_level": "UG"}
 
 
 @pytest.fixture
-def client(db_session, monkeypatch):
-    monkeypatch.setenv(DEV_AUTH_ENV, "1")
+def client(db_session):
     app.dependency_overrides[get_session] = lambda: db_session
     yield TestClient(app)
     app.dependency_overrides.clear()
 
 
-def as_user(user_id: int) -> dict:
-    return {"X-User-Id": str(user_id)}
+def as_user(user_id: int, role: str = "student") -> dict:
+    """Headers with a real signed token, as a logged-in client would send."""
+    token = create_access_token({"sub": str(user_id), "user_id": user_id, "role": role})
+    return {"Authorization": f"Bearer {token}"}
 
 
 def profiles_for(db_session, user_id: int) -> int:
@@ -116,20 +118,40 @@ def test_rejected_profile_writes_nothing(client, db_session, make_user):
     assert profiles_for(db_session, user) == 0
 
 
-# --- Authentication stand-in -----------------------------------------------
+# --- Authentication (UP-1): real tokens, decided by M4's authorize() --------
 
 
-def test_request_without_identity_is_unauthenticated(client):
-    for method in (client.get, client.post):
-        kwargs = {"json": VALID} if method is client.post else {}
-        response = method("/api/v1/profile", **kwargs)
-        assert response.status_code == 401
+def test_request_without_a_token_is_unauthenticated(client):
+    assert client.get("/api/v1/profile").status_code == 401
+    assert client.post("/api/v1/profile", json=VALID).status_code == 401
 
 
-def test_identity_header_is_ignored_unless_dev_auth_is_enabled(client, make_user, monkeypatch):
-    monkeypatch.delenv(DEV_AUTH_ENV)
-    response = client.get("/api/v1/profile", headers=as_user(make_user()))
+def test_the_old_development_header_no_longer_authenticates(client, make_user):
+    response = client.get("/api/v1/profile", headers={"X-User-Id": str(make_user())})
     assert response.status_code == 401
+
+
+def test_token_signed_with_another_secret_is_rejected(client, make_user):
+    forged = jwt.encode(
+        {"sub": str(make_user()), "role": "student"},
+        "upskill-ai-dev-secret-key-change-in-production",  # the old built-in default
+        algorithm="HS256",
+    )
+    response = client.get("/api/v1/profile", headers={"Authorization": f"Bearer {forged}"})
+    assert response.status_code == 401
+
+
+def test_token_for_an_unknown_account_is_rejected(client):
+    assert client.get("/api/v1/profile", headers=as_user(999_999)).status_code == 401
+
+
+def test_faculty_cannot_use_the_student_profile_routes(client, make_user):
+    faculty = make_user(role="faculty_mentor")
+    headers = as_user(faculty, role="faculty_mentor")
+    assert client.get("/api/v1/profile", headers=headers).status_code == 403
+    response = client.post("/api/v1/profile", json=VALID, headers=headers)
+    assert response.status_code == 403
+    assert response.json() == {"detail": "Only students can manage a student profile"}
 
 
 # --- Database guard ---------------------------------------------------------

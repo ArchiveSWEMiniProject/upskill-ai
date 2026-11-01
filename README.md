@@ -14,31 +14,25 @@ Stack: Next.js (TypeScript), FastAPI (Python 3.12), PostgreSQL 16, SQLAlchemy + 
 
 ## Continuous integration
 
-Every pull request and push to `main` starts a fresh Jenkins LTS server and
-SonarQube on a GitHub-hosted runner. The workflow runs the repository's
-`Jenkinsfile` and reports the `Jenkins pipeline` check required by branch
-protection. No always-on laptop, external CI VM or temporary webhook tunnel is
-needed for these checks.
+Every pull request and every push to `main` runs the `Jenkinsfile` on a fresh
+Jenkins LTS server with its own SonarQube (GitHub Actions provides the machine).
+The stages are lint, unit tests with coverage, SonarQube analysis and quality
+gate, Docker image build, and a deploy smoke test of the full compose stack.
+The result is the **Jenkins pipeline** check on the pull request, and `main`
+only accepts a merge with that check green and one approving review.
 
-The pipeline creates a Python 3.12 virtual environment with `uv`, installs the
-requirements, runs Ruff and pytest with coverage, and checks the SonarQube gate.
-Database tests use a disposable PostgreSQL 16 database rebuilt from the real
-Alembic migrations. Docker-capable agents also build the API/web images and
-smoke-test the deployed stack. Failing tests, zero collected tests and a failing
-quality gate fail the build. Logs and reports are uploaded as workflow artifacts.
-
-See [the current CI setup](docs/CI.md) for execution, gate conditions and local
-testing. The optional interactive local servers and older Sprint 1 evidence are
-documented in [the historical evidence checklist](docs/SPRINT1_CI_EVIDENCE.md);
-their temporary PR-4-only setup is not the current PR-check infrastructure.
-Credentials must never be committed.
+Details, the quality gate, and how to run it yourself: [docs/CI.md](docs/CI.md).
+The interactive local Jenkins and SonarQube from `ci/compose.yml`, and the
+Sprint 1 verification evidence, are described in
+[docs/SPRINT1_CI_EVIDENCE.md](docs/SPRINT1_CI_EVIDENCE.md).
 
 ## Sprint 2 reference data
 
-See [the seed guide](docs/SPRINT2_SEEDS.md) for Hemanth's five taxonomy skills,
-aliases/prerequisites and five catalogue resources, load order, idempotence and
-real-database regression checks. These are personal contributions to shared
-UA-7/UA-8 tasks, not a claim that the full team seed targets are complete.
+See [the seed guide](docs/SPRINT2_SEEDS.md) for Hemanth's five progress-testing
+canonical skills, aliases/prerequisites and five catalogue resources. The shared
+taxonomy now contains 40 skills, including API Testing; the progress script reuses
+that canonical row and adds the other four when absent. The guide documents load
+order, idempotence and real-database regression checks alongside the shared seeds.
 
 ## Repository layout
 
@@ -75,6 +69,17 @@ The layout mirrors module boundaries, so a cross-module import shows up in revie
 - Every member commits in every sprint.
 
 Review pairs: Vansh → Yajat, Yajat → Hemanth, Hemanth → Shubhika, Shubhika → Vansh (author → reviewer).
+
+## Seed data
+
+Load after `alembic upgrade head`, the taxonomy before the catalogue. Every file is safe to run again.
+
+```
+psql "$DATABASE_URL" -f taxonomy_seed.sql            # then any other taxonomy_seed_*.sql
+psql "$DATABASE_URL" -f catalogue_seed.sql           # then any other catalogue_seed_*.sql
+```
+
+The seed tests load them all into the migrated test database on every CI run.
 
 ## Frozen contracts
 

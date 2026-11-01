@@ -1,7 +1,8 @@
 -- UA-7: Hemanth's five canonical skills for progress testing.
 -- Uses the shared taxonomy_seed.sql INSERT format from main.
 -- Requires the shared skill table; does not create or alter schema.
--- Skill names are distinct from Yajat's existing twenty skills.
+-- API Testing also exists in the shared seed; reuse its canonical row.
+-- The other four skills are added only when absent.
 BEGIN;
 
 INSERT INTO skill (skill_name, category, created_at) VALUES
