@@ -287,3 +287,12 @@ def test_compute_gap_string_level_is_compared_by_rank_not_alphabetically_advance
         ),
     ]
     assert compute_gap(student, requirements) == []
+
+
+def test_compute_gap_gives_identical_output_on_repeated_calls(
+    partial_student_vector, backend_developer_requirements
+):
+    """TC-F2-03: a pure function returns the same result every time."""
+    first = compute_gap(partial_student_vector, backend_developer_requirements)
+    second = compute_gap(partial_student_vector, backend_developer_requirements)
+    assert first == second
