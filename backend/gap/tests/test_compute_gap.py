@@ -238,3 +238,52 @@ def test_compute_gap_accepts_a_skill_vector_object(
 ):
     vector = SkillVector(tuple(partial_student_vector))
     assert compute_gap(vector, backend_developer_requirements) == EXPECTED_PARTIAL_GAP
+
+
+def test_requirement_converts_a_string_level_to_level():
+    requirement = RoleSkillRequirement(
+        ROLE_BACKEND_DEVELOPER, SKILL_PYTHON, "Python", "advanced", weight=5
+    )
+    assert requirement.required_level is Level.advanced
+
+
+def test_requirement_rejects_an_unknown_level():
+    with pytest.raises(ValueError, match="required_level"):
+        RoleSkillRequirement(
+            ROLE_BACKEND_DEVELOPER, SKILL_PYTHON, "Python", "expert", weight=5
+        )
+
+
+def test_compute_gap_string_level_is_compared_by_rank_not_alphabetically_beginner():
+    """A beginner must not count as meeting an advanced requirement."""
+    student = [
+        SkillVectorEntry(
+            SKILL_PYTHON, "Python", Level.beginner, confidence=0.80, source="resume"
+        ),
+    ]
+    requirements = [
+        RoleSkillRequirement(
+            ROLE_BACKEND_DEVELOPER, SKILL_PYTHON, "Python", "advanced", weight=5
+        ),
+    ]
+    assert compute_gap(student, requirements) == [
+        GapItem(
+            SKILL_PYTHON, "Python", Level.advanced,
+            current_level=Level.beginner, weight=5, rank=1
+        )
+    ]
+
+
+def test_compute_gap_string_level_is_compared_by_rank_not_alphabetically_advanced():
+    """An advanced student must not show a gap against an intermediate requirement."""
+    student = [
+        SkillVectorEntry(
+            SKILL_PYTHON, "Python", Level.advanced, confidence=0.90, source="course"
+        ),
+    ]
+    requirements = [
+        RoleSkillRequirement(
+            ROLE_BACKEND_DEVELOPER, SKILL_PYTHON, "Python", "intermediate", weight=5
+        ),
+    ]
+    assert compute_gap(student, requirements) == []

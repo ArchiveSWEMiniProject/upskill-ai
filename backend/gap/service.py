@@ -21,12 +21,27 @@ from backend.shared.skill_vector import Level, SkillVectorEntry
 
 @dataclass(frozen=True)
 class RoleSkillRequirement:
-    """One row of role_skill_requirement (docs/CONTRACTS.md, section 2)."""
+    """One row of role_skill_requirement (docs/CONTRACTS.md, section 2).
+
+    required_level may be given as a Level or as its string value (for example
+    a raw database value). It is converted to a Level on creation, so levels
+    are always compared by rank and never alphabetically.
+    """
     role_id: int
     skill_id: int
     skill_name: str
     required_level: Level
     weight: int
+
+    def __post_init__(self) -> None:
+        try:
+            level = Level(self.required_level)
+        except ValueError:
+            allowed = ", ".join(member.value for member in Level)
+            raise ValueError(
+                f"required_level must be one of: {allowed} (got {self.required_level!r})"
+            ) from None
+        object.__setattr__(self, "required_level", level)
 
 
 @dataclass(frozen=True)
