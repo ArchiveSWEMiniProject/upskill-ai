@@ -26,6 +26,14 @@ The interactive local Jenkins and SonarQube from `ci/compose.yml`, and the
 Sprint 1 verification evidence, are described in
 [docs/SPRINT1_CI_EVIDENCE.md](docs/SPRINT1_CI_EVIDENCE.md).
 
+## Sprint 2 reference data
+
+See [the seed guide](docs/SPRINT2_SEEDS.md) for Hemanth's five progress-testing
+canonical skills, aliases/prerequisites and five catalogue resources. The shared
+taxonomy now contains 40 skills, including API Testing; the progress script reuses
+that canonical row and adds the other four when absent. The guide documents load
+order, idempotence and real-database regression checks alongside the shared seeds.
+
 ## Repository layout
 
 The layout mirrors module boundaries, so a cross-module import shows up in review as a path crossing a top-level folder.
