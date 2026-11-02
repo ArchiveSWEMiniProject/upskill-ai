@@ -1,22 +1,15 @@
 """
 backend/gap/tests/test_compute_gap.py
 
-Written before compute_gap() is implemented, per the Sprint 1 study
-task: "write compute_gap() test fixtures before the implementation."
-
-These fixtures model the Backend Developer sample role from
-taxonomy_seed.sql, so once RM-1/RM-2 land in Sprint 2/3 this file
-should need zero changes — only the xfail markers come off.
-
-Expected to currently fail with NotImplementedError (the stub in
-service.py) — that is the "right reason" called for in the kickoff
-plan, not a bug in these fixtures.
+Tests for compute_gap() (RM-1 / RM-2). The fixtures model the Backend
+Developer sample role from taxonomy_seed.sql. They were written before the
+implementation, per the Sprint 1 study task, and now run against it.
 """
 
 import pytest
 
 from backend.gap.service import GapItem, RoleSkillRequirement, compute_gap
-from backend.shared.skill_vector import Level, SkillVectorEntry
+from backend.shared.skill_vector import Level, SkillVector, SkillVectorEntry
 
 # ---------------------------------------------------------------------
 # Skill ids below mirror taxonomy_seed.sql's Backend Developer role.
@@ -150,7 +143,6 @@ EXPECTED_PARTIAL_GAP = [
 ]
 
 
-@pytest.mark.xfail(raises=NotImplementedError, reason="RM-1/RM-2 not implemented until Sprint 2/3")
 def test_compute_gap_identifies_and_ranks_missing_and_below_level_skills(
     partial_student_vector, backend_developer_requirements
 ):
@@ -158,7 +150,6 @@ def test_compute_gap_identifies_and_ranks_missing_and_below_level_skills(
     assert result == EXPECTED_PARTIAL_GAP
 
 
-@pytest.mark.xfail(raises=NotImplementedError, reason="RM-1/RM-2 not implemented until Sprint 2/3")
 def test_compute_gap_excludes_skills_already_met(
     partial_student_vector, backend_developer_requirements
 ):
@@ -167,7 +158,6 @@ def test_compute_gap_excludes_skills_already_met(
     assert SKILL_SQL_BASICS not in gap_skill_ids  # met at intermediate, required beginner
 
 
-@pytest.mark.xfail(raises=NotImplementedError, reason="RM-1/RM-2 not implemented until Sprint 2/3")
 def test_compute_gap_is_empty_when_all_requirements_met(
     fully_qualified_student_vector, backend_developer_requirements
 ):
@@ -175,7 +165,6 @@ def test_compute_gap_is_empty_when_all_requirements_met(
     assert result == []
 
 
-@pytest.mark.xfail(raises=NotImplementedError, reason="RM-1/RM-2 not implemented until Sprint 2/3")
 def test_compute_gap_for_new_student_equals_full_requirement_list(
     empty_student_vector, backend_developer_requirements
 ):
@@ -189,7 +178,6 @@ def test_compute_gap_for_new_student_equals_full_requirement_list(
     assert [item.skill_id for item in result] == expected_order
 
 
-@pytest.mark.xfail(raises=NotImplementedError, reason="RM-1/RM-2 not implemented until Sprint 2/3")
 def test_compute_gap_ranking_is_strictly_descending_by_weight(
     empty_student_vector, backend_developer_requirements
 ):
@@ -198,7 +186,6 @@ def test_compute_gap_ranking_is_strictly_descending_by_weight(
     assert weights == sorted(weights, reverse=True)
 
 
-@pytest.mark.xfail(raises=NotImplementedError, reason="RM-1/RM-2 not implemented until Sprint 2/3")
 def test_compute_gap_breaks_weight_ties_by_skill_id_ascending(
     empty_student_vector_for_ties, tied_weight_requirements
 ):
@@ -206,3 +193,97 @@ def test_compute_gap_breaks_weight_ties_by_skill_id_ascending(
     skill_id must sort first, per the tie-break rule in the docstring."""
     result = compute_gap(empty_student_vector_for_ties, tied_weight_requirements)
     assert [item.skill_id for item in result] == [SKILL_DOCKER, SKILL_UNIT_TESTING]
+
+
+def test_compute_gap_ranking_does_not_depend_on_input_order(
+    partial_student_vector, backend_developer_requirements
+):
+    shuffled = list(reversed(backend_developer_requirements))
+    assert compute_gap(partial_student_vector, shuffled) == EXPECTED_PARTIAL_GAP
+
+
+def test_compute_gap_is_empty_when_the_role_has_no_requirements(partial_student_vector):
+    assert compute_gap(partial_student_vector, []) == []
+
+
+def test_compute_gap_uses_the_highest_level_when_a_skill_appears_twice():
+    student = [
+        SkillVectorEntry(
+            SKILL_PYTHON, "Python", Level.beginner, confidence=0.50, source="manual"
+        ),
+        SkillVectorEntry(
+            SKILL_PYTHON, "Python", Level.advanced, confidence=0.90, source="course"
+        ),
+    ]
+    requirements = [
+        RoleSkillRequirement(
+            ROLE_BACKEND_DEVELOPER, SKILL_PYTHON, "Python", Level.intermediate, weight=5
+        ),
+    ]
+    assert compute_gap(student, requirements) == []
+
+
+def test_compute_gap_does_not_modify_its_inputs(
+    partial_student_vector, backend_developer_requirements
+):
+    vector_before = list(partial_student_vector)
+    requirements_before = list(backend_developer_requirements)
+    compute_gap(partial_student_vector, backend_developer_requirements)
+    assert partial_student_vector == vector_before
+    assert backend_developer_requirements == requirements_before
+
+
+def test_compute_gap_accepts_a_skill_vector_object(
+    partial_student_vector, backend_developer_requirements
+):
+    vector = SkillVector(tuple(partial_student_vector))
+    assert compute_gap(vector, backend_developer_requirements) == EXPECTED_PARTIAL_GAP
+
+
+def test_requirement_converts_a_string_level_to_level():
+    requirement = RoleSkillRequirement(
+        ROLE_BACKEND_DEVELOPER, SKILL_PYTHON, "Python", "advanced", weight=5
+    )
+    assert requirement.required_level is Level.advanced
+
+
+def test_requirement_rejects_an_unknown_level():
+    with pytest.raises(ValueError, match="required_level"):
+        RoleSkillRequirement(
+            ROLE_BACKEND_DEVELOPER, SKILL_PYTHON, "Python", "expert", weight=5
+        )
+
+
+def test_compute_gap_string_level_is_compared_by_rank_not_alphabetically_beginner():
+    """A beginner must not count as meeting an advanced requirement."""
+    student = [
+        SkillVectorEntry(
+            SKILL_PYTHON, "Python", Level.beginner, confidence=0.80, source="resume"
+        ),
+    ]
+    requirements = [
+        RoleSkillRequirement(
+            ROLE_BACKEND_DEVELOPER, SKILL_PYTHON, "Python", "advanced", weight=5
+        ),
+    ]
+    assert compute_gap(student, requirements) == [
+        GapItem(
+            SKILL_PYTHON, "Python", Level.advanced,
+            current_level=Level.beginner, weight=5, rank=1
+        )
+    ]
+
+
+def test_compute_gap_string_level_is_compared_by_rank_not_alphabetically_advanced():
+    """An advanced student must not show a gap against an intermediate requirement."""
+    student = [
+        SkillVectorEntry(
+            SKILL_PYTHON, "Python", Level.advanced, confidence=0.90, source="course"
+        ),
+    ]
+    requirements = [
+        RoleSkillRequirement(
+            ROLE_BACKEND_DEVELOPER, SKILL_PYTHON, "Python", "intermediate", weight=5
+        ),
+    ]
+    assert compute_gap(student, requirements) == []
