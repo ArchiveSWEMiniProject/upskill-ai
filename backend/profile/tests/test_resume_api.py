@@ -314,3 +314,33 @@ def test_no_file_is_left_behind_when_the_record_cannot_be_saved(db_session, stor
     with pytest.raises(IntegrityError):  # student 999999 does not exist
         ResumeService(db_session).upload(999_999, "cv.pdf", pdf_with_text(RESUME_LINES))
     assert stored_files(storage) == []
+
+
+def test_no_file_is_left_behind_when_the_upload_cannot_be_committed(
+    client, db_session, storage, student, monkeypatch
+):
+    def commit():
+        raise RuntimeError("database went away")
+
+    monkeypatch.setattr(db_session, "commit", commit)
+    with pytest.raises(RuntimeError, match="database went away"):
+        upload(client, student, "cv.pdf", pdf_with_text(RESUME_LINES))
+    assert stored_files(storage) == []
+
+
+def test_resume_is_parsed_off_the_event_loop(client, student, monkeypatch):
+    from backend.profile import resume
+
+    loops = []
+    extract = resume.extract_text
+
+    def spy(data, file_type):
+        try:
+            loops.append(asyncio.get_running_loop())
+        except RuntimeError:
+            loops.append(None)  # a worker thread, as wanted
+        return extract(data, file_type)
+
+    monkeypatch.setattr(resume, "extract_text", spy)
+    assert upload(client, student, "cv.pdf", pdf_with_text(RESUME_LINES)).status_code == 201
+    assert loops == [None]

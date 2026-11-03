@@ -136,6 +136,12 @@ class ResumeService:
         self._session = session
         self._now = now
 
+    @staticmethod
+    def discard(upload: ResumeUpload) -> None:
+        """Delete the file of an upload whose record was not saved. Cleanup
+        finds files through their records, so this one would never go."""
+        Path(upload.stored_path).unlink(missing_ok=True)
+
     def upload(self, student_id: int, filename: str | None, data: bytes) -> UploadResult:
         file_type = check_upload(data)  # nothing is stored if this raises
 

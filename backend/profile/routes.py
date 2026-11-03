@@ -158,7 +158,7 @@ def _student_id(session: Session, user_id: int) -> int:
 
 @router.post("/resume", status_code=status.HTTP_201_CREATED, response_model=ResumeOut,
              responses=RESUME_ERRORS)
-async def upload_resume(
+def upload_resume(
     user_id: UserId,
     session: Annotated[Session, Depends(get_session)],
     file: Annotated[UploadFile, File(description="PDF or DOCX, at most 5 MB")],
@@ -167,13 +167,19 @@ async def upload_resume(
     happened: `extracted` (text found), `unreadable` (under 100 characters, so
     use manual entry instead) or `failed` (the file could not be processed;
     the profile is unchanged). Unusable files are not kept."""
+    # A plain def, so FastAPI runs it in its thread pool: parsing a PDF and the
+    # database calls block, and on the event loop they would stall every request.
     student_id = _student_id(session, user_id)
-    data = await file.read(MAX_BYTES + 1)  # one byte over is enough to refuse
+    data = file.file.read(MAX_BYTES + 1)  # one byte over is enough to refuse
     try:
         result = ResumeService(session).upload(student_id, file.filename, data)
     except ResumeRejected as error:
         raise HTTPException(error.status_code, error.message) from error
-    session.commit()
+    try:
+        session.commit()
+    except Exception:
+        ResumeService.discard(result.upload)
+        raise
     return _resume_out(result.upload, result.message)
 
 
