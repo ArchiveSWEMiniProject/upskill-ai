@@ -148,3 +148,11 @@ def test_no_target_role_returns_409(client, student_headers):
 
 def test_login_is_required(client):
     assert client.get(URL).status_code == 401
+
+
+def test_a_faculty_account_is_refused(client, make_user, bearer):
+    headers = bearer(make_user("faculty_mentor"), "faculty_mentor")
+
+    response = client.get(URL, headers=headers)
+
+    assert response.status_code == 403

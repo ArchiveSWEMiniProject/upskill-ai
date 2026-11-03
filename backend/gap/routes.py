@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from backend.auth.dependencies import get_current_user
 from backend.auth.models import UserContext
+from backend.auth.permissions import authorize
 from backend.database import get_session
 from backend.gap.exceptions import NoProfileError, NoTargetRoleError
 from backend.gap.repository import GapRepository
@@ -19,8 +20,8 @@ SessionDep = Annotated[Session, Depends(get_session)]
 
 
 def student_user_id(user: Annotated[UserContext, Depends(get_current_user)]) -> int:
-    """The caller's user id, if the caller is a student (only students have a gap)."""
-    if user.role.value != "student":
+    """The caller's user id, if M4's authorize() lets them read their own gap."""
+    if not authorize(user, "gap:read", resource={"user_id": user.user_id}):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Only students have a skill gap")
     return user.user_id
 
