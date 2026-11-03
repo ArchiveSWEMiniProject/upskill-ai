@@ -42,6 +42,20 @@ The layout mirrors module boundaries, so a cross-module import shows up in revie
 | `docs/` | SRS, architecture, backlog, test plan, work allocation, frozen contracts | Vansh |
 | `docker-compose.yml`, `Jenkinsfile` | Infrastructure | Shubhika / Hemanth |
 
+## Running the stack
+
+```
+cp .env.example .env        # then replace every change-me value
+docker compose up --build
+```
+
+`docker compose` refuses to start if `POSTGRES_PASSWORD` or `JWT_SECRET` is unset, so there are no built-in default secrets, and the API refuses to start while either is still a `change-me` value. One way to make a secret: `python3 -c "import secrets; print(secrets.token_urlsafe(48))"`. The database is not published to the host; only the API (port 8000) and web (port 3000) are.
+
+**If you ran the stack before these secrets were required:** Postgres reads `POSTGRES_PASSWORD` only when it first creates the database, so your existing `pgdata` volume still has the old password, `upskill_password`. A different password in `.env` makes the API fail to connect. Either:
+
+- keep your local data: set `POSTGRES_PASSWORD=upskill_password` in `.env`, or
+- start fresh: `docker compose down -v` (this deletes the local database), then `docker compose up --build`.
+
 ## Module interaction rules
 
 - **R1** A module calls another only through its published service interface.
