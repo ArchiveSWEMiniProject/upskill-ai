@@ -19,6 +19,17 @@ def test_missing_database_url_is_a_clear_error(monkeypatch):
         database.get_engine()
 
 
+def test_example_database_password_is_refused(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://upskill:change-me@upskill-db:5432/upskill_ai")
+    with pytest.raises(RuntimeError, match="POSTGRES_PASSWORD"):
+        database.get_engine()
+
+
+def test_a_real_database_password_is_accepted(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://upskill:s3cret-value@upskill-db:5432/upskill_ai")
+    assert database.database_url().endswith("/upskill_ai")
+
+
 def test_session_is_usable_and_closed_after_the_request(monkeypatch):
     monkeypatch.setenv("DATABASE_URL", "sqlite://")
     sessions = database.get_session()
