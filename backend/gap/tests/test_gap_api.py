@@ -156,3 +156,31 @@ def test_a_faculty_account_is_refused(client, make_user, bearer):
     response = client.get(URL, headers=headers)
 
     assert response.status_code == 403
+
+
+def test_gap_uses_the_skills_the_student_declared(
+    client, db_session, student_headers, role
+):
+    """No fixed vector here: the skill goes in through M1's API and comes back
+    out of M1's get_skill_vector()."""
+    skills = role["skills"]
+    choose_role(client, db_session, student_headers, role["id"])
+    db_session.execute(
+        text("INSERT INTO skill_alias (skill_id, alias_text) VALUES (:s, 'py')"),
+        {"s": skills["Python"]},
+    )
+    declared = client.post(
+        "/api/v1/profile/skills",
+        json={"skill": "py", "level": "beginner"},
+        headers=student_headers,
+    )
+    assert declared.status_code == 201
+
+    items = client.get(URL, headers=student_headers).json()["items"]
+
+    assert [(item["skill_name"], item["current_level"]) for item in items] == [
+        ("Python", "beginner"),
+        ("SQL Basics", None),
+        ("Docker", None),
+    ]
+    assert items[0]["skill_id"] == skills["Python"]

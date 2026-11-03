@@ -13,6 +13,7 @@ from backend.gap.repository import GapRepository
 from backend.gap.schemas import GapItemOut, GapOut
 from backend.gap.student_gap import StudentGapService
 from backend.shared.skill_vector import SkillVector
+from backend.skills.vector import get_skill_vector
 
 router = APIRouter(prefix="/api/v1/roadmap", tags=["roadmap"])
 
@@ -27,15 +28,9 @@ def student_user_id(user: Annotated[UserContext, Depends(get_current_user)]) -> 
 
 
 def vector_provider(session: SessionDep) -> Callable[[int], SkillVector]:
-    """M1's get_skill_vector(), bound to this request's session (REQ-F1-27).
-
-    The import is inside the function because UP-11 (#83) is not in main yet.
-    Once it is, move it to the top of this file.
-    """
+    """M1's get_skill_vector(), bound to this request's session (REQ-F1-27)."""
 
     def vector_for(student_id: int) -> SkillVector:
-        from backend.skills.vector import get_skill_vector
-
         return get_skill_vector(student_id, session)
 
     return vector_for
