@@ -6,7 +6,6 @@ from decimal import Decimal
 import pytest
 from sqlalchemy import delete, select
 
-from backend.profile.models import Student
 from backend.shared.skill_vector import (
     Level,
     ProfileNotFoundError,
@@ -26,10 +25,12 @@ CONTRACT_FIELDS = {
 
 
 @pytest.fixture
-def student_id(db_session, student) -> int:
-    """The student_id of the `student` fixture's profile (the newest one)."""
-    newest = select(Student.student_id).order_by(Student.student_id.desc())
-    return db_session.scalars(newest).first()
+def student_id(client, student) -> int:
+    """The student_id of the `student` fixture's own profile, read through its
+    token rather than guessed from the newest row."""
+    response = client.get("/api/v1/profile", headers=student)
+    assert response.status_code == 200, response.json()
+    return response.json()["student_id"]
 
 
 def hold(db_session, student_id, skill_id, source, level, confidence=None):
