@@ -12,3 +12,9 @@ class ProfileNotFoundError(ProfileError):
     """The account has not created a profile yet."""
 
     message = "Profile not found"
+
+
+class ProfileItemNotFoundError(ProfileError):
+    """No such entry on the caller's profile (it may belong to someone else)."""
+
+    message = "Entry not found"

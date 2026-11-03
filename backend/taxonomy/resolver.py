@@ -4,8 +4,8 @@ Maps free-text skill strings to canonical skill ids using the alias table from
 the frozen taxonomy schema (docs/CONTRACTS.md, section 2). Matching is done on
 a lowercased, whitespace-trimmed form (REQ-F1-20, F1-21).
 
-Pure logic with no database access: callers load skills and aliases through
-M4's interface and build the index with build_alias_index().
+Pure logic with no database access: backend/taxonomy/reader.py loads the
+skills and aliases and builds the index with build_alias_index().
 """
 
 from collections.abc import Iterable, Mapping

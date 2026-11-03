@@ -45,3 +45,7 @@ def get_session() -> Iterator[Session]:
         raise
     finally:
         session.close()
+
+
+# Alias for compatibility across module dependencies
+get_db = get_session

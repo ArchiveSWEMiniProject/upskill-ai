@@ -12,6 +12,8 @@ node_modules/
 frontend/node_modules/
 frontend/.next/
 frontend/coverage/
+frontend/next-env.d.ts
+frontend/*.tsbuildinfo
 uploads/
 pgdata/
 .idea/

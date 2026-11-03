@@ -1,7 +1,9 @@
 # Continuous integration (UA-3, UA-4)
 
 Every pull request and every push to `main` runs the repository's `Jenkinsfile`
-on a fresh **Jenkins LTS** server with its own **SonarQube**. The result is
+on a fresh **Jenkins LTS** server with its own **SonarQube**, and so does a
+weekly scheduled run on `main` (Mondays, 08:47 IST) that catches breakage from
+new dependency releases or removed images before a PR does. The result is
 reported on the pull request as the **`Jenkins pipeline`** check, and `main`
 only accepts a merge when that check passes.
 
@@ -43,6 +45,23 @@ The two Docker stages run only when the Jenkins agent can reach a Docker
 daemon. A Jenkins without one (for example the interactive local server from
 `ci/compose.yml`) skips them with a message.
 
+## Jenkins plugins
+
+The CI Jenkins image installs an exact, checksummed plugin set and never
+contacts `updates.jenkins.io`, so an outage of Jenkins' update service (as on
+19 October 2026) does not break pull request checks.
+
+| File | Purpose |
+|---|---|
+| `ci/jenkins/plugins.txt` | The plugins we choose, with versions, and the Jenkins core version |
+| `ci/jenkins/plugins.lock` | Generated: every plugin including dependencies, with version, Maven group and SHA-256 |
+| `ci/jenkins/lock-plugins.py` | Regenerates the lock from `plugins.txt`, reading only download mirrors and plugin manifests |
+| `ci/jenkins/install-plugins.sh` | Image build step: downloads each locked file from Jenkins' Maven repository or a mirror and rejects any checksum mismatch |
+
+To add or upgrade a plugin, edit `plugins.txt`, run `ci/jenkins/lock-plugins.py`,
+and commit both files. When changing the Jenkins base image, update the
+`jenkins-core` line too, so dependencies are resolved for that core.
+
 ## Quality gate: UpSkill CI
 
 A fresh SonarQube has no history, so the built-in gate, which only checks
@@ -58,6 +77,31 @@ A fresh SonarQube has no history, so the built-in gate, which only checks
 The 60% coverage threshold is a starting point that the current code passes.
 Raise it in `ci/run-pipeline.sh` once more modules have landed; changing it
 affects everyone, so agree it as a team.
+
+## Branch protection on `main`
+
+- Changes reach `main` only through a pull request; nobody can push directly,
+  administrators included.
+- A pull request needs **one approving review** and a green **Jenkins
+  pipeline** check (accepted only from GitHub Actions, so it cannot be faked by
+  another status).
+- Force pushes and deleting `main` are blocked.
+
+Branch rules (`feature/<module>-<story-id>-<slug>`, review pairs) are in the
+README.
+
+## Evidence
+
+| What | Where |
+|---|---|
+| First green run of the full pipeline, including Docker build and deploy smoke test | PR #13, Actions run 39063184464 |
+| First green run on `main` | Actions run 39063879110 (push of PR #13's merge) |
+| Gate failing on a real issue (API container running as root, `security_rating` 2) | Local run before the Dockerfile fix; described in PR #13 |
+| A failing test blocks the merge | PR #14: the check failed at Backend checks (`1 failed, 14 passed`), and GitHub refused the merge with "Required status check \"Jenkins pipeline\" is failing." PR closed unmerged |
+
+Each run's Jenkins console log and SonarQube results are in its
+`jenkins-build-<n>` artifact (kept 30 days); the Actions log keeps the full
+console output for as long as GitHub retains the run.
 
 ## Running it yourself
 
