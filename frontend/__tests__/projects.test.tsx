@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { ProjectSection } from "@/app/(m1)/_components/ProjectSection";
@@ -144,6 +144,56 @@ test("deleting asks first", async () => {
   await userEvent.setup().click(await screen.findByRole("button", { name: "Delete Study Goals" }));
   expect(window.confirm).toHaveBeenCalledWith('Delete the project "Study Goals"?');
   expect(await screen.findByText("No projects yet.")).toBeInTheDocument();
+});
+
+test("a project added while the list is still loading is not overwritten by that older list", async () => {
+  const calls = mockApi({
+    "GET /profile/projects": [
+      { status: 200, body: [] },
+      { status: 200, body: [PROJECT] },
+    ],
+    "POST /profile/projects": { status: 201, body: PROJECT },
+  });
+  // Hold the first list request until the new project has been saved.
+  const reply = global.fetch;
+  let releaseList!: () => void;
+  const listHeld = new Promise<void>((resolve) => (releaseList = resolve));
+  let lists = 0;
+  global.fetch = jest.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+    if ((init?.method ?? "GET") === "GET" && lists++ === 0) await listHeld;
+    return reply(url, init);
+  }) as typeof fetch;
+
+  render(<ProjectSection onUnauthorized={onUnauthorized} />);
+  const user = userEvent.setup();
+  await user.type(field(addForm(), /^Title/), PROJECT.title);
+  await user.type(field(addForm(), /^Description/), PROJECT.description);
+  await user.click(within(addForm()).getByRole("button", { name: "Add project" }));
+  await act(async () => releaseList());
+
+  await waitFor(() => expect(calls.filter((call) => call.method === "GET")).toHaveLength(2));
+  const list = await screen.findByRole("list", { name: "Your projects" });
+  expect(within(list).getByText(PROJECT.title)).toBeInTheDocument();
+  expect(screen.queryByText("No projects yet.")).not.toBeInTheDocument();
+});
+
+test("an earlier error is cleared once a later change succeeds", async () => {
+  mockApi({
+    "GET /profile/projects": { status: 200, body: [PROJECT] },
+    "DELETE /profile/projects/4": [
+      { status: 500, body: { detail: "Could not delete the project" } },
+      { status: 204 },
+    ],
+  });
+  jest.spyOn(window, "confirm").mockReturnValue(true);
+  render(<ProjectSection onUnauthorized={onUnauthorized} />);
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole("button", { name: "Delete Study Goals" }));
+  expect(await screen.findByText("Could not delete the project")).toBeInTheDocument();
+
+  await user.click(screen.getByRole("button", { name: "Delete Study Goals" }));
+  expect(await screen.findByText("No projects yet.")).toBeInTheDocument();
+  expect(screen.queryByText("Could not delete the project")).not.toBeInTheDocument();
 });
 
 test("only http(s) repository addresses are rendered as links", async () => {
