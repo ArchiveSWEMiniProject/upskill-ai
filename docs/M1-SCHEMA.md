@@ -49,7 +49,7 @@ One row per **student, skill and source**, so all contributing sources are kept 
 | `confidence` | numeric(3,2) null, `CHECK` 0 to 1 | Null for manual skills |
 | `updated_at` | timestamptz | |
 
-Vector rule: group by `(student_id, skill_id)`, take the highest level by rank. The winning row supplies `source` and `confidence`. Every skill therefore appears once in the vector and every source stays recorded.
+Vector rule: group by `(student_id, skill_id)`, take the highest level by rank. The winning row supplies `source` and `confidence`. Every skill therefore appears once in the vector and every source stays recorded. On equal levels, the source with the stronger evidence wins: `completion`, then `resume`, then `course`, then `manual`. Implemented in `backend/skills/vector.py` (UP-11).
 
 ### `skill_change_history`
 Append-only (REQ-F1-07).
