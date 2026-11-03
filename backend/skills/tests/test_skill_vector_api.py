@@ -210,9 +210,6 @@ def test_requires_a_student_token(client, make_user, bearer):
 # --- TC-F1-13: the vector M1 produces is what M2's gap analysis consumes ------------
 
 
-@pytest.mark.xfail(
-    raises=NotImplementedError, reason="compute_gap() (RM-1, M2) not implemented yet"
-)
 def test_tc_f1_13_gap_analysis_consumes_the_vector(
     client, db_session, skill_ids, student, student_id
 ):
