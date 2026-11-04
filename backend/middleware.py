@@ -8,6 +8,7 @@ Complies with:
 """
 
 import logging
+import re
 import uuid
 from typing import Callable
 
@@ -17,14 +18,18 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 logger = logging.getLogger("upskill.api")
 
+_SAFE_CORRELATION_ID = re.compile(r"^[a-zA-Z0-9_\-]{1,64}$")
+
 
 class CorrelationIdMiddleware(BaseHTTPMiddleware):
-    """Middleware that assigns or preserves X-Correlation-ID for every request."""
+    """Middleware that assigns or validates X-Correlation-ID for every request."""
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
-        # Extract existing correlation ID or generate a new UUIDv4
-        correlation_id = request.headers.get("X-Correlation-ID")
-        if not correlation_id:
+        # Validate incoming correlation ID: safe alphanumeric/dash/underscore <= 64 chars
+        incoming_id = request.headers.get("X-Correlation-ID")
+        if incoming_id and _SAFE_CORRELATION_ID.match(incoming_id.strip()):
+            correlation_id = incoming_id.strip()
+        else:
             correlation_id = str(uuid.uuid4())
 
         # Store in request state so route handlers and exception handlers can access it

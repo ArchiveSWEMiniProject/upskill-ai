@@ -48,10 +48,3 @@ def read_root():
 def health_check():
     return {"status": "ok"}
 
-
-@app.get("/api/v1/test/trigger-error")
-def trigger_test_error():
-    """Test endpoint that raises an unexpected exception to verify error sanitization (TC-F4-13)."""
-    raise RuntimeError(
-        "Unexpected internal failure with secret_token=XYZ123 and db_internal_id=999"
-    )

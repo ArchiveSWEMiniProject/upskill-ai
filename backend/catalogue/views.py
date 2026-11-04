@@ -8,6 +8,7 @@ Implements:
 - NFR-PERF-04: Paginated catalogue result sets
 """
 
+import re
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
@@ -203,6 +204,23 @@ def get_catalogue_item(
     return _format_item_response(item)
 
 
+def escape_like(term: str) -> str:
+    """Escape SQL LIKE wildcards % and _ and backslash."""
+    return term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
+def parse_duration_minutes(val: Optional[str]) -> Optional[int]:
+    """Parse text duration like '~10 hours', '45 mins', '1 hour' into minutes."""
+    if not val:
+        return None
+    match = re.search(r"(\d+(?:\.\d+)?)\s*(hour|hr|minute|min)", val.lower())
+    if not match:
+        return None
+    num = float(match.group(1))
+    unit = match.group(2)
+    return int(num * 60) if "h" in unit else int(num)
+
+
 @catalogue_router.get(
     "",
     response_model=list[LearningItemResponse],
@@ -215,10 +233,14 @@ def list_catalogue_items(
         description="Search term matching title, description, or tagged skill names (TC-F4-09)",
     ),
     skill_id: Optional[int] = Query(None, description="Filter by canonical skill ID"),
-    skill: Optional[str] = Query(None, description="Filter by canonical skill name"),
+    skill_name: Optional[str] = Query(None, description="Filter by canonical skill name"),
+    skill: Optional[str] = Query(None, description="Alias for skill_name"),
     level: Optional[SkillLevel] = Query(None, description="Filter by difficulty level"),
     item_type: Optional[LearningItemType] = Query(None, description="Filter by resource type"),
     duration: Optional[str] = Query(None, description="Filter by duration string"),
+    max_duration_minutes: Optional[int] = Query(
+        None, ge=1, description="Filter resources with duration <= specified minutes"
+    ),
     limit: int = Query(50, ge=1, le=100, description="Page limit (NFR-PERF-04)"),
     offset: int = Query(0, ge=0, description="Page offset (NFR-PERF-04)"),
     current_user: UserContext = Depends(get_current_user),
@@ -239,17 +261,17 @@ def list_catalogue_items(
     if current_user.role != UserRole.ADMINISTRATOR:
         query = query.filter(LearningItem.moderation_state == ModerationState.APPROVED)
 
-    # Search across title, description, and tagged skill names (TC-F4-09)
+    # Search across title, description, and tagged skill names with escaped wildcards (TC-F4-09)
     if q:
-        search_term = f"%{q.strip()}%"
+        search_escaped = f"%{escape_like(q.strip())}%"
         skill_item_ids = (
             db.query(LearningItemSkill.item_id)
             .join(Skill, Skill.skill_id == LearningItemSkill.skill_id)
-            .filter(Skill.skill_name.ilike(search_term))
+            .filter(Skill.skill_name.ilike(search_escaped, escape="\\"))
         )
         query = query.filter(
-            (LearningItem.title.ilike(search_term))
-            | (LearningItem.description.ilike(search_term))
+            (LearningItem.title.ilike(search_escaped, escape="\\"))
+            | (LearningItem.description.ilike(search_escaped, escape="\\"))
             | (LearningItem.item_id.in_(skill_item_ids))
         )
 
@@ -261,20 +283,31 @@ def list_catalogue_items(
         query = query.filter(LearningItem.item_type == item_type)
 
     if duration:
-        query = query.filter(LearningItem.duration.ilike(f"%{duration.strip()}%"))
+        escaped_dur = f"%{escape_like(duration.strip())}%"
+        query = query.filter(LearningItem.duration.ilike(escaped_dur, escape="\\"))
+
+    if max_duration_minutes is not None:
+        all_durations = db.query(LearningItem.item_id, LearningItem.duration).all()
+        matched_ids = [
+            cid
+            for cid, dur in all_durations
+            if (mins := parse_duration_minutes(dur)) is not None
+            and mins <= max_duration_minutes
+        ]
+        query = query.filter(LearningItem.item_id.in_(matched_ids))
 
     if skill_id is not None:
         query = query.join(LearningItem.skills).filter(LearningItemSkill.skill_id == skill_id)
 
-    if skill:
-        skill_name_term = f"%{skill.strip()}%"
-        skill_match = (
+    target_skill = skill_name or skill
+    if target_skill:
+        escaped_skill = f"%{escape_like(target_skill.strip())}%"
+        skill_item_ids = (
             db.query(LearningItemSkill.item_id)
             .join(Skill, Skill.skill_id == LearningItemSkill.skill_id)
-            .filter(Skill.skill_name.ilike(skill_name_term))
-            .subquery()
+            .filter(Skill.skill_name.ilike(escaped_skill, escape="\\"))
         )
-        query = query.filter(LearningItem.item_id.in_(skill_match))
+        query = query.filter(LearningItem.item_id.in_(skill_item_ids))
 
     total = query.distinct().count()
 

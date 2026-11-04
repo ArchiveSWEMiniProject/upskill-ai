@@ -15,7 +15,7 @@ from backend.catalogue.models import (
     ModerationState,
     SkillLevel,
 )
-from backend.database import get_session
+from backend.database import _session_factory
 
 
 def get_resources_for_skill(
@@ -35,7 +35,7 @@ def get_resources_for_skill(
 
     owns_session = False
     if db is None:
-        db = next(get_session())
+        db = _session_factory()()
         owns_session = True
 
     try:
@@ -56,7 +56,7 @@ def get_resources_for_skill(
             level_str = level.value if hasattr(level, "value") else str(level).lower()
             query = query.filter(LearningItem.level == level_str)
 
-        items = query.all()
+        items = query.order_by(LearningItem.item_id.asc()).all()
 
         results = []
         for item in items:
