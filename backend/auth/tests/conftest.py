@@ -48,7 +48,7 @@ def db_session():
         text(
             """
             CREATE TABLE IF NOT EXISTS profile_item (
-                item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                profile_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 student_id INTEGER,
                 item_type VARCHAR(20),
                 title VARCHAR(100),
