@@ -48,28 +48,19 @@ def list_assigned_mentees(
         )
 
     # Administrators can see all assignments; faculty mentors see only their own
+    base_query = (
+        "SELECT s.student_id, s.user_id, s.name, s.education_level, s.target_role_id, "
+        "u.email, cr.role_name AS target_role_name, ma.assigned_at "
+        "FROM mentor_assignment ma "
+        "JOIN student s ON s.student_id = ma.student_id "
+        "JOIN user_account u ON u.user_id = s.user_id "
+        "LEFT JOIN career_role cr ON cr.role_id = s.target_role_id"
+    )
     if current_user.role == UserRole.ADMINISTRATOR:
-        query = text(
-            "SELECT s.student_id, s.user_id, s.name, s.education_level, s.target_role_id, "
-            "u.email, cr.role_name AS target_role_name, ma.assigned_at "
-            "FROM mentor_assignment ma "
-            "JOIN student s ON s.student_id = ma.student_id "
-            "JOIN user_account u ON u.user_id = s.user_id "
-            "LEFT JOIN career_role cr ON cr.role_id = s.target_role_id "
-            "ORDER BY s.student_id ASC"
-        )
+        query = text(f"{base_query} ORDER BY s.student_id ASC")
         params = {}
     else:
-        query = text(
-            "SELECT s.student_id, s.user_id, s.name, s.education_level, s.target_role_id, "
-            "u.email, cr.role_name AS target_role_name, ma.assigned_at "
-            "FROM mentor_assignment ma "
-            "JOIN student s ON s.student_id = ma.student_id "
-            "JOIN user_account u ON u.user_id = s.user_id "
-            "LEFT JOIN career_role cr ON cr.role_id = s.target_role_id "
-            "WHERE ma.mentor_id = :mentor_id "
-            "ORDER BY s.student_id ASC"
-        )
+        query = text(f"{base_query} WHERE ma.mentor_id = :mentor_id ORDER BY s.student_id ASC")
         params = {"mentor_id": current_user.user_id}
 
     rows = db.execute(query, params).mappings().all()
@@ -169,7 +160,8 @@ def get_mentee_details(
     items_rows = (
         db.execute(
             text(
-                "SELECT item_id, item_type, title, description, grade, completion_term "
+                "SELECT profile_item_id AS item_id, item_type, title, description, "
+                "grade, completion_term "
                 "FROM profile_item "
                 "WHERE student_id = :sid "
                 "ORDER BY created_at DESC"

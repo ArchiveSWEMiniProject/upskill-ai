@@ -202,6 +202,15 @@ def test_tc_f4_06_faculty_mentee_scoping(
     assert details["profile_items"][0]["title"] == "Cloud Computing"
 
     # 5. Read-only verification (REQ-F1-40): faculty cannot update or delete mentee profile
+    # 5a. Live API rejection over HTTP (returns 403 when faculty writes to student endpoints)
+    write_resp = client.post(
+        "/api/v1/profile",
+        json={"name": "Tampered Name", "education_level": "bachelor"},
+        headers={"Authorization": f"Bearer {faculty_token}"},
+    )
+    assert write_resp.status_code == 403
+
+    # 5b. Authorize contract verification in memory
     from backend.auth.models import UserContext, UserRole
     from backend.auth.permissions import authorize
 
