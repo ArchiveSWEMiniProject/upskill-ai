@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/forms";
 import type { ProgressRecord } from "@/lib/progress";
+import { ProgressUpdate } from "./ProgressUpdate";
 
 type Resource = { item_id: number; title: string; source_url: string };
 
@@ -51,6 +52,7 @@ export function ResourceProgress({ resourceId }: { resourceId: number }) {
           {busy ? "Enrolling…" : "Enrol / resume tracking"}
         </button>}
         {progress && <p role="status">{progress.status}: {progress.completion_percentage}% complete</p>}
+        {progress && <ProgressUpdate progress={progress} onUpdated={setProgress} />}
       </>}
     </section>
   );

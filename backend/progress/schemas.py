@@ -16,3 +16,8 @@ class ProgressOut(BaseModel):
     resource_id: int
     status: Literal["enrolled", "in-progress", "completed"]
     completion_percentage: int
+
+
+class ProgressUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    completion_percentage: int = Field(ge=0, le=100, strict=True)

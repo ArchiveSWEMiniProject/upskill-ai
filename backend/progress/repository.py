@@ -11,6 +11,12 @@ class ProgressRepository:
     def __init__(self, session: Session):
         self.session = session
 
+    def owned(self, student_id: int, progress_id: int) -> Progress | None:
+        """Lock the caller's record for one atomic progress/completion change."""
+        return self.session.scalars(select(Progress).where(
+            Progress.student_id == student_id, Progress.progress_id == progress_id
+        ).with_for_update()).one_or_none()
+
     def enrol(self, student_id: int, resource_id: int) -> Progress:
         # Retry/double-click safe; the DB also serializes concurrent enrolments.
         self.session.execute(

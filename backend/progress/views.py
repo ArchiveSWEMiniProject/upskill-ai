@@ -10,7 +10,7 @@ from backend.catalogue import get_resource
 from backend.database import get_session
 from backend.profile import get_student_id
 from backend.progress.repository import ProgressRepository
-from backend.progress.schemas import EnrolIn, ProgressOut
+from backend.progress.schemas import EnrolIn, ProgressOut, ProgressUpdate
 
 router = APIRouter(prefix="/api/v1/progress", tags=["progress"])
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -36,5 +36,21 @@ def enrol(body: EnrolIn, student_id: StudentId, session: SessionDep) -> Progress
     if get_resource(body.resource_id, session) is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Approved resource not found")
     record = ProgressRepository(session).enrol(student_id, body.resource_id)
+    session.commit()
+    return ProgressOut.model_validate(record)
+
+
+@router.patch("/{progress_id}", response_model=ProgressOut)
+def update_progress(
+    progress_id: int, body: ProgressUpdate, student_id: StudentId, session: SessionDep
+) -> ProgressOut:
+    record = ProgressRepository(session).owned(student_id, progress_id)
+    if record is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Enrolled progress record not found")
+    if record.status == "completed":
+        raise HTTPException(status.HTTP_409_CONFLICT, "Completed progress cannot be changed")
+    record.completion_percentage = body.completion_percentage
+    # 100% progress does not substitute for the separate evidence-aware completion operation.
+    record.status = "enrolled" if body.completion_percentage == 0 else "in-progress"
     session.commit()
     return ProgressOut.model_validate(record)
