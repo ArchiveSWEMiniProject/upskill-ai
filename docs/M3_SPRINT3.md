@@ -34,3 +34,6 @@ unresolved integration; completion's PR must remain draft until it is resolved.
 
 Local PR-1 validation on 2026-11-05: Python 3.12.3 / PostgreSQL 16, real Alembic
 schema: **280 backend tests passed**, including 17 enrolment cases. Ruff passed.
+Frontend PR-1 validation: **38 tests passed**, TypeScript passed as part of the
+Next.js production build, and the production build passed. There is no separate
+frontend lint script in the current repository; no lint result is invented.
