@@ -10,4 +10,5 @@ export default createJestConfig({
   moduleNameMapper: { "^@/(.*)$": "<rootDir>/$1" },
   clearMocks: true,
   testPathIgnorePatterns: ["/node_modules/", "/.next/"],
+  modulePathIgnorePatterns: ["<rootDir>/.next/"],
 });

@@ -37,3 +37,26 @@ schema: **280 backend tests passed**, including 17 enrolment cases. Ruff passed.
 Frontend PR-1 validation: **38 tests passed**, TypeScript passed as part of the
 Next.js production build, and the production build passed. There is no separate
 frontend lint script in the current repository; no lint result is invented.
+
+## PR-2 / issue #52
+
+`PATCH /api/v1/progress/{progress_id}` accepts `completion_percentage` as a whole
+number from 0 through 100 inclusive (SRS Appendix B; TC-F3-03/04). Invalid values
+return 422 naming the field and do not change stored progress. Only the enrollee
+can update; nonexistent and other students' progress both return 404.
+
+The sources do not define every transition detail. The implementation keeps 0%
+as `enrolled` and positive progress, including 100%, as `in-progress`; only the
+separate evidence-aware completion operation may set `completed`. Completed
+records reject percentage edits with 409, preventing accidental reopening.
+These transition choices need review; no additional persisted states are added.
+Row locking serializes edits/completion and prevents races on the same record.
+
+The tracking page displays the saved server response and provides a percentage
+editor with field-level validation. No dashboard or completion workflow is added
+in this PR. Merge after PR-1 (#51); the branch/PR is based on that feature branch.
+
+Local PR-2 validation on 2026-11-05: **300 backend tests passed**, **95% backend
+coverage** (1370/1445 statements), Ruff passed; **42 frontend tests passed** and
+`npm run typecheck` passed. Jest excludes generated `.next` modules so running
+tests after a production build does not discover the standalone package twice.
