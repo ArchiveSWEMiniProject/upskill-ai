@@ -9,8 +9,9 @@ from backend.auth import UserContext, UserRole, authorize, require_role
 from backend.catalogue import get_resource
 from backend.database import get_session
 from backend.profile import get_student_id
+from backend.progress.completion import EvidenceRequirement, get_completion_policy
 from backend.progress.repository import ProgressRepository
-from backend.progress.schemas import EnrolIn, ProgressOut, ProgressUpdate
+from backend.progress.schemas import CompleteIn, EnrolIn, ProgressOut, ProgressUpdate
 
 router = APIRouter(prefix="/api/v1/progress", tags=["progress"])
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -52,5 +53,34 @@ def update_progress(
     record.completion_percentage = body.completion_percentage
     # 100% progress does not substitute for the separate evidence-aware completion operation.
     record.status = "enrolled" if body.completion_percentage == 0 else "in-progress"
+    session.commit()
+    return ProgressOut.model_validate(record)
+
+
+@router.post("/{progress_id}/complete", response_model=ProgressOut)
+def complete_progress(
+    progress_id: int, body: CompleteIn, student_id: StudentId, session: SessionDep,
+    policy: Annotated[EvidenceRequirement, Depends(get_completion_policy)],
+) -> ProgressOut:
+    record = ProgressRepository(session).owned(student_id, progress_id)
+    if record is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Enrolled progress record not found")
+    if get_resource(record.resource_id, session) is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Approved resource not found")
+    if record.status != "completed":
+        requirement = policy(record.resource_id)
+        if requirement is not False:
+            if requirement is True:
+                raise HTTPException(
+                    status.HTTP_409_CONFLICT,
+                    "Submit valid completion evidence before completing this resource.",
+                )
+            raise HTTPException(
+                status.HTTP_503_SERVICE_UNAVAILABLE,
+                "Completion is unavailable until this resource's "
+                "evidence requirements are confirmed.",
+            )
+        record.status = "completed"
+        record.completion_percentage = 100
     session.commit()
     return ProgressOut.model_validate(record)

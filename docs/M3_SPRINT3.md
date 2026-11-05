@@ -60,3 +60,44 @@ Local PR-2 validation on 2026-11-05: **300 backend tests passed**, **95% backend
 coverage** (1370/1445 statements), Ruff passed; **42 frontend tests passed** and
 `npm run typecheck` passed. Jest excludes generated `.next` modules so running
 tests after a production build does not discover the standalone package twice.
+
+## PR-3 / issue #53 - DRAFT: unresolved evidence-policy integration
+
+The user confirmed on 2026-11-05 that the team has not resolved how catalogue
+resources declare evidence requirements. SRS F3-06 and TC-F3-06 require valid
+evidence before accepting evidence-based completion, but the frozen resource
+tagging fields/current M4 model do not include that policy. No type-based rule,
+new catalogue field, or permissive default is invented.
+
+`POST /api/v1/progress/{progress_id}/complete` takes `{}`. It checks enrolment,
+ownership and approved resource identity, then reads the server-side
+`get_completion_policy()` boundary. The boundary accepts a canonical resource ID
+and returns True (evidence required), False (explicitly exempt), or None (unknown).
+It is intentionally unbound in production and always returns unknown until the
+team supplies its authoritative provider. Unknown policy returns 503 with a
+clear message; required evidence returns 409 prompting submission, and neither
+changes progress. A server-confirmed exemption records `completed` / 100%.
+Repeating an already-recorded completion is a no-op. No new persisted state is
+added, and client claims about policy/evidence are rejected.
+
+This PR must remain draft. The success/required-policy tests inject controlled
+server policies to verify the boundary; they do not prove a real M4 evidence
+policy integration. To unblock: the team must decide the evidence policy/source,
+bind the provider, and verify actual resources against it. PR-4 (#54) subsequently
+adds evidence submission/validation; PR-5/6 add M1 vector updates and M2 refresh.
+This branch implements none of those later stories and does not write vectors.
+The UI shows the server's evidence/unavailable message without pretending that
+completion succeeded. Merge after PR-2 (#52); do not close #53 on this draft.
+
+Local PR-3 validation on 2026-11-05: **317 backend tests passed**, **95% backend
+coverage** (1396/1471 statements), Ruff and diff checks passed; **46 frontend
+tests passed** and the Next.js production build, including TypeScript, passed.
+The default unavailable policy is tested as a blocking response. Tests with
+injected policies validate completion behavior only, not the unresolved real
+policy integration. No hosted result or full Sprint 3 completion is inferred
+from these local checks.
+
+Review/merge order: enrolment branch first, progress-update branch second, then
+completion only after its integration is resolved and the PR is made ready.
+Each dependent PR is initially based on the preceding feature branch to keep
+its diff specific to its issue. Retarget it to main after its dependency merges.
