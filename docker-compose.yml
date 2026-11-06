@@ -28,8 +28,13 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-upskill}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@upskill-db:5432/${POSTGRES_DB:-upskill_ai}
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env (copy .env.example)}
       PORT: 8000
+      RESUME_STORAGE_DIR: /var/lib/upskill/resumes
     ports:
       - "8000:8000"
+    volumes:
+      # Resumes are kept until their deletion date (UP-6, REQ-F1-18), so they
+      # need a volume that outlives the container.
+      - resumes:/var/lib/upskill/resumes
     depends_on:
       upskill-db:
         condition: service_healthy
@@ -52,3 +57,4 @@ services:
 volumes:
   pgdata:
     name: pgdata
+  resumes:
