@@ -7,8 +7,9 @@ which rule R2 forbids.
 """
 
 from datetime import datetime
+from decimal import Decimal
 
-from sqlalchemy import DateTime, Integer, String, func
+from sqlalchemy import DateTime, Integer, Numeric, String, Text, func
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -86,3 +87,25 @@ class ResumeUpload(Base):
     processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     delete_after: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class ExtractedSkillCandidate(Base):
+    """A skill found in a resume (UP-7). It is only a proposal: nothing reaches
+    student_skill until the student confirms it (UP-8, REQ-F1-15)."""
+
+    __tablename__ = "extracted_skill_candidate"
+    __mapper_args__ = {"eager_defaults": True}
+
+    candidate_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    upload_id: Mapped[int] = mapped_column(Integer)
+    skill_id: Mapped[int] = mapped_column(Integer)
+    suggested_level: Mapped[str] = mapped_column(
+        ENUM("beginner", "intermediate", "advanced", name="skill_level", create_type=False)
+    )
+    confidence: Mapped[Decimal] = mapped_column(Numeric(3, 2))
+    source_sentence: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(
+        ENUM("pending", "confirmed", "rejected", name="candidate_status", create_type=False),
+        default="pending",
+    )
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

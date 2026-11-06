@@ -123,3 +123,31 @@ test("a dropped connection is reported", async () => {
   expect(screen.getByRole("alert")).toHaveTextContent("Cannot reach the server");
   expect(screen.getByRole("button", { name: "Upload resume" })).toBeEnabled();
 });
+
+test("skills found in the resume are announced and passed on for review", async () => {
+  setToken("signed.jwt.token");
+  mockApi({ "GET /profile/resume": { status: 200, body: [] } });
+  installFakeUpload();
+  const onExtracted = jest.fn();
+  render(<ResumeSection onUnauthorized={onUnauthorized} onExtracted={onExtracted} />);
+  await screen.findByRole("form", { name: "Upload a resume" });
+  await choose(pdf());
+
+  await act(async () => FakeUpload.last!.respond(201, { ...READ, skills_found: 4 }));
+
+  expect(screen.getByRole("status")).toHaveTextContent(
+    "asha-cv.pdf was read successfully. Review the 4 skills found below.",
+  );
+  expect(onExtracted).toHaveBeenCalledTimes(1);
+});
+
+test("a readable resume with no recognised skills offers manual entry", async () => {
+  setToken("signed.jwt.token");
+  await renderSection();
+  await choose(pdf());
+  const message = "We read your resume but found no skills we recognise. You can add your skills manually.";
+
+  await act(async () => FakeUpload.last!.respond(201, { ...READ, skills_found: 0, message }));
+
+  expect(screen.getByRole("alert")).toHaveTextContent(message);
+});

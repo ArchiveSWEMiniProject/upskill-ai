@@ -13,7 +13,7 @@ from backend.database import get_session
 from backend.main import app
 from backend.profile import resume_cleanup
 from backend.profile.models import ResumeUpload
-from backend.profile.resume import ResumeService
+from backend.profile.resume import NO_SKILLS_MESSAGE, ResumeService
 from backend.profile.tests.resume_files import (
     RESUME_LINES,
     docx_with_text,
@@ -79,7 +79,9 @@ def test_readable_resume_is_stored_and_extracted(
     body = response.json()
     assert (body["status"], body["file_type"], body["file_name"]) == ("extracted", file_type, name)
     assert body["size_bytes"] == len(data)
-    assert body["message"] is None and body["manual_entry"] is None
+    # No taxonomy is seeded here, so nothing is recognised: manual entry is offered.
+    assert body["skills_found"] == 0
+    assert body["message"] == NO_SKILLS_MESSAGE and body["manual_entry"] is not None
     assert body["deleted"] is False
     files = stored_files(storage)
     assert len(files) == 1 and files[0].read_bytes() == data
