@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Annotated
 
 from pydantic import (
@@ -9,6 +9,7 @@ from pydantic import (
     StringConstraints,
     TypeAdapter,
     ValidationError,
+    field_serializer,
     field_validator,
 )
 
@@ -145,3 +146,28 @@ class ResumeOut(BaseModel):
     uploaded_at: datetime
     delete_after: datetime
     deleted: bool
+
+
+# --- Target role (UP-13) -----------------------------------------------------
+
+
+class TargetRoleIn(BaseModel):
+    role_id: int
+
+
+class TargetRoleOut(BaseModel):
+    """The active target role and how the student stands against it."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    role_id: int
+    role_name: str
+    set_at: datetime | None
+    required: int
+    held: int
+    gap: int
+
+    @field_serializer("set_at")
+    def _utc(self, value: datetime | None) -> datetime | None:
+        """Always UTC, so the same instant reads the same however it was loaded."""
+        return None if value is None else value.astimezone(UTC)
