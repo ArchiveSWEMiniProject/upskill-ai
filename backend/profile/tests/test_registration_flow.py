@@ -143,6 +143,20 @@ def test_api_refuses_to_start_without_a_signing_secret(monkeypatch):
             pass
 
 
+def test_api_refuses_to_start_with_the_example_signing_secret(monkeypatch):
+    monkeypatch.setenv("JWT_SECRET", "change-me-to-a-long-random-string")
+    with pytest.raises(RuntimeError, match="JWT_SECRET is still the change-me placeholder"):
+        with TestClient(app):
+            pass
+
+
+def test_api_refuses_to_start_with_the_example_database_password(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://upskill:change-me@upskill-db:5432/upskill_ai")
+    with pytest.raises(RuntimeError, match="POSTGRES_PASSWORD"):
+        with TestClient(app):
+            pass
+
+
 def test_concurrent_duplicate_registration_is_still_rejected(client, db_session, monkeypatch):
     """Two sign-ups with one email can both pass the existence check; the
     unique constraint must still stop the second with the same 400."""
