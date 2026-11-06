@@ -155,6 +155,11 @@ class TargetRoleIn(BaseModel):
     role_id: int
 
 
+class RoleOut(BaseModel):
+    role_id: int
+    role_name: str
+
+
 class TargetRoleOut(BaseModel):
     """The active target role and how the student stands against it."""
 

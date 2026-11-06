@@ -32,4 +32,6 @@ export const EMPTY_SECTIONS = {
   "GET /profile/courses": { status: 200, body: [] },
   "GET /profile/projects": { status: 200, body: [] },
   "GET /profile/resume": { status: 200, body: [] },
+  "GET /profile/roles": { status: 200, body: [] },
+  "GET /profile/target-role": { status: 404, body: { detail: "No target role chosen" } },
 };
