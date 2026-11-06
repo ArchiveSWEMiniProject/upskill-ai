@@ -24,6 +24,7 @@ export type Upload = {
   size_bytes: number;
   status: "extracted" | "unreadable" | "failed";
   message: string | null;
+  skills_found?: number | null;
   uploaded_at: string;
   delete_after: string;
   deleted: boolean;
@@ -50,7 +51,13 @@ export function retentionText(upload: Upload): string {
   return upload.deleted ? "File deleted" : `File deleted on ${formatDate(upload.delete_after)}`;
 }
 
-export function ResumeSection({ onUnauthorized }: { onUnauthorized: (status: number) => void }) {
+type Props = {
+  onUnauthorized: (status: number) => void;
+  // Called after a resume is read, so the skills found in it can be reviewed.
+  onExtracted?: () => void;
+};
+
+export function ResumeSection({ onUnauthorized, onExtracted }: Props) {
   const [uploads, setUploads] = useState<Upload[] | null>(null);
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [done, setDone] = useState("");
@@ -85,8 +92,15 @@ export function ResumeSection({ onUnauthorized }: { onUnauthorized: (status: num
     if (status === 201) {
       form.reset();
       setUploads((current) => [data, ...(current ?? [])]);
-      if (data.status === "extracted") setDone(`${data.file_name} was read successfully.`);
-      else setError(data.message ?? STATUS_TEXT[data.status]);
+      if (data.status === "extracted" && data.skills_found === 0) {
+        setError(data.message ?? "No skills were found. You can add your skills manually.");
+      } else if (data.status === "extracted") {
+        const found = data.skills_found
+          ? ` Review the ${data.skills_found} skill${data.skills_found === 1 ? "" : "s"} found below.`
+          : "";
+        setDone(`${data.file_name} was read successfully.${found}`);
+        onExtracted?.();
+      } else setError(data.message ?? STATUS_TEXT[data.status]);
     } else if (status === 401 || status === 403) {
       onUnauthorized(status);
     } else {

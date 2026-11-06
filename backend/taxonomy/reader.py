@@ -27,6 +27,10 @@ class TaxonomyReader:
             self._names = {skill_id: name for skill_id, name in rows}
         return self._names
 
-    def resolver(self) -> SkillResolver:
+    def alias_index(self) -> dict[str, int]:
+        """Normalised canonical names and aliases -> skill id."""
         aliases = self._session.execute(select(_skill_alias.c.skill_id, _skill_alias.c.alias_text))
-        return SkillResolver(build_alias_index(self.names().items(), aliases))
+        return build_alias_index(self.names().items(), aliases)
+
+    def resolver(self) -> SkillResolver:
+        return SkillResolver(self.alias_index())

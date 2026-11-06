@@ -27,7 +27,10 @@ from pathlib import Path
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backend.profile.extracted_skills import ExtractedSkillService
 from backend.profile.models import ResumeUpload
+from backend.profile.skill_extraction import extract_candidates
+from backend.taxonomy.reader import TaxonomyReader
 
 MAX_BYTES = 5 * 1024 * 1024
 MIN_TEXT_CHARS = 100
@@ -39,6 +42,9 @@ TYPE_MESSAGE = "Only PDF and DOCX files are accepted."
 SIZE_MESSAGE = "File exceeds the 5 MB limit."
 UNREADABLE_MESSAGE = (
     "We could not read any text in this resume. You can add your skills manually instead."
+)
+NO_SKILLS_MESSAGE = (
+    "We read your resume but found no skills we recognise. You can add your skills manually."
 )
 FAILED_MESSAGE = "We could not process this resume. Your profile has not been changed."
 
@@ -129,6 +135,7 @@ def clean_filename(name: str | None) -> str:
 class UploadResult:
     upload: ResumeUpload
     message: str | None
+    skills_found: int | None = None  # candidates proposed (UP-7); None if not read
 
 
 class ResumeService:
@@ -149,6 +156,7 @@ class ResumeService:
         stored.write_bytes(data)
         stored.chmod(0o600)
 
+        text = ""
         try:
             text = extract_text(data, file_type)
             status = "extracted" if len(text.strip()) >= MIN_TEXT_CHARS else "unreadable"
@@ -171,13 +179,25 @@ class ResumeService:
             # Nothing will ever read an unusable file again: keep no copy.
             stored.unlink(missing_ok=True)
             upload.deleted_at = processed
+        found = None
         try:
             with self._session.begin_nested():
                 self._session.add(upload)
+                if status == "extracted":
+                    # UP-7: proposals only; nothing is added to the profile here.
+                    self._session.flush()
+                    candidates = extract_candidates(
+                        text, TaxonomyReader(self._session).alias_index()
+                    )
+                    found = ExtractedSkillService(self._session).record(
+                        upload.upload_id, candidates
+                    )
         except Exception:
             stored.unlink(missing_ok=True)  # never leave a file without its record
             raise
-        return UploadResult(upload, message)
+        if status == "extracted" and found == 0:
+            message = NO_SKILLS_MESSAGE
+        return UploadResult(upload, message, found)
 
     def list(self, student_id: int) -> list[ResumeUpload]:
         return list(self._session.scalars(

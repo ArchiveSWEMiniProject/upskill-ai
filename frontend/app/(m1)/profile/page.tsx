@@ -12,6 +12,7 @@ import type { Profile } from "@/lib/types";
 
 import { CourseSection } from "../_components/CourseSection";
 import { CreateProfileForm } from "../_components/CreateProfileForm";
+import { ExtractedSkillsSection } from "../_components/ExtractedSkillsSection";
 import { FormError } from "../_components/FormMessages";
 import { ProjectSection } from "../_components/ProjectSection";
 import { ResumeSection } from "../_components/ResumeSection";
@@ -28,6 +29,7 @@ const STUDENTS_ONLY = "This page is for student accounts.";
 export default function ProfilePage() {
   const router = useRouter();
   const [state, setState] = useState<State>({ kind: "loading" });
+  const [uploads, setUploads] = useState(0);
 
   const logOut = useCallback(() => {
     clearToken();
@@ -84,7 +86,11 @@ export default function ProfilePage() {
             </section>
             <CourseSection onUnauthorized={onUnauthorized} />
             <ProjectSection onUnauthorized={onUnauthorized} />
-            <ResumeSection onUnauthorized={onUnauthorized} />
+            <ResumeSection
+              onUnauthorized={onUnauthorized}
+              onExtracted={() => setUploads((count) => count + 1)}
+            />
+            <ExtractedSkillsSection refreshKey={uploads} onUnauthorized={onUnauthorized} />
             <TargetRoleSection onUnauthorized={onUnauthorized} />
           </>
         )}

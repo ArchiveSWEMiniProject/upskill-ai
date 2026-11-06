@@ -143,6 +143,7 @@ class ResumeOut(BaseModel):
     status: str  # extracted | unreadable | failed
     message: str | None = None
     manual_entry: str | None = None  # where to add skills instead (REQ-F1-11)
+    skills_found: int | None = None  # skills proposed for review (UP-7)
     uploaded_at: datetime
     delete_after: datetime
     deleted: bool

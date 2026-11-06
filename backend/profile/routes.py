@@ -1,6 +1,7 @@
-from typing import Annotated
+from decimal import Decimal
+from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy.orm import Session
 
 from backend.database import get_session
@@ -12,6 +13,20 @@ from backend.profile.exceptions import (
     ProfileNotFoundError,
     ResumeNotFoundError,
     UnknownRoleError,
+)
+from backend.profile.extracted_schemas import (
+    BulkConfirmOut,
+    ExtractedSkillOut,
+    ExtractedSkillsOut,
+    SkillDecisionOut,
+    SkillDecisionsIn,
+)
+from backend.profile.extracted_skills import (
+    CandidateAlreadyDecidedError,
+    CandidateNotFoundError,
+    Decision,
+    ExtractedSkillService,
+    high_confidence_threshold,
 )
 from backend.profile.repository import ProfileItemRepository, StudentRepository
 from backend.profile.resume import MAX_BYTES, ResumeRejected, ResumeService
@@ -139,7 +154,7 @@ RESUME_ERRORS = {
 }
 
 
-def _resume_out(upload, message: str | None = None) -> ResumeOut:
+def _resume_out(upload, message: str | None = None, skills_found: int | None = None) -> ResumeOut:
     return ResumeOut(
         upload_id=upload.upload_id,
         file_name=upload.original_filename,
@@ -147,10 +162,11 @@ def _resume_out(upload, message: str | None = None) -> ResumeOut:
         size_bytes=upload.size_bytes,
         status=upload.status,
         message=message,
-        manual_entry=MANUAL_ENTRY if upload.status != "extracted" else None,
+        manual_entry=MANUAL_ENTRY if upload.status != "extracted" or skills_found == 0 else None,
         uploaded_at=upload.uploaded_at,
         delete_after=upload.delete_after,
         deleted=upload.deleted_at is not None,
+        skills_found=skills_found,
     )
 
 
@@ -185,7 +201,7 @@ def upload_resume(
     except Exception:
         ResumeService.discard(result.upload)
         raise
-    return _resume_out(result.upload, result.message)
+    return _resume_out(result.upload, result.message, result.skills_found)
 
 
 @router.get("/resume", response_model=list[ResumeOut], responses=RESUME_NOT_FOUND)
@@ -193,6 +209,33 @@ def list_resumes(user_id: UserId, session: Annotated[Session, Depends(get_sessio
     """The caller's uploads, newest first, with their status and deletion date."""
     student_id = _student_id(session, user_id)
     return [_resume_out(upload) for upload in ResumeService(session).list(student_id)]
+
+
+@router.get("/resume/extracted", response_model=ExtractedSkillsOut, responses=NOT_FOUND)
+def list_extracted_skills(
+    user_id: UserId,
+    session: Annotated[Session, Depends(get_session)],
+    min_confidence: Annotated[float | None, Query(ge=0, le=1)] = None,
+    upload_id: int | None = None,
+    status_filter: Annotated[
+        Literal["pending", "confirmed", "rejected", "all"], Query(alias="status")
+    ] = "pending",
+) -> ExtractedSkillsOut:
+    """Skills found in the caller's resumes, highest confidence first, each with
+    its confidence and the sentence it came from (REQ-F1-13, F1-14). Pending
+    ones by default; none of them is on the profile until confirmed."""
+    found = ExtractedSkillService(session).candidates(
+        _student_id(session, user_id),
+        status=None if status_filter == "all" else status_filter,
+        min_confidence=None if min_confidence is None else Decimal(str(min_confidence)),
+        upload_id=upload_id,
+    )
+    return ExtractedSkillsOut(
+        threshold=float(high_confidence_threshold()),
+        candidates=[
+            ExtractedSkillOut(**{**vars(c), "confidence": float(c.confidence)}) for c in found
+        ],
+    )
 
 
 @router.get("/resume/{upload_id}", response_model=ResumeOut, responses=RESUME_NOT_FOUND)
@@ -256,3 +299,57 @@ def get_target_role(
     if summary is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No target role chosen")
     return TargetRoleOut.model_validate(summary)
+
+
+# --- Extracted resume skills (UP-7, UP-8) -------------------------------------
+
+
+def _decision_out(outcome) -> SkillDecisionOut:
+    return SkillDecisionOut(
+        candidate_id=outcome.candidate_id,
+        skill_id=outcome.skill_id,
+        skill_name=outcome.skill_name,
+        status=outcome.status,
+        level=outcome.level,
+    )
+
+
+@router.post(
+    "/skills/confirm",
+    response_model=list[SkillDecisionOut],
+    responses={
+        404: {"description": "No profile, or no such extracted skill on it"},
+        409: {"description": "An extracted skill was already confirmed or rejected"},
+    },
+)
+def decide_extracted_skills(
+    body: SkillDecisionsIn, user_id: UserId, session: Annotated[Session, Depends(get_session)]
+) -> list[SkillDecisionOut]:
+    """Confirm (optionally at an edited level) or reject extracted skills, one
+    decision each (REQ-F1-15, F1-16). All of them apply, or none do."""
+    student_id = _student_id(session, user_id)
+    decisions = [Decision(d.candidate_id, d.action, d.level) for d in body.decisions]
+    try:
+        outcomes = ExtractedSkillService(session).decide(student_id, decisions)
+    except CandidateNotFoundError as error:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, error.message) from error
+    except CandidateAlreadyDecidedError as error:
+        raise HTTPException(status.HTTP_409_CONFLICT, error.message) from error
+    session.commit()
+    return [_decision_out(outcome) for outcome in outcomes]
+
+
+@router.post("/skills/confirm-high-confidence", response_model=BulkConfirmOut,
+             responses=NOT_FOUND)
+def confirm_high_confidence_skills(
+    user_id: UserId, session: Annotated[Session, Depends(get_session)]
+) -> BulkConfirmOut:
+    """Confirm in one action every pending extracted skill whose confidence is
+    at or above the configured threshold (REQ-F1-17)."""
+    threshold, outcomes = ExtractedSkillService(session).confirm_high_confidence(
+        _student_id(session, user_id)
+    )
+    session.commit()
+    return BulkConfirmOut(
+        threshold=float(threshold), confirmed=[_decision_out(o) for o in outcomes]
+    )
