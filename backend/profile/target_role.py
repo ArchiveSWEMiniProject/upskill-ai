@@ -75,6 +75,13 @@ class TargetRoleService:
             return None
         return self._summary(student)
 
+    def list_roles(self) -> list[tuple[int, str]]:
+        """Every role a student can choose, by name."""
+        rows = self._session.execute(
+            select(_role.c.role_id, _role.c.role_name).order_by(_role.c.role_name)
+        )
+        return [(role_id, name) for role_id, name in rows]
+
     def _role_name(self, role_id: int) -> str | None:
         return self._session.scalar(select(_role.c.role_name).where(_role.c.role_id == role_id))
 

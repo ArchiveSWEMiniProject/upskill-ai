@@ -191,3 +191,14 @@ def test_students_cannot_touch_each_others_role(client, student, make_user, bear
     client.put(URL, json={"role_id": roles["Backend"]}, headers=student)
 
     assert client.get(URL, headers=other).status_code == 404
+
+
+def test_students_can_list_the_roles_to_choose_from(client, student, roles):
+    listed = client.get("/api/v1/profile/roles", headers=student)
+
+    assert listed.status_code == 200
+    assert listed.json() == [
+        {"role_id": roles["Analyst"], "role_name": "Analyst"},
+        {"role_id": roles["Backend"], "role_name": "Backend"},
+    ]
+    assert client.get("/api/v1/profile/roles").status_code == 401

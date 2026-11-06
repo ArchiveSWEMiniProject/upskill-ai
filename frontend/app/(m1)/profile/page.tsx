@@ -15,6 +15,7 @@ import { CreateProfileForm } from "../_components/CreateProfileForm";
 import { FormError } from "../_components/FormMessages";
 import { ProjectSection } from "../_components/ProjectSection";
 import { ResumeSection } from "../_components/ResumeSection";
+import { TargetRoleSection } from "../_components/TargetRoleSection";
 
 type State =
   | { kind: "loading" }
@@ -84,6 +85,7 @@ export default function ProfilePage() {
             <CourseSection onUnauthorized={onUnauthorized} />
             <ProjectSection onUnauthorized={onUnauthorized} />
             <ResumeSection onUnauthorized={onUnauthorized} />
+            <TargetRoleSection onUnauthorized={onUnauthorized} />
           </>
         )}
       </main>

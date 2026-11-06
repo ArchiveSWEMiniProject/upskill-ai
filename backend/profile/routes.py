@@ -23,6 +23,7 @@ from backend.profile.schemas import (
     ProjectIn,
     ProjectOut,
     ResumeOut,
+    RoleOut,
     TargetRoleIn,
     TargetRoleOut,
 )
@@ -205,6 +206,17 @@ def get_resume(
 
 
 # --- Target role (UP-13) -----------------------------------------------------
+
+
+@router.get("/roles", response_model=list[RoleOut])
+def list_roles(
+    user_id: UserId, session: Annotated[Session, Depends(get_session)]
+) -> list[RoleOut]:
+    """The roles a student can pick as their target (REQ-F1-31)."""
+    return [
+        RoleOut(role_id=role_id, role_name=name)
+        for role_id, name in TargetRoleService(session).list_roles()
+    ]
 
 
 @router.put(
