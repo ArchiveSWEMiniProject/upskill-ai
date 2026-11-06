@@ -17,14 +17,17 @@ const GAP = {
     {
       rank: 1, skill_id: 1, skill_name: "Python",
       required_level: "intermediate", current_level: "beginner", weight: 5,
+      resources: [],
     },
     {
       rank: 2, skill_id: 3, skill_name: "SQL Basics",
       required_level: "beginner", current_level: null, weight: 3,
+      resources: [],
     },
     {
       rank: 3, skill_id: 4, skill_name: "Docker",
       required_level: "beginner", current_level: null, weight: 1,
+      resources: [],
     },
   ],
 };
@@ -40,7 +43,7 @@ test("without a token the page sends the visitor to log in", () => {
 });
 
 test("the gap is requested with the token and listed most important first", async () => {
-  const calls = mockApi({ "GET /roadmap/gap": { status: 200, body: GAP } });
+  const calls = mockApi({ "GET /roadmap": { status: 200, body: GAP } });
   render(<RoadmapPage />);
 
   expect(await screen.findByText("Target role: Backend Developer")).toBeInTheDocument();
@@ -56,7 +59,7 @@ test("the gap is requested with the token and listed most important first", asyn
 });
 
 test("a student with no gap is told they meet every requirement", async () => {
-  mockApi({ "GET /roadmap/gap": { status: 200, body: { ...GAP, items: [] } } });
+  mockApi({ "GET /roadmap": { status: 200, body: { ...GAP, items: [] } } });
   render(<RoadmapPage />);
 
   expect(
@@ -67,7 +70,7 @@ test("a student with no gap is told they meet every requirement", async () => {
 
 test("a student without a target role is asked to choose one", async () => {
   mockApi({
-    "GET /roadmap/gap": { status: 409, body: { detail: "Choose a target role to see your skill gap" } },
+    "GET /roadmap": { status: 409, body: { detail: "Choose a target role to see your skill gap" } },
   });
   render(<RoadmapPage />);
 
@@ -76,7 +79,7 @@ test("a student without a target role is asked to choose one", async () => {
 
 test("a student without a profile is pointed to the profile page", async () => {
   mockApi({
-    "GET /roadmap/gap": { status: 404, body: { detail: "Create your profile before viewing your skill gap" } },
+    "GET /roadmap": { status: 404, body: { detail: "Create your profile before viewing your skill gap" } },
   });
   render(<RoadmapPage />);
 
@@ -85,7 +88,7 @@ test("a student without a profile is pointed to the profile page", async () => {
 });
 
 test("an expired token logs the student out", async () => {
-  mockApi({ "GET /roadmap/gap": { status: 401, body: { detail: "Not authenticated" } } });
+  mockApi({ "GET /roadmap": { status: 401, body: { detail: "Not authenticated" } } });
   render(<RoadmapPage />);
 
   await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/"));
@@ -93,7 +96,7 @@ test("an expired token logs the student out", async () => {
 });
 
 test("a non-student account is told the page is for students", async () => {
-  mockApi({ "GET /roadmap/gap": { status: 403, body: { detail: "Only students have a skill gap" } } });
+  mockApi({ "GET /roadmap": { status: 403, body: { detail: "Only students have a skill gap" } } });
   render(<RoadmapPage />);
 
   expect(await screen.findByRole("alert")).toHaveTextContent("This page is for student accounts.");
@@ -107,7 +110,7 @@ test("an unreachable server shows an error", async () => {
 });
 
 test("log out clears the token", async () => {
-  mockApi({ "GET /roadmap/gap": { status: 200, body: GAP } });
+  mockApi({ "GET /roadmap": { status: 200, body: GAP } });
   render(<RoadmapPage />);
   await screen.findByText("Target role: Backend Developer");
 
