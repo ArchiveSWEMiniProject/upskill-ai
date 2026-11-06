@@ -7,8 +7,12 @@ from backend.database import get_session
 from backend.profile.dependencies import current_user_id
 from backend.profile.exceptions import ProfileNotFoundError
 from backend.profile.repository import StudentRepository
-from backend.skills.exceptions import UnknownSkillError
-from backend.skills.repository import StudentSkillRepository
+from backend.skills.exceptions import (
+    NotACanonicalSkillError,
+    UnknownSkillError,
+    UnresolvedSkillNotFoundError,
+)
+from backend.skills.repository import StudentSkillRepository, UnresolvedSkillRepository
 from backend.skills.schemas import (
     SkillDeclare,
     SkillOut,
@@ -16,6 +20,8 @@ from backend.skills.schemas import (
     SkillVectorEntryOut,
     SkillVectorOut,
     UnknownSkillDetail,
+    UnresolvedMap,
+    UnresolvedSkillOut,
 )
 from backend.skills.service import SkillService
 from backend.skills.vector import compute_skill_vector
@@ -28,7 +34,10 @@ SessionDep = Annotated[Session, Depends(get_session)]
 
 def skill_service(session: SessionDep) -> SkillService:
     return SkillService(
-        StudentRepository(session), StudentSkillRepository(session), TaxonomyReader(session)
+        StudentRepository(session),
+        StudentSkillRepository(session),
+        TaxonomyReader(session),
+        UnresolvedSkillRepository(session),
     )
 
 
@@ -60,7 +69,9 @@ def declare_skill(
         detail = UnknownSkillDetail(
             message=f"Unknown skill: {error.raw}",
             suggestions=[SkillSuggestion(skill_id=i, skill_name=n) for i, n in error.suggestions],
+            unresolved_id=error.unresolved_id,
         )
+        session.commit()  # keep the unresolved string even though the request fails
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail.model_dump()) from error
     session.commit()
     if not result.created:
@@ -97,4 +108,51 @@ def read_skill_vector(
             )
             for entry in vector
         ]
+    )
+
+
+# --- Unresolved skills (UP-10, REQ-F1-22) -------------------------------------
+
+
+@router.get("/skills/unresolved", response_model=list[UnresolvedSkillOut])
+def list_unresolved_skills(
+    user_id: Annotated[int, Depends(current_user_id)],
+    service: Annotated[SkillService, Depends(skill_service)],
+) -> list[UnresolvedSkillOut]:
+    """Skill strings we could not match, each with the closest real skills, for
+    the student to map."""
+    try:
+        found = service.list_unresolved(user_id)
+    except ProfileNotFoundError as error:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, error.message) from error
+    return [
+        UnresolvedSkillOut(
+            unresolved_id=entry.unresolved_id,
+            raw_text=entry.raw_text,
+            suggestions=[SkillSuggestion(skill_id=i, skill_name=n) for i, n in suggestions],
+        )
+        for entry, suggestions in found
+    ]
+
+
+@router.post("/skills/unresolved/{unresolved_id}/map", response_model=SkillOut)
+def map_unresolved_skill(
+    unresolved_id: int,
+    body: UnresolvedMap,
+    user_id: Annotated[int, Depends(current_user_id)],
+    service: Annotated[SkillService, Depends(skill_service)],
+    session: SessionDep,
+) -> SkillOut:
+    """Map an unresolved string to a canonical skill at a level: the skill is
+    declared and the string closed."""
+    try:
+        result = service.map_unresolved(user_id, unresolved_id, body.skill_id, body.level)
+    except (ProfileNotFoundError, UnresolvedSkillNotFoundError) as error:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, error.message) from error
+    except NotACanonicalSkillError as error:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, error.message) from error
+    session.commit()
+    return SkillOut(
+        skill_id=result.skill_id, skill_name=result.skill_name, level=result.level,
+        source=result.source,
     )
