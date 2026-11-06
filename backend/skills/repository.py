@@ -1,7 +1,8 @@
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from backend.skills.models import SkillChangeHistory, StudentSkill
+from backend.skills.models import SkillChangeHistory, StudentSkill, UnresolvedSkill
 
 
 class StudentSkillRepository:
@@ -37,3 +38,46 @@ class StudentSkillRepository:
             )
         )
         self._session.flush()
+
+
+class UnresolvedSkillRepository:
+    """Always scoped to one student: someone else's entry looks like no entry."""
+
+    def __init__(self, session: Session):
+        self._session = session
+
+    def record(self, student_id: int, raw: str, normalised: str) -> UnresolvedSkill:
+        """Store the string, or return the open entry already holding the same
+        text, so asking twice for the same unknown skill never duplicates it."""
+        existing = self._session.scalars(
+            select(UnresolvedSkill).where(
+                UnresolvedSkill.student_id == student_id,
+                UnresolvedSkill.normalised_text == normalised,
+                UnresolvedSkill.status == "open",
+            )
+        ).first()
+        if existing is not None:
+            return existing
+        entry = UnresolvedSkill(
+            student_id=student_id, raw_text=raw, normalised_text=normalised, status="open"
+        )
+        self._session.add(entry)
+        self._session.flush()
+        return entry
+
+    def list_open(self, student_id: int) -> list[UnresolvedSkill]:
+        return list(
+            self._session.scalars(
+                select(UnresolvedSkill)
+                .where(UnresolvedSkill.student_id == student_id, UnresolvedSkill.status == "open")
+                .order_by(UnresolvedSkill.unresolved_id)
+            )
+        )
+
+    def get(self, student_id: int, unresolved_id: int) -> UnresolvedSkill | None:
+        return self._session.scalars(
+            select(UnresolvedSkill).where(
+                UnresolvedSkill.student_id == student_id,
+                UnresolvedSkill.unresolved_id == unresolved_id,
+            )
+        ).first()
