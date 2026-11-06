@@ -2,7 +2,7 @@
 
 // Loads and edits one list of profile entries (courses, projects) through the
 // API's list / add / replace / delete routes.
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { api } from "./api";
 import { errorMessage, type FieldErrors, fieldErrors } from "./forms";
@@ -16,6 +16,9 @@ export function useEntries<T>(
 ) {
   const [entries, setEntries] = useState<T[] | null>(null);
   const [error, setError] = useState("");
+  // Counts finished saves and deletes, so a list that was requested before
+  // one of them can be recognised as possibly missing it.
+  const changes = useRef(0);
 
   const failed = useCallback(
     (status: number, data: unknown): string => {
@@ -26,10 +29,28 @@ export function useEntries<T>(
   );
 
   useEffect(() => {
-    api<T[]>(path).then(({ status, data }) => {
-      if (status === 200) setEntries(data);
-      else setError(failed(status, data));
-    });
+    let active = true;
+    async function load() {
+      for (;;) {
+        const started = changes.current;
+        const { status, data } = await api<T[]>(path);
+        if (!active) return;
+        if (status !== 200) {
+          setError(failed(status, data));
+          return;
+        }
+        // Showing this list would drop an entry saved while it loaded, so ask
+        // again; the server has every finished change by now.
+        if (changes.current === started) {
+          setEntries(data);
+          return;
+        }
+      }
+    }
+    load();
+    return () => {
+      active = false;
+    };
   }, [path, failed]);
 
   // Adds when id is undefined, otherwise replaces that entry.
@@ -39,6 +60,8 @@ export function useEntries<T>(
       json: body,
     });
     if (status === 200 || status === 201) {
+      changes.current += 1;
+      setError("");
       setEntries((current) =>
         id === undefined
           ? [...(current ?? []), data]
@@ -55,6 +78,8 @@ export function useEntries<T>(
   async function remove(id: number): Promise<boolean> {
     const { status, data } = await api(`${path}/${id}`, { method: "DELETE" });
     if (status === 204 || status === 404) {
+      changes.current += 1;
+      setError("");
       setEntries((current) => (current ?? []).filter((entry) => idOf(entry) !== id));
       return true;
     }
