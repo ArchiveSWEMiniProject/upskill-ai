@@ -14,6 +14,8 @@ import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError, VerifyMismatchError
 
+from backend.database import PLACEHOLDER_PREFIX
+
 # Argon2id password hasher configuration (RFC 9106 recommended profile)
 _hasher = PasswordHasher(
     time_cost=2,
@@ -25,7 +27,8 @@ _hasher = PasswordHasher(
 
 # JWT Configuration. There is deliberately no default secret: anyone who knew
 # it could sign their own administrator token. jwt_secret() raises if it is
-# missing, and backend/main.py calls it at startup so the API refuses to start.
+# missing or still the .env.example placeholder, and backend/main.py calls it
+# at startup so the API refuses to start.
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # 24 hours
 
@@ -34,6 +37,11 @@ def jwt_secret() -> str:
     secret = os.environ.get("JWT_SECRET", "")
     if not secret.strip():
         raise RuntimeError("JWT_SECRET is not set; refusing to issue or accept tokens")
+    if secret.startswith(PLACEHOLDER_PREFIX):
+        raise RuntimeError(
+            "JWT_SECRET is still the change-me placeholder from .env.example; "
+            "set a long random value in .env"
+        )
     return secret
 
 

@@ -42,6 +42,27 @@ The layout mirrors module boundaries, so a cross-module import shows up in revie
 | `docs/` | SRS, architecture, backlog, test plan, work allocation, frozen contracts | Vansh |
 | `docker-compose.yml`, `Jenkinsfile` | Infrastructure | Shubhika / Hemanth |
 
+## Running the stack
+
+```
+cp .env.example .env        # then replace every change-me value
+docker compose up --build
+```
+
+`docker compose` refuses to start if `POSTGRES_PASSWORD` or `JWT_SECRET` is unset, so there are no built-in default secrets, and the API refuses to start while either is still a `change-me` value. One way to make a secret: `python3 -c "import secrets; print(secrets.token_urlsafe(48))"`. The database is not published to the host; only the API (port 8000) and web (port 3000) are.
+
+**If you ran the stack before these secrets were required:** Postgres reads `POSTGRES_PASSWORD` only when it first creates the database, so your existing `pgdata` volume still has the old default password, `upskill_password`, and changing `.env` alone makes the API fail to connect. To change the password and keep your data:
+
+1. Put the new password in `.env` as `POSTGRES_PASSWORD`. Set `JWT_SECRET` too: compose needs both even to start only the database.
+2. Start only the database: `docker compose up -d upskill-db`
+3. Give the existing database user the same password. Inside the container psql connects without a password; it asks for the new one twice and does not show it or keep it in your shell history:
+   ```
+   docker compose exec upskill-db psql -U upskill -d upskill_ai -c '\password upskill'
+   ```
+4. Start the rest: `docker compose up -d --build`
+
+Use your own `POSTGRES_USER` and `POSTGRES_DB` in step 3 if you changed them. If you don't need the local data, `docker compose down -v` deletes it instead, and the next start creates the database with the new password.
+
 ## Module interaction rules
 
 - **R1** A module calls another only through its published service interface.

@@ -31,4 +31,5 @@ export const PROFILE = {
 export const EMPTY_SECTIONS = {
   "GET /profile/courses": { status: 200, body: [] },
   "GET /profile/projects": { status: 200, body: [] },
+  "GET /profile/resume": { status: 200, body: [] },
 };

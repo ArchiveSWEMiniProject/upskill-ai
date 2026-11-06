@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from backend.database import get_session
@@ -10,8 +10,10 @@ from backend.profile.exceptions import (
     ProfileAlreadyExistsError,
     ProfileError,
     ProfileNotFoundError,
+    ResumeNotFoundError,
 )
 from backend.profile.repository import ProfileItemRepository, StudentRepository
+from backend.profile.resume import MAX_BYTES, ResumeRejected, ResumeService
 from backend.profile.schemas import (
     CourseIn,
     CourseOut,
@@ -19,6 +21,7 @@ from backend.profile.schemas import (
     ProfileOut,
     ProjectIn,
     ProjectOut,
+    ResumeOut,
 )
 from backend.profile.service import ProfileService
 
@@ -116,3 +119,82 @@ def add_entry_routes(path: str, service_type: type[EntryService], body_type, out
 add_entry_routes("/courses", CourseService, CourseIn, CourseOut)
 # REQ-F1-03, F1-37
 add_entry_routes("/projects", ProjectService, ProjectIn, ProjectOut)
+
+
+# --- Resume upload (UP-6) ------------------------------------------------------
+
+MANUAL_ENTRY = "/api/v1/profile/skills"
+RESUME_NOT_FOUND = {
+    404: {"description": "No profile yet, or no such upload on the caller's profile"}
+}
+RESUME_ERRORS = {
+    **RESUME_NOT_FOUND,
+    413: {"description": "File exceeds the 5 MB limit."},
+    415: {"description": "Only PDF and DOCX files are accepted."},
+}
+
+
+def _resume_out(upload, message: str | None = None) -> ResumeOut:
+    return ResumeOut(
+        upload_id=upload.upload_id,
+        file_name=upload.original_filename,
+        file_type=upload.file_type,
+        size_bytes=upload.size_bytes,
+        status=upload.status,
+        message=message,
+        manual_entry=MANUAL_ENTRY if upload.status != "extracted" else None,
+        uploaded_at=upload.uploaded_at,
+        delete_after=upload.delete_after,
+        deleted=upload.deleted_at is not None,
+    )
+
+
+def _student_id(session: Session, user_id: int) -> int:
+    student = StudentRepository(session).get_by_user_id(user_id)
+    if student is None:
+        raise _not_found(ProfileNotFoundError())
+    return student.student_id
+
+
+@router.post("/resume", status_code=status.HTTP_201_CREATED, response_model=ResumeOut,
+             responses=RESUME_ERRORS)
+def upload_resume(
+    user_id: UserId,
+    session: Annotated[Session, Depends(get_session)],
+    file: Annotated[UploadFile, File(description="PDF or DOCX, at most 5 MB")],
+) -> ResumeOut:
+    """Upload a resume (REQ-F1-08 to F1-11). The response's `status` says what
+    happened: `extracted` (text found), `unreadable` (under 100 characters, so
+    use manual entry instead) or `failed` (the file could not be processed;
+    the profile is unchanged). Unusable files are not kept."""
+    # A plain def, so FastAPI runs it in its thread pool: parsing a PDF and the
+    # database calls block, and on the event loop they would stall every request.
+    student_id = _student_id(session, user_id)
+    data = file.file.read(MAX_BYTES + 1)  # one byte over is enough to refuse
+    try:
+        result = ResumeService(session).upload(student_id, file.filename, data)
+    except ResumeRejected as error:
+        raise HTTPException(error.status_code, error.message) from error
+    try:
+        session.commit()
+    except Exception:
+        ResumeService.discard(result.upload)
+        raise
+    return _resume_out(result.upload, result.message)
+
+
+@router.get("/resume", response_model=list[ResumeOut], responses=RESUME_NOT_FOUND)
+def list_resumes(user_id: UserId, session: Annotated[Session, Depends(get_session)]):
+    """The caller's uploads, newest first, with their status and deletion date."""
+    student_id = _student_id(session, user_id)
+    return [_resume_out(upload) for upload in ResumeService(session).list(student_id)]
+
+
+@router.get("/resume/{upload_id}", response_model=ResumeOut, responses=RESUME_NOT_FOUND)
+def get_resume(
+    upload_id: int, user_id: UserId, session: Annotated[Session, Depends(get_session)]
+):
+    upload = ResumeService(session).get(_student_id(session, user_id), upload_id)
+    if upload is None:
+        raise _not_found(ResumeNotFoundError())
+    return _resume_out(upload)

@@ -129,3 +129,19 @@ class ProjectOut(BaseModel):
     title: str
     description: str
     repository_url: str | None
+
+
+# --- Resume upload (UP-6) ----------------------------------------------------
+
+
+class ResumeOut(BaseModel):
+    upload_id: int
+    file_name: str
+    file_type: str
+    size_bytes: int
+    status: str  # extracted | unreadable | failed
+    message: str | None = None
+    manual_entry: str | None = None  # where to add skills instead (REQ-F1-11)
+    uploaded_at: datetime
+    delete_after: datetime
+    deleted: bool

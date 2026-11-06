@@ -1,7 +1,9 @@
 """FastAPI application entrypoint for UpSkill-AI."""
 
+import asyncio
+import os
 from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 
 from fastapi import FastAPI
 
@@ -9,8 +11,10 @@ from backend.auth.faculty_views import faculty_router
 from backend.auth.security import jwt_secret
 from backend.auth.views import auth_router
 from backend.catalogue.views import catalogue_router
+from backend.database import database_url
 from backend.gap.routes import router as gap_router
 from backend.middleware import CorrelationIdMiddleware, register_error_handlers
+from backend.profile import resume_cleanup
 from backend.profile.routes import router as profile_router
 from backend.recommendations.routes import router as roadmap_router
 from backend.skills.routes import router as skills_router
@@ -18,8 +22,20 @@ from backend.skills.routes import router as skills_router
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    jwt_secret()  # refuse to start without a signing secret
+    jwt_secret()  # refuse to start without a real signing secret
+    # ...or with the example database password. Tests that swap in their own
+    # session leave DATABASE_URL unset, so it is only checked when present.
+    if os.environ.get("DATABASE_URL"):
+        database_url()
+    interval = resume_cleanup.interval_seconds()
+    cleanup = (
+        asyncio.create_task(resume_cleanup.purge_periodically(interval)) if interval > 0 else None
+    )
     yield
+    if cleanup:
+        cleanup.cancel()
+        with suppress(asyncio.CancelledError):
+            await cleanup
 
 
 app = FastAPI(
