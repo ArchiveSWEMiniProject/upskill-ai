@@ -10,8 +10,8 @@ from backend.auth.faculty_views import faculty_router
 from backend.auth.security import jwt_secret
 from backend.auth.views import auth_router
 from backend.catalogue.views import catalogue_router
-from backend.middleware import CorrelationIdMiddleware, register_error_handlers
 from backend.database import database_url
+from backend.middleware import CorrelationIdMiddleware, register_error_handlers
 from backend.profile.routes import router as profile_router
 from backend.skills.routes import router as skills_router
 
