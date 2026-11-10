@@ -12,6 +12,11 @@ from backend.evidence.repository import EvidenceConflict, record_evidence
 from backend.profile import get_student_id
 from backend.progress.completion import EvidenceRequirement, get_completion_policy
 from backend.progress.repository import ProgressRepository
+from backend.progress.roadmap_refresh import (
+    RoadmapInvalidator,
+    get_roadmap_invalidator,
+    request_roadmap_refresh,
+)
 from backend.progress.schemas import CompleteIn, EnrolIn, ProgressOut, ProgressUpdate
 from backend.progress.vector_update import (
     SkillVectorWriter,
@@ -68,6 +73,7 @@ def complete_progress(
     progress_id: int, body: CompleteIn, student_id: StudentId, session: SessionDep,
     policy: Annotated[EvidenceRequirement, Depends(get_completion_policy)],
     vector_writer: Annotated[SkillVectorWriter | None, Depends(get_skill_vector_writer)],
+    invalidate: Annotated[RoadmapInvalidator | None, Depends(get_roadmap_invalidator)],
 ) -> ProgressOut:
     record = ProgressRepository(session).owned(student_id, progress_id)
     if record is None:
@@ -94,6 +100,7 @@ def complete_progress(
             evidence = record_evidence(session, record.progress_id, body.evidence)
         except EvidenceConflict as exc:
             raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
-        apply_completion_vector(session, record, evidence, vector_writer)
+        changed = apply_completion_vector(session, record, evidence, vector_writer)
+        request_roadmap_refresh(student_id, session, evidence, changed, invalidate)
     session.commit()
     return ProgressOut.model_validate(record)
