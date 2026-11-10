@@ -1,7 +1,4 @@
-"""PR-3 draft: the real default blocks completion; injected policies test the boundary.
-
-These tests do not establish catalogue policy or PR-4 evidence integration.
-"""
+"""PR-3 completion with the temporary waiver and future policy boundary."""
 
 import pytest
 from sqlalchemy import text
@@ -39,22 +36,12 @@ def set_policy(requirement):
     return calls
 
 
-def test_default_unresolved_policy_does_not_accept_completion(client, enrolled, db_session):
+def test_default_policy_records_completion_without_evidence(client, enrolled, db_session):
     record, headers = enrolled
-    response = client.post(completion_url(record), json={}, headers=headers)
-    assert response.status_code == 503
-    assert "evidence requirements" in response.json()["detail"]
-    assert saved(db_session) == ("enrolled", 0)
-
-
-def test_explicit_server_exemption_records_completion(client, enrolled, db_session):
-    record, headers = enrolled
-    calls = set_policy(False)
     response = client.post(completion_url(record), json={}, headers=headers)
     assert response.status_code == 200
     assert response.json() == {**record, "status": "completed", "completion_percentage": 100}
     assert saved(db_session) == ("completed", 100)
-    assert calls == [record["resource_id"]]
     assert db_session.execute(text("SELECT count(*) FROM student_skill")).scalar_one() == 0
     assert db_session.execute(text("SELECT count(*) FROM skill_change_history")).scalar_one() == 0
 

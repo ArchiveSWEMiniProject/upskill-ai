@@ -3,8 +3,8 @@
 Live GitHub assignments on 2026-11-05: #51 (PR-1 enrolment), #52 (PR-2 progress),
 and #53 (PR-3 completion). The older Kickoff Plan puts PR-3 in Sprint 4; the
 newer explicit Sprint 3 assignment on #53 is followed for this work. PR-4 through
-PR-9 remain outside these changes. The team has confirmed evidence policy is an
-unresolved integration; completion's PR must remain draft until it is resolved.
+PR-9 remain outside these changes. Completion temporarily accepts self-reported
+completion while the catalogue evidence policy is pending.
 
 ## PR-1 / issue #51
 
@@ -61,43 +61,20 @@ coverage** (1370/1445 statements), Ruff passed; **42 frontend tests passed** and
 `npm run typecheck` passed. Jest excludes generated `.next` modules so running
 tests after a production build does not discover the standalone package twice.
 
-## PR-3 / issue #53 - DRAFT: unresolved evidence-policy integration
+## PR-3 / issue #53 — temporary evidence waiver
 
-The user confirmed on 2026-11-05 that the team has not resolved how catalogue
-resources declare evidence requirements. SRS F3-06 and TC-F3-06 require valid
-evidence before accepting evidence-based completion, but the frozen resource
-tagging fields/current M4 model do not include that policy. No type-based rule,
-new catalogue field, or permissive default is invented.
+On 2026-11-10, Hemanth asked to allow completion without evidence for now.
+`POST /api/v1/progress/{progress_id}/complete` takes `{}` and checks enrolment,
+ownership and approved resource identity. The server currently waives evidence
+for every eligible resource and records `completed` at 100%. Repeating a
+completion returns the existing record. The request schema rejects client
+claims about policy or evidence.
 
-`POST /api/v1/progress/{progress_id}/complete` takes `{}`. It checks enrolment,
-ownership and approved resource identity, then reads the server-side
-`get_completion_policy()` boundary. The boundary accepts a canonical resource ID
-and returns True (evidence required), False (explicitly exempt), or None (unknown).
-It is intentionally unbound in production and always returns unknown until the
-team supplies its authoritative provider. Unknown policy returns 503 with a
-clear message; required evidence returns 409 prompting submission, and neither
-changes progress. A server-confirmed exemption records `completed` / 100%.
-Repeating an already-recorded completion is a no-op. No new persisted state is
-added, and client claims about policy/evidence are rejected.
+The server-side policy interface still supports requiring evidence (409) or
+reporting an unavailable policy (503). Tests exercise those paths with injected
+policies. The catalogue policy remains pending, and issue #54 tracks evidence
+submission and validation. Skill updates and recommendation refresh are
+separate work under #55 and #56.
 
-This PR must remain draft. The success/required-policy tests inject controlled
-server policies to verify the boundary; they do not prove a real M4 evidence
-policy integration. To unblock: the team must decide the evidence policy/source,
-bind the provider, and verify actual resources against it. PR-4 (#54) subsequently
-adds evidence submission/validation; PR-5/6 add M1 vector updates and M2 refresh.
-This branch implements none of those later stories and does not write vectors.
-The UI shows the server's evidence/unavailable message without pretending that
-completion succeeded. Merge after PR-2 (#52); do not close #53 on this draft.
-
-Local PR-3 validation on 2026-11-05: **317 backend tests passed**, **95% backend
-coverage** (1396/1471 statements), Ruff and diff checks passed; **46 frontend
-tests passed** and the Next.js production build, including TypeScript, passed.
-The default unavailable policy is tested as a blocking response. Tests with
-injected policies validate completion behavior only, not the unresolved real
-policy integration. No hosted result or full Sprint 3 completion is inferred
-from these local checks.
-
-Review/merge order: enrolment branch first, progress-update branch second, then
-completion only after its integration is resolved and the PR is made ready.
-Each dependent PR is initially based on the preceding feature branch to keep
-its diff specific to its issue. Retarget it to main after its dependency merges.
+Review order remains enrolment (#88), progress updates (#89), then completion
+(#90). Retarget each dependent PR to `main` after its prerequisite merges.
