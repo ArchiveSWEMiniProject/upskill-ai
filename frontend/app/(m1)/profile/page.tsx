@@ -3,6 +3,7 @@
 // The student's own profile (REQ-F1-39: there is no way to open anyone
 // else's). Each part of the profile is its own section component and loads
 // its own data once the profile exists.
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
@@ -76,6 +77,7 @@ export default function ProfilePage() {
           <>
             <section aria-label="Profile">
               <h2>{state.profile.name}</h2>
+              <Link href="/progress/dashboard">View learning progress</Link>
               <p className="muted">
                 {state.profile.education_level ?? "Education level not given"}
               </p>

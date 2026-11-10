@@ -7,6 +7,8 @@ from sqlalchemy.orm import Session
 
 from backend.auth import UserContext, UserRole, authorize, require_role
 from backend.catalogue import get_resource
+from backend.dashboard.schemas import ProgressDashboard
+from backend.dashboard.service import GapSummaryReader, get_gap_summary_reader, read_dashboard
 from backend.database import get_session
 from backend.evidence.repository import EvidenceConflict, record_evidence
 from backend.profile import get_student_id
@@ -41,6 +43,14 @@ def current_student(
 
 
 StudentId = Annotated[int, Depends(current_student)]
+
+
+@router.get("/dashboard", response_model=ProgressDashboard)
+def dashboard(
+    student_id: StudentId, session: SessionDep,
+    gap_reader: Annotated[GapSummaryReader | None, Depends(get_gap_summary_reader)],
+) -> ProgressDashboard:
+    return read_dashboard(student_id, session, gap_reader)
 
 
 @router.post("/enrol", response_model=ProgressOut, status_code=status.HTTP_201_CREATED)
