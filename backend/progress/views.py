@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from backend.auth import UserContext, UserRole, authorize, require_role
 from backend.catalogue import get_resource
 from backend.database import get_session
+from backend.evidence.repository import EvidenceConflict, record_evidence
 from backend.profile import get_student_id
 from backend.progress.completion import EvidenceRequirement, get_completion_policy
 from backend.progress.repository import ProgressRepository
@@ -69,18 +70,23 @@ def complete_progress(
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Approved resource not found")
     if record.status != "completed":
         requirement = policy(record.resource_id)
-        if requirement is not False:
-            if requirement is True:
-                raise HTTPException(
-                    status.HTTP_409_CONFLICT,
-                    "Submit valid completion evidence before completing this resource.",
-                )
+        if requirement is None:
             raise HTTPException(
                 status.HTTP_503_SERVICE_UNAVAILABLE,
                 "Completion is unavailable until this resource's "
                 "evidence requirements are confirmed.",
             )
+        if requirement and body.evidence is None:
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                "Submit valid completion evidence before completing this resource.",
+            )
         record.status = "completed"
         record.completion_percentage = 100
+    if body.evidence is not None:
+        try:
+            record_evidence(session, record.progress_id, body.evidence)
+        except EvidenceConflict as exc:
+            raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
     session.commit()
     return ProgressOut.model_validate(record)
