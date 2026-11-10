@@ -48,18 +48,20 @@ def _current_streak(events: list[ProgressEvent], today: date) -> int:
 def read_dashboard(
     student_id: int, session: Session, gap_reader: GapSummaryReader | None,
 ) -> ProgressDashboard:
-    progress_rows = session.scalars(select(Progress).where(
+    rows = session.execute(select(Progress, ProgressEvent).outerjoin(ProgressEvent).where(
         Progress.student_id == student_id
-    ).order_by(Progress.progress_id)).all()
-    events = list(session.scalars(select(ProgressEvent).join(Progress).where(
-        Progress.student_id == student_id
-    ).order_by(ProgressEvent.occurred_at, ProgressEvent.event_id)))
+    ).order_by(Progress.progress_id, ProgressEvent.occurred_at, ProgressEvent.event_id))
+    progress_rows: dict[int, Progress] = {}
+    events: list[ProgressEvent] = []
     history: dict[int, list[ProgressSnapshot]] = defaultdict(list)
-    for event in events:
-        history[event.progress_id].append(ProgressSnapshot.model_validate(event))
+    for row, event in rows:
+        progress_rows[row.progress_id] = row
+        if event is not None:
+            events.append(event)
+            history[row.progress_id].append(ProgressSnapshot.model_validate(event))
 
     resources = []
-    for row in progress_rows:
+    for row in progress_rows.values():
         item = get_resource(row.resource_id, session)
         resources.append(ResourceProgress(
             **ProgressOut.model_validate(row).model_dump(),
@@ -67,8 +69,8 @@ def read_dashboard(
             history=history[row.progress_id],
         ))
 
-    completed_count = sum(row.status == "completed" for row in progress_rows)
-    first_completion = next((e.occurred_at for e in events if e.status == "completed"), None)
+    completed_count = sum(row.status == "completed" for row in progress_rows.values())
+    first_completion = min((e.occurred_at for e in events if e.status == "completed"), default=None)
     milestones = [
         Milestone(label="First resource completed", achieved_at=first_completion)
     ] if completed_count else []
