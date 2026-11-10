@@ -69,16 +69,23 @@ def read_dashboard(
             history=history[row.progress_id],
         ))
 
-    completed_count = sum(row.status == "completed" for row in progress_rows.values())
-    first_completion = min((e.occurred_at for e in events if e.status == "completed"), default=None)
+    completed_ids = {row.progress_id for row in progress_rows.values() if row.status == "completed"}
+    completion_times = {
+        event.progress_id: event.occurred_at for event in events if event.status == "completed"
+    }
+    # An earlier completion may predate the history migration, leaving its date unknown.
+    first_completion = (
+        min(completion_times[progress_id] for progress_id in completed_ids)
+        if completed_ids and completed_ids <= completion_times.keys() else None
+    )
     milestones = [
         Milestone(label="First resource completed", achieved_at=first_completion)
-    ] if completed_count else []
+    ] if completed_ids else []
     summary = gap_reader(student_id, session) if gap_reader is not None else None
     proportion = summary.closed / summary.total if summary and summary.total else None
     return ProgressDashboard(
         resources=resources,
-        completed_count=completed_count,
+        completed_count=len(completed_ids),
         current_streak_days=_current_streak(events, datetime.now(UTC).date()),
         milestones=milestones,
         gap_summary=summary,

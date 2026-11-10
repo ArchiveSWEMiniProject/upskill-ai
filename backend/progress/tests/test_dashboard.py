@@ -3,6 +3,8 @@
 from datetime import UTC, date, datetime
 from unittest.mock import Mock
 
+from sqlalchemy import text
+
 from backend.dashboard.schemas import GapSummary
 from backend.dashboard.service import _current_streak, get_gap_summary_reader
 from backend.main import app
@@ -62,3 +64,24 @@ def test_streak_counts_distinct_days_with_increases_and_expires_after_a_gap():
     assert _current_streak(events, date(2026, 11, 9)) == 2
     assert _current_streak(events, date(2026, 11, 10)) == 2
     assert _current_streak(events, date(2026, 11, 11)) == 0
+
+
+def test_milestone_date_is_unknown_if_a_completion_predates_history(
+    client, student, resource, bearer, db_session,
+):
+    headers = bearer(student[0])
+    db_session.execute(text(
+        "INSERT INTO progress (student_id, resource_id, status, completion_percentage) "
+        "VALUES (:student, :resource, 'completed', 100)"
+    ), {"student": student[1], "resource": resource()})
+    new = client.post("/api/v1/progress/enrol", json={"resource_id": resource()}, headers=headers)
+    assert new.status_code == 201
+    response = client.post(f'/api/v1/progress/{new.json()["progress_id"]}/complete',
+                           json={}, headers=headers)
+    assert response.status_code == 200
+
+    response = client.get("/api/v1/progress/dashboard", headers=headers)
+    assert response.status_code == 200
+    result = response.json()
+    assert result["completed_count"] == 2
+    assert result["milestones"] == [{"label": "First resource completed", "achieved_at": None}]
