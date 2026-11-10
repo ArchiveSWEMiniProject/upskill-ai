@@ -35,3 +35,14 @@ test("a completed resource has no repeated completion control", () => {
     onCompleted={jest.fn()} />);
   expect(screen.queryByRole("button")).not.toBeInTheDocument();
 });
+
+test("submits a numeric quiz score when adding evidence after self-reported completion", async () => {
+  const completed: ProgressRecord = { ...record, status: "completed", completion_percentage: 100 };
+  const calls = mockApi({ "POST /progress/5/complete": { status: 200, body: completed } });
+  render(<CompleteResource progress={completed} onCompleted={jest.fn()} />);
+  await userEvent.selectOptions(screen.getByRole("combobox"), "quiz");
+  await userEvent.type(screen.getByLabelText("Quiz score (0–100)"), "0");
+  await userEvent.click(screen.getByRole("button", { name: "Save evidence" }));
+  expect(calls.at(-1)?.body).toEqual({ evidence: { evidence_type: "quiz", score: 0 } });
+  expect(await screen.findByText("Completion evidence saved.")).toBeInTheDocument();
+});
