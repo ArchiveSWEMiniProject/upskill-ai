@@ -4,6 +4,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from backend.evidence.schemas import EvidenceIn
+
 
 class EnrolIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -24,5 +26,5 @@ class ProgressUpdate(BaseModel):
 
 
 class CompleteIn(BaseModel):
-    # Clients cannot claim an evidence exemption or submit unvalidated PR-4 evidence here.
     model_config = ConfigDict(extra="forbid")
+    evidence: EvidenceIn | None = None
