@@ -16,6 +16,7 @@ from backend.catalogue.models import (
     SkillLevel,
 )
 from backend.database import _session_factory
+from backend.shared.skill_vector import Level
 
 
 def get_resource(item_id: int, db: Session) -> dict | None:
@@ -30,6 +31,17 @@ def get_resource(item_id: int, db: Session) -> dict | None:
     if item is None:
         return None
     return {"item_id": item.item_id, "title": item.title, "item_type": item.item_type.value}
+
+
+def get_resource_skill_levels(item_id: int, db: Session) -> dict[int, Level]:
+    """Return approved catalogue coverage by canonical skill ID."""
+    tags = db.query(LearningItemSkill.skill_id, LearningItemSkill.coverage_level).join(
+        LearningItem, LearningItem.item_id == LearningItemSkill.item_id
+    ).filter(
+        LearningItem.item_id == item_id,
+        LearningItem.moderation_state == ModerationState.APPROVED,
+    ).order_by(LearningItemSkill.skill_id)
+    return {skill_id: Level(level.value) for skill_id, level in tags}
 
 
 def get_resources_for_skill(

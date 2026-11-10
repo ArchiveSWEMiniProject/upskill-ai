@@ -10,7 +10,11 @@ from backend.catalogue.schemas import (
     SkillLevel,
     SkillTagInput,
 )
-from backend.catalogue.service import get_resource, get_resources_for_skill
+from backend.catalogue.service import (
+    get_resource,
+    get_resource_skill_levels,
+    get_resources_for_skill,
+)
 from backend.catalogue.views import catalogue_router
 
 __all__ = [
@@ -28,4 +32,5 @@ __all__ = [
     "catalogue_router",
     "get_resources_for_skill",
     "get_resource",
+    "get_resource_skill_levels",
 ]

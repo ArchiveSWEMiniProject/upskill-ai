@@ -13,6 +13,11 @@ from backend.profile import get_student_id
 from backend.progress.completion import EvidenceRequirement, get_completion_policy
 from backend.progress.repository import ProgressRepository
 from backend.progress.schemas import CompleteIn, EnrolIn, ProgressOut, ProgressUpdate
+from backend.progress.vector_update import (
+    SkillVectorWriter,
+    apply_completion_vector,
+    get_skill_vector_writer,
+)
 
 router = APIRouter(prefix="/api/v1/progress", tags=["progress"])
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -62,6 +67,7 @@ def update_progress(
 def complete_progress(
     progress_id: int, body: CompleteIn, student_id: StudentId, session: SessionDep,
     policy: Annotated[EvidenceRequirement, Depends(get_completion_policy)],
+    vector_writer: Annotated[SkillVectorWriter | None, Depends(get_skill_vector_writer)],
 ) -> ProgressOut:
     record = ProgressRepository(session).owned(student_id, progress_id)
     if record is None:
@@ -85,8 +91,9 @@ def complete_progress(
         record.completion_percentage = 100
     if body.evidence is not None:
         try:
-            record_evidence(session, record.progress_id, body.evidence)
+            evidence = record_evidence(session, record.progress_id, body.evidence)
         except EvidenceConflict as exc:
             raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
+        apply_completion_vector(session, record, evidence, vector_writer)
     session.commit()
     return ProgressOut.model_validate(record)
