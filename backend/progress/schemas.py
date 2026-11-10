@@ -21,3 +21,8 @@ class ProgressOut(BaseModel):
 class ProgressUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     completion_percentage: int = Field(ge=0, le=100, strict=True)
+
+
+class CompleteIn(BaseModel):
+    # Clients cannot claim an evidence exemption or submit unvalidated PR-4 evidence here.
+    model_config = ConfigDict(extra="forbid")

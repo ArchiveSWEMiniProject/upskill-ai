@@ -3,8 +3,8 @@
 Live GitHub assignments on 2026-11-05: #51 (PR-1 enrolment), #52 (PR-2 progress),
 and #53 (PR-3 completion). The older Kickoff Plan puts PR-3 in Sprint 4; the
 newer explicit Sprint 3 assignment on #53 is followed for this work. PR-4 through
-PR-9 remain outside these changes. The team has confirmed evidence policy is an
-unresolved integration; completion's PR must remain draft until it is resolved.
+PR-9 remain outside these changes. Completion temporarily accepts self-reported
+completion while the catalogue evidence policy is pending.
 
 ## PR-1 / issue #51
 
@@ -60,3 +60,21 @@ Local PR-2 validation on 2026-11-05: **300 backend tests passed**, **95% backend
 coverage** (1370/1445 statements), Ruff passed; **42 frontend tests passed** and
 `npm run typecheck` passed. Jest excludes generated `.next` modules so running
 tests after a production build does not discover the standalone package twice.
+
+## PR-3 / issue #53 — temporary evidence waiver
+
+On 2026-11-10, Hemanth asked to allow completion without evidence for now.
+`POST /api/v1/progress/{progress_id}/complete` takes `{}` and checks enrolment,
+ownership and approved resource identity. The server currently waives evidence
+for every eligible resource and records `completed` at 100%. Repeating a
+completion returns the existing record. The request schema rejects client
+claims about policy or evidence.
+
+The server-side policy interface still supports requiring evidence (409) or
+reporting an unavailable policy (503). Tests exercise those paths with injected
+policies. The catalogue policy remains pending, and issue #54 tracks evidence
+submission and validation. Skill updates and recommendation refresh are
+separate work under #55 and #56.
+
+Review order remains enrolment (#88), progress updates (#89), then completion
+(#90). Retarget each dependent PR to `main` after its prerequisite merges.
