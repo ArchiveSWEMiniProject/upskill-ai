@@ -56,14 +56,18 @@ def enrol(body: EnrolIn, student_id: StudentId, session: SessionDep) -> Progress
 def update_progress(
     progress_id: int, body: ProgressUpdate, student_id: StudentId, session: SessionDep
 ) -> ProgressOut:
-    record = ProgressRepository(session).owned(student_id, progress_id)
+    progress = ProgressRepository(session)
+    record = progress.owned(student_id, progress_id)
     if record is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Enrolled progress record not found")
     if record.status == "completed":
         raise HTTPException(status.HTTP_409_CONFLICT, "Completed progress cannot be changed")
-    record.completion_percentage = body.completion_percentage
-    # 100% progress does not substitute for the separate evidence-aware completion operation.
-    record.status = "enrolled" if body.completion_percentage == 0 else "in-progress"
+    new_status = "enrolled" if body.completion_percentage == 0 else "in-progress"
+    if (record.status, record.completion_percentage) != (new_status, body.completion_percentage):
+        record.completion_percentage = body.completion_percentage
+        # 100% progress remains distinct from the evidence-aware completion operation.
+        record.status = new_status
+        progress.record_event(record)
     session.commit()
     return ProgressOut.model_validate(record)
 
@@ -75,7 +79,8 @@ def complete_progress(
     vector_writer: Annotated[SkillVectorWriter | None, Depends(get_skill_vector_writer)],
     invalidate: Annotated[RoadmapInvalidator | None, Depends(get_roadmap_invalidator)],
 ) -> ProgressOut:
-    record = ProgressRepository(session).owned(student_id, progress_id)
+    progress = ProgressRepository(session)
+    record = progress.owned(student_id, progress_id)
     if record is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Enrolled progress record not found")
     if get_resource(record.resource_id, session) is None:
@@ -95,6 +100,7 @@ def complete_progress(
             )
         record.status = "completed"
         record.completion_percentage = 100
+        progress.record_event(record)
     if body.evidence is not None:
         try:
             evidence = record_evidence(session, record.progress_id, body.evidence)

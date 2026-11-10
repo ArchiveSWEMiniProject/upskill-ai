@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
-from backend.progress.models import Progress
+from backend.progress.models import Progress, ProgressEvent
 
 
 class ProgressRepository:
@@ -19,12 +19,23 @@ class ProgressRepository:
 
     def enrol(self, student_id: int, resource_id: int) -> Progress:
         # Retry/double-click safe; the DB also serializes concurrent enrolments.
-        self.session.execute(
+        inserted = self.session.scalar(
             insert(Progress)
             .values(student_id=student_id, resource_id=resource_id,
                     status="enrolled", completion_percentage=0)
             .on_conflict_do_nothing(constraint="uq_progress_student_resource")
+            .returning(Progress.progress_id)
         )
-        return self.session.scalars(select(Progress).where(
+        record = self.session.scalars(select(Progress).where(
             Progress.student_id == student_id, Progress.resource_id == resource_id
         )).one()
+        if inserted is not None:
+            self.record_event(record)
+        return record
+
+    def record_event(self, record: Progress) -> None:
+        self.session.add(ProgressEvent(
+            progress_id=record.progress_id,
+            status=record.status,
+            completion_percentage=record.completion_percentage,
+        ))
