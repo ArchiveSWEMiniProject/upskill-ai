@@ -7,7 +7,7 @@ export default async function ProgressPage({ params }: {
 }) {
   const { resourceId } = await params;
   if (!/^[1-9]\d*$/.test(resourceId) || !Number.isSafeInteger(Number(resourceId))) notFound();
-  return <main><Link href="/profile">Your profile</Link>
+  return <main><Link href="/progress/dashboard">Your progress</Link>
     <ResourceProgress resourceId={Number(resourceId)} />
   </main>;
 }
