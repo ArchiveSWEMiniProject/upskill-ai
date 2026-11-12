@@ -9,7 +9,7 @@ from backend.catalogue import get_resource_skill_levels
 from backend.evidence.models import CompletionEvidence
 from backend.progress.models import Progress
 from backend.shared.skill_vector import Level, SkillVector, Source
-from backend.skills.vector import get_skill_vector
+from backend.skills.vector import apply_vector_update, get_skill_vector
 
 
 class SkillVectorWriter(Protocol):
@@ -21,8 +21,9 @@ class SkillVectorWriter(Protocol):
 
 
 def get_skill_vector_writer() -> SkillVectorWriter | None:
-    """UP-12 has yet to publish the writer. Leave validated evidence pending."""
-    return None
+    """M1's apply_vector_update() (UP-12), applied in the request's transaction.
+    Returning None (as tests may) leaves validated evidence pending."""
+    return apply_vector_update
 
 
 def apply_completion_vector(
