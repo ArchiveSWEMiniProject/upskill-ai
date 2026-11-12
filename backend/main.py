@@ -12,9 +12,11 @@ from backend.auth.security import jwt_secret
 from backend.auth.views import auth_router
 from backend.catalogue.views import catalogue_router
 from backend.database import database_url
+from backend.gap.routes import router as gap_router
 from backend.middleware import CorrelationIdMiddleware, register_error_handlers
 from backend.profile import resume_cleanup
 from backend.profile.routes import router as profile_router
+from backend.recommendations.routes import router as roadmap_router
 from backend.skills.routes import router as skills_router
 
 
@@ -53,6 +55,8 @@ app.include_router(skills_router)
 app.include_router(auth_router)
 app.include_router(faculty_router)
 app.include_router(catalogue_router)
+app.include_router(gap_router)
+app.include_router(roadmap_router)
 
 
 @app.get("/")

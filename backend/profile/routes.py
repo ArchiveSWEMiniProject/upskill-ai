@@ -11,6 +11,7 @@ from backend.profile.exceptions import (
     ProfileError,
     ProfileNotFoundError,
     ResumeNotFoundError,
+    UnknownRoleError,
 )
 from backend.profile.repository import ProfileItemRepository, StudentRepository
 from backend.profile.resume import MAX_BYTES, ResumeRejected, ResumeService
@@ -22,8 +23,11 @@ from backend.profile.schemas import (
     ProjectIn,
     ProjectOut,
     ResumeOut,
+    TargetRoleIn,
+    TargetRoleOut,
 )
 from backend.profile.service import ProfileService
+from backend.profile.target_role import TargetRoleService
 
 router = APIRouter(prefix="/api/v1/profile", tags=["profile"])
 
@@ -198,3 +202,45 @@ def get_resume(
     if upload is None:
         raise _not_found(ResumeNotFoundError())
     return _resume_out(upload)
+
+
+# --- Target role (UP-13) -----------------------------------------------------
+
+
+@router.put(
+    "/target-role",
+    response_model=TargetRoleOut,
+    responses={404: {"description": "No profile yet"}, 422: {"description": "Unknown role"}},
+)
+def set_target_role(
+    body: TargetRoleIn, user_id: UserId, session: Annotated[Session, Depends(get_session)]
+) -> TargetRoleOut:
+    """Choose the caller's one active target role, replacing any earlier one
+    (REQ-F1-31, F1-32). A change marks recommendations stale (REQ-F1-33); the
+    reply counts required, held and gap skills (REQ-F1-34)."""
+    try:
+        summary = TargetRoleService(session).set_target_role(user_id, body.role_id)
+    except ProfileNotFoundError as error:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, error.message) from error
+    except UnknownRoleError as error:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, error.message) from error
+    session.commit()
+    return TargetRoleOut.model_validate(summary)
+
+
+@router.get(
+    "/target-role",
+    response_model=TargetRoleOut,
+    responses={404: {"description": "No profile yet, or no target role chosen"}},
+)
+def get_target_role(
+    user_id: UserId, session: Annotated[Session, Depends(get_session)]
+) -> TargetRoleOut:
+    """The caller's current target role with its required/held/gap counts."""
+    try:
+        summary = TargetRoleService(session).get_target_role(user_id)
+    except ProfileNotFoundError as error:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, error.message) from error
+    if summary is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No target role chosen")
+    return TargetRoleOut.model_validate(summary)
