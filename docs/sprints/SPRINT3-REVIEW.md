@@ -33,6 +33,17 @@ Other Sprint 3 items:
   needs to sign off the M2 side.
 - **STC-F1-01 walkthrough script:** written after the sprint ended, on 12 Nov
   (#101). It is executed in Hardening.
+- **End-to-end demo, automated (12 Nov, #104):**
+  `backend/integration_tests/test_profile_to_roadmap.py` runs the whole journey
+  over HTTP (register, profile, skills, target role, `/roadmap/gap`,
+  `/roadmap`), on TC-F1-13's data (exactly 3 gap entries) and on the real
+  seeds (Backend Developer: 5 required, 3 held, 2 gap). The branch includes
+  #92, #87 and #91, so once those merge, a green pipeline means the demo
+  works. All 3 tests pass in CI (run 43237507648, 343 passed, none
+  skipped). The manual runbook is `docs/testing/SPRINT3-DEMO.md`.
+- **Unit test backfill (12 Nov, #103):** `backend/auth/permissions.py` and
+  `backend/auth/dependencies.py` go from 63% and 70% to 100%, and the
+  catalogue validators and `get_resources_for_skill()` to 100%.
 - **Shared and CI work merged in the sprint:** #8, #9, #11, #15, #16, #72, #73,
   #82.
 
@@ -56,8 +67,11 @@ Other Sprint 3 items:
 
 ## Proposed actions for Sprint 4
 
-1. Merge in dependency order: #92, then #94, #93 and #95, then #87, then #91.
-   Then run STC-F1-01 (#101) as the demo rehearsal.
+1. Merge in dependency order: #92, then #94, #93 and #95, then #87, then #91,
+   then #104 (the demo test). Then run STC-F1-01 (#101) and
+   `docs/testing/SPRINT3-DEMO.md` as the demo rehearsal. #88 (M3 PR-1)
+   conflicts with #87/#91 in `backend/main.py` (router list only), so
+   whichever merges second needs a quick re-merge.
 2. Open the UP-12 PR now. Hemanth's PR-5 (#97) depends on
    `apply_vector_update()`, which is committed on
    `feature/m1-up12-vector-updates` with no PR yet.
