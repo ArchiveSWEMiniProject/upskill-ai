@@ -10,8 +10,12 @@ import os
 from collections.abc import Iterator
 from functools import lru_cache
 
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import Engine, create_engine, make_url
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+
+# Every secret in .env.example starts with this, so a copied but unedited
+# .env is refused instead of running with a password everyone knows.
+PLACEHOLDER_PREFIX = "change-me"
 
 
 class Base(DeclarativeBase):
@@ -22,6 +26,11 @@ def database_url() -> str:
     url = os.environ.get("DATABASE_URL")
     if not url:
         raise RuntimeError("DATABASE_URL is not set")
+    if (make_url(url).password or "").startswith(PLACEHOLDER_PREFIX):
+        raise RuntimeError(
+            "The database password is still the change-me placeholder from .env.example; "
+            "set POSTGRES_PASSWORD in .env"
+        )
     return url
 
 

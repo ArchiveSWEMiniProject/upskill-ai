@@ -16,6 +16,9 @@ RUN chmod +x /app/backend/entrypoint.sh
 
 # Run the API (and its startup migration) as an unprivileged user, not root.
 RUN useradd --no-create-home --uid 10001 app
+# Resume storage (UP-6). A new named volume copies this directory's owner and
+# mode, so only the app user can read the stored files.
+RUN install -d -o app -m 700 /var/lib/upskill/resumes
 USER app
 
 EXPOSE 8000

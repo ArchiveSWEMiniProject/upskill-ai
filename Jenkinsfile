@@ -87,6 +87,14 @@ pipeline {
                     export POSTGRES_PASSWORD="$(head -c 32 /dev/urandom | base64 | tr -dc A-Za-z0-9)"
                     export JWT_SECRET="$(head -c 48 /dev/urandom | base64 | tr -dc A-Za-z0-9)"
                     set -x
+                    # The database must not be published to the host (architecture 4.4).
+                    # The smoke override removes every host port, so check the real file.
+                    docker compose -f docker-compose.yml config --format json | .venv/bin/python -c "
+import json, sys
+ports = json.load(sys.stdin)['services']['upskill-db'].get('ports')
+assert not ports, f'upskill-db publishes host ports: {ports}'
+print('upskill-db publishes no host ports')
+"
                     docker compose up -d --build --wait --wait-timeout 180
                     docker compose exec -T upskill-api python -c "
 import json, time, urllib.request
