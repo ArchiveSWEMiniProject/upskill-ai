@@ -10,6 +10,7 @@ from backend.shared.skill_vector import (
     Level,
     ProfileNotFoundError,
     SkillVector,
+    SkillVectorEntry,
     Source,
 )
 from backend.skills import vector as vector_module
@@ -140,6 +141,27 @@ def test_the_result_is_the_contracts_skill_vector(db_session, skill_ids, student
     result = update(db_session, student_id, skill_ids["Python"], "beginner")
     assert isinstance(result, SkillVector)
     assert result.entries == vector_module.get_skill_vector(student_id, db_session).entries
+
+
+def test_a_no_op_result_equals_the_vector_read_before_it(
+    client, db_session, skill_ids, student, student_id
+):
+    """M3's PR-5 checks `after != before` against get_skill_vector(); a no-op
+    must compare equal there, and a raise must not."""
+    declare(client, student, "python", "advanced")
+    before = vector_module.get_skill_vector(student_id, db_session)
+    assert update(db_session, student_id, skill_ids["Python"], "beginner") == before
+    assert update(db_session, student_id, skill_ids["React"], "beginner") != before
+
+
+def test_vector_update_compares_by_entries_only():
+    entry = SkillVectorEntry(1, "Python", Level.beginner, confidence=None, source="manual")
+    plain = SkillVector((entry,))
+    assert VectorUpdate((entry,), changed=True) == plain
+    assert plain == VectorUpdate((entry,), changed=False)
+    assert VectorUpdate((), changed=False) != plain
+    assert VectorUpdate((entry,)) != "not a vector"
+    assert hash(VectorUpdate((entry,), changed=True)) == hash(plain)
 
 
 def test_levels_and_sources_may_be_given_as_strings_or_enums(

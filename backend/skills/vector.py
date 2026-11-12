@@ -118,12 +118,24 @@ def get_skill_vector(student_id: int, session: Session | None = None) -> SkillVe
 # --- UP-12: accepting skill vector updates (REQ-F1-29, F1-30, ADR-04) ---------
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=False)
 class VectorUpdate(SkillVector):
     """What apply_vector_update() returns: the student's vector after the call
-    (the frozen contract's SkillVector) plus whether the call changed it."""
+    (the frozen contract's SkillVector) plus whether the call changed it.
+
+    It compares equal to any SkillVector with the same entries, so a caller
+    that checks `after != before` against get_skill_vector() sees a no-op as
+    unchanged (the generated dataclass __eq__ would only match its own class).
+    """
 
     changed: bool = False
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, SkillVector):
+            return self.entries == other.entries
+        return NotImplemented
+
+    __hash__ = SkillVector.__hash__
 
 
 def apply_vector_update(
