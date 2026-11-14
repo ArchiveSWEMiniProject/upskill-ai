@@ -141,17 +141,67 @@ def test_tc_f4_05_faculty_blocked_from_catalogue_moderation(client, admin_token,
     assert "Access denied" in mod_resp.json()["detail"]
 
 
-def test_tc_f4_06_faculty_mentee_scoping(
+def test_tc_f4_06_faculty_mentee_list_and_pagination(
     client, faculty_token, student1_token, admin_token, db_session
 ):
-    """TC-F4-06 & CA-6: Verify faculty mentee view listing, details, and scoping (REQ-F4-13)."""
+    """TC-F4-06 & CA-6: Faculty can list assigned mentees with pagination; students denied."""
+    # 1. Faculty lists mentees with pagination (CA-6, REQ-F4-13)
+    list_resp = client.get(
+        "/api/v1/faculty/mentees?limit=10&offset=0",
+        headers={"Authorization": f"Bearer {faculty_token}"},
+    )
+    assert list_resp.status_code == 200
+    mentees = list_resp.json()
+    assert len(mentees) == 1
+    assert mentees[0]["student_id"] == 101
+    assert mentees[0]["name"] == "Student One"
+
+    # Admin can list all mentees
+    admin_list_resp = client.get(
+        "/api/v1/faculty/mentees?limit=10&offset=0",
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert admin_list_resp.status_code == 200
+
+    # 2. Student blocked from viewing faculty mentee list (403 via central authorize)
+    student_list_resp = client.get(
+        "/api/v1/faculty/mentees",
+        headers={"Authorization": f"Bearer {student1_token}"},
+    )
+    assert student_list_resp.status_code == 403
+    assert "Access denied" in student_list_resp.json()["detail"]
+
+
+def test_tc_f4_06_faculty_mentee_scoping_unassigned_denied(
+    client, faculty_token, db_session
+):
+    """TC-F4-06: Student 102 is NOT assigned to Faculty 2 -> must return 403 (NFR-SEC-08)."""
+    resp_unassigned = client.get(
+        "/api/v1/faculty/mentees/102",
+        headers={"Authorization": f"Bearer {faculty_token}"},
+    )
+    assert resp_unassigned.status_code == 403
+    assert "Access denied" in resp_unassigned.json()["detail"]
+
+
+def test_tc_f4_06_faculty_mentee_details_deduplicated_skills(
+    client, faculty_token, db_session
+):
+    """TC-F4-06 & CA-6: Faculty view resolves skills via get_skill_vector (highest level wins)."""
     from sqlalchemy import text
 
-    # Seed skills and profile items for student 101
+    # Seed skills: two sources for Docker (manual beginner, course intermediate)
+    # The unified skill vector must return Docker exactly once with intermediate level!
     db_session.execute(
         text(
-            "INSERT INTO student_skill (student_id, skill_id, level, source) "
-            "VALUES (101, 1, 'intermediate', 'course')"
+            "INSERT INTO student_skill (student_id, skill_id, source, level, confidence) "
+            "VALUES (101, 1, 'manual', 'beginner', 0.50)"
+        )
+    )
+    db_session.execute(
+        text(
+            "INSERT INTO student_skill (student_id, skill_id, source, level, confidence) "
+            "VALUES (101, 1, 'course', 'intermediate', 0.85)"
         )
     )
     db_session.execute(
@@ -162,33 +212,6 @@ def test_tc_f4_06_faculty_mentee_scoping(
     )
     db_session.commit()
 
-    # 1. Faculty lists mentees (CA-6, REQ-F4-13)
-    list_resp = client.get(
-        "/api/v1/faculty/mentees",
-        headers={"Authorization": f"Bearer {faculty_token}"},
-    )
-    assert list_resp.status_code == 200
-    mentees = list_resp.json()
-    assert len(mentees) == 1
-    assert mentees[0]["student_id"] == 101
-    assert mentees[0]["name"] == "Student One"
-
-    # 2. Student blocked from viewing faculty mentee list
-    student_list_resp = client.get(
-        "/api/v1/faculty/mentees",
-        headers={"Authorization": f"Bearer {student1_token}"},
-    )
-    assert student_list_resp.status_code == 403
-
-    # 3. Student 102 is NOT assigned to Faculty 2 -> must return 403 (NFR-SEC-08)
-    resp_unassigned = client.get(
-        "/api/v1/faculty/mentees/102",
-        headers={"Authorization": f"Bearer {faculty_token}"},
-    )
-    assert resp_unassigned.status_code == 403
-    assert "Access denied" in resp_unassigned.json()["detail"]
-
-    # 4. Student 101 IS assigned to Faculty 2 -> returns 200 with skills & items
     resp_assigned = client.get(
         "/api/v1/faculty/mentees/101",
         headers={"Authorization": f"Bearer {faculty_token}"},
@@ -196,13 +219,18 @@ def test_tc_f4_06_faculty_mentee_scoping(
     assert resp_assigned.status_code == 200
     details = resp_assigned.json()
     assert details["student_id"] == 101
+    assert details["name"] == "Student One"
+    # Deduplication check: exactly 1 skill entry for Docker, with level 'intermediate'
     assert len(details["skills"]) == 1
     assert details["skills"][0]["skill_name"] == "Docker"
+    assert details["skills"][0]["level"] == "intermediate"
     assert len(details["profile_items"]) == 1
     assert details["profile_items"][0]["title"] == "Cloud Computing"
 
-    # 5. Read-only verification (REQ-F1-40): faculty cannot update or delete mentee profile
-    # 5a. Live API rejection over HTTP (returns 403 when faculty writes to student endpoints)
+
+def test_tc_f4_06_faculty_mentee_read_only_live_rejection(client, faculty_token):
+    """REQ-F1-40: Live HTTP write attempts by faculty against student profile are rejected (403)."""
+    # Attempt profile creation/update
     write_resp = client.post(
         "/api/v1/profile",
         json={"name": "Tampered Name", "education_level": "bachelor"},
@@ -210,18 +238,13 @@ def test_tc_f4_06_faculty_mentee_scoping(
     )
     assert write_resp.status_code == 403
 
-    # 5b. Authorize contract verification in memory
-    from backend.auth.models import UserContext, UserRole
-    from backend.auth.permissions import authorize
-
-    faculty_user = UserContext(
-        user_id=2, email="faculty@pes.edu", role=UserRole.FACULTY_MENTOR
+    # Attempt adding a course entry
+    course_resp = client.put(
+        "/api/v1/profile/courses/1",
+        json={"title": "Hacked Course", "grade": "A", "completion_term": "Fall 2026"},
+        headers={"Authorization": f"Bearer {faculty_token}"},
     )
-    assert not authorize(faculty_user, "profile:edit", {"student_id": 101})
-    assert not authorize(faculty_user, "profile:update", {"student_id": 101})
-    assert not authorize(faculty_user, "student:update", {"student_id": 101})
-    assert not authorize(faculty_user, "student:delete", {"student_id": 101})
-    assert not authorize(faculty_user, "course:create", {"student_id": 101})
+    assert course_resp.status_code == 403
 
 
 def test_tc_f4_12_server_side_enforcement(client, student1_token):

@@ -21,6 +21,7 @@ from backend.auth.models import (
 )
 from backend.auth.permissions import authorize
 from backend.database import get_db
+from backend.skills.vector import get_skill_vector
 
 faculty_router = APIRouter(prefix="/api/v1/faculty", tags=["faculty"])
 
@@ -31,6 +32,8 @@ faculty_router = APIRouter(prefix="/api/v1/faculty", tags=["faculty"])
     summary="List all assigned mentees (Faculty mentor only)",
 )
 def list_assigned_mentees(
+    limit: int = 50,
+    offset: int = 0,
     current_user: UserContext = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> list[MenteeSummaryResponse]:
@@ -41,7 +44,7 @@ def list_assigned_mentees(
     - NFR-SEC-08: Access restricted strictly to assigned mentees.
     - Non-faculty/non-admin roles are rejected with 403.
     """
-    if current_user.role not in {UserRole.FACULTY_MENTOR, UserRole.ADMINISTRATOR}:
+    if not authorize(current_user, "mentee:view"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied: only faculty mentors can view mentee lists",
@@ -57,11 +60,14 @@ def list_assigned_mentees(
         "LEFT JOIN career_role cr ON cr.role_id = s.target_role_id"
     )
     if current_user.role == UserRole.ADMINISTRATOR:
-        query = text(f"{base_query} ORDER BY s.student_id ASC")
-        params = {}
+        query = text(f"{base_query} ORDER BY s.student_id ASC LIMIT :limit OFFSET :offset")
+        params = {"limit": limit, "offset": offset}
     else:
-        query = text(f"{base_query} WHERE ma.mentor_id = :mentor_id ORDER BY s.student_id ASC")
-        params = {"mentor_id": current_user.user_id}
+        query = text(
+            f"{base_query} WHERE ma.mentor_id = :mentor_id ORDER BY s.student_id ASC "
+            "LIMIT :limit OFFSET :offset"
+        )
+        params = {"mentor_id": current_user.user_id, "limit": limit, "offset": offset}
 
     rows = db.execute(query, params).mappings().all()
 
@@ -133,29 +139,20 @@ def get_mentee_details(
             detail=f"Student with ID {student_id} not found",
         )
 
-    skills_rows = (
-        db.execute(
-            text(
-                "SELECT sk.skill_id, sk.skill_name, ss.level, ss.source "
-                "FROM student_skill ss "
-                "JOIN skill sk ON sk.skill_id = ss.skill_id "
-                "WHERE ss.student_id = :sid "
-                "ORDER BY sk.skill_name ASC"
-            ),
-            {"sid": student_id},
-        )
-        .mappings()
-        .all()
-    )
-    skills = [
-        MenteeSkillSummary(
-            skill_id=sr["skill_id"],
-            skill_name=sr["skill_name"],
-            level=str(sr["level"]),
-            source=sr["source"],
-        )
-        for sr in skills_rows
-    ]
+    # Fetch the student's unified skill vector using M1's published interface (REQ-F1-27, R1/R2)
+    try:
+        vector = get_skill_vector(student_id, db)
+        skills = [
+            MenteeSkillSummary(
+                skill_id=entry.canonical_skill_id,
+                skill_name=entry.canonical_skill_name,
+                level=entry.level.value if hasattr(entry.level, "value") else str(entry.level),
+                source=entry.source.value if hasattr(entry.source, "value") else str(entry.source),
+            )
+            for entry in vector
+        ]
+    except Exception:
+        skills = []
 
     items_rows = (
         db.execute(

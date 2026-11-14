@@ -36,10 +36,11 @@ def db_session():
             CREATE TABLE IF NOT EXISTS student_skill (
                 student_id INTEGER,
                 skill_id INTEGER,
-                level VARCHAR(20),
                 source VARCHAR(50),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                PRIMARY KEY (student_id, skill_id)
+                level VARCHAR(20),
+                confidence NUMERIC(3, 2),
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (student_id, skill_id, source)
             )
             """
         )
@@ -52,11 +53,13 @@ def db_session():
                 student_id INTEGER,
                 item_type VARCHAR(20),
                 title VARCHAR(100),
-                description TEXT,
+                course_code VARCHAR(15),
                 grade VARCHAR(10),
                 completion_term VARCHAR(20),
-                url TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                description TEXT,
+                repository_url VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
             """
         )
