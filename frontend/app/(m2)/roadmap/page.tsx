@@ -33,7 +33,7 @@ export default function RoadmapPage() {
       logOut();
       return;
     }
-    api<Gap>("/roadmap/gap").then(({ status, data }) => {
+    api<Gap>("/roadmap").then(({ status, data }) => {
       if (status === 200) setState({ kind: "ready", gap: data });
       else if (status === 404) setState({ kind: "no-profile" });
       else if (status === 409) setState({ kind: "no-role" });
