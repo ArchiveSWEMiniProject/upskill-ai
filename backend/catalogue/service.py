@@ -18,6 +18,20 @@ from backend.catalogue.models import (
 from backend.database import _session_factory
 
 
+def get_resource(item_id: int, db: Session) -> dict | None:
+    """Public approved-resource identity lookup for M3 enrolment.
+
+    Keep catalogue model access inside M4. No writes or moderation changes.
+    """
+    item = db.query(LearningItem).filter(
+        LearningItem.item_id == item_id,
+        LearningItem.moderation_state == ModerationState.APPROVED,
+    ).first()
+    if item is None:
+        return None
+    return {"item_id": item.item_id, "title": item.title, "item_type": item.item_type.value}
+
+
 def get_resources_for_skill(
     skill_ids: list[int],
     level: Optional[Union[SkillLevel, str]] = None,

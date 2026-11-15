@@ -16,6 +16,7 @@ from backend.gap.routes import router as gap_router
 from backend.middleware import CorrelationIdMiddleware, register_error_handlers
 from backend.profile import resume_cleanup
 from backend.profile.routes import router as profile_router
+from backend.progress.views import router as progress_router
 from backend.skills.routes import router as skills_router
 
 
@@ -50,6 +51,7 @@ register_error_handlers(app)
 
 # Mount module routers
 app.include_router(profile_router)
+app.include_router(progress_router)
 app.include_router(skills_router)
 app.include_router(auth_router)
 app.include_router(faculty_router)
