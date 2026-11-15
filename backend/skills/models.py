@@ -8,7 +8,7 @@ Only M1 writes either table (architecture rule R4).
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import DateTime, Integer, Numeric, func
+from sqlalchemy import DateTime, Integer, Numeric, String, func
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -46,5 +46,26 @@ class SkillChangeHistory(Base):
     new_level: Mapped[str | None] = mapped_column(LevelType)
     source: Mapped[str] = mapped_column(SourceType)
     changed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+
+class UnresolvedSkill(Base):
+    """A skill string the resolver could not match (REQ-F1-22), kept so the
+    student can map it to a canonical skill (UP-10)."""
+
+    __tablename__ = "unresolved_skill"
+    __mapper_args__ = {"eager_defaults": True}
+
+    unresolved_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    student_id: Mapped[int] = mapped_column(Integer)
+    upload_id: Mapped[int | None] = mapped_column(Integer)
+    raw_text: Mapped[str] = mapped_column(String(120))
+    normalised_text: Mapped[str] = mapped_column(String(120))
+    status: Mapped[str] = mapped_column(
+        ENUM("open", "mapped", name="unresolved_status", create_type=False), default="open"
+    )
+    mapped_skill_id: Mapped[int | None] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

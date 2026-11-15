@@ -29,6 +29,21 @@ class SkillSuggestion(BaseModel):
 class UnknownSkillDetail(BaseModel):
     message: str
     suggestions: list[SkillSuggestion]
+    # The kept copy of the string; map it with POST /skills/unresolved/{id}/map.
+    unresolved_id: int | None = None
+
+
+class UnresolvedSkillOut(BaseModel):
+    unresolved_id: int
+    raw_text: str
+    suggestions: list[SkillSuggestion]
+
+
+class UnresolvedMap(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    skill_id: int
+    level: Level
 
 
 class SkillVectorEntryOut(BaseModel):
